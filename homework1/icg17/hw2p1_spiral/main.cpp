@@ -11,6 +11,7 @@
 
 Triangle triangle;
 
+glm::mat4 tsrMat(float tx, float ty, float scale, float angle);
 
 void Init() {
     // sets background color
@@ -20,11 +21,56 @@ void Init() {
 }
 
 void Display() {
+    const bool FERMAT = true;
+    const float PI = 3.14159;
+
+    // Constants for simple spiral
+    // Controls the number of triangles drawn
+    const int NUMTRIANGLES_SIMPLE = 60;
+    // Controls the distance between each triangle
+    const float B = 0.04;
+    // Set the max triangle size
+    const float MAX_TRIANGLE_SIZE = 0.08;
+    // Set the min triangle size
+    const float MIN_TRIANGLE_SIZE = 0.01;
+
+    // Constants for Fermat's spiral
+    const float RATIO = 137.508;
+    // Controls the number of triangles drawn
+    const int NUMTRIANGLES_FERMAT = 500;
+    // Controls the scaling factor
+    const float C = 0.003;
+    // Controls the triangles size
+    const float TRIANGLE_SIZE = 0.02;
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     glm::mat4 model = IDENTITY_MATRIX;
-    // compute transformations here
-    triangle.Draw(model);
+    if(FERMAT){
+        for(int i = 1; i <= NUMTRIANGLES_FERMAT; i++) {
+            float theta = i * RATIO;
+            float r = C*sqrt(theta);
+            model = tsrMat(r*cos(theta),r*sin(theta),TRIANGLE_SIZE,theta);
+            triangle.Draw(model);
+        }
+    } else {
+        float dTheta = 3*2*PI/NUMTRIANGLES_SIMPLE;
+        float dScale = (MAX_TRIANGLE_SIZE-MIN_TRIANGLE_SIZE)/NUMTRIANGLES_SIMPLE;
+        for(int i = 0; i <= NUMTRIANGLES_SIMPLE; i++) {
+            float theta = i*dTheta;
+            float r = B*theta;
+            model = tsrMat(r*cos(theta),r*sin(theta),i*dScale+MIN_TRIANGLE_SIZE,dTheta*i);
+            triangle.Draw(model);
+        }
+    }
+}
+
+glm::mat4 tsrMat(float tx, float ty, float scale, float angle){
+    glm::mat4 model = IDENTITY_MATRIX;
+    model = glm::translate(model,glm::vec3(tx,ty,0));
+    model = glm::rotate(model,(glm::float32)angle,glm::vec3(0,0,1));
+    model = glm::scale(model,glm::vec3(scale,scale,0));
+    return model;
 }
 
 void ErrorCallback(int error, const char* description) {
