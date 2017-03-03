@@ -13,28 +13,6 @@ Triangle triangle;
 
 glm::mat4 tsrMat(float tx, float ty, float scale, float angle);
 
-const bool FERMAT = true;
-const float PI = 3.14159;
-
-// Constants for simple spiral
-// Controls the number of triangles drawn
-const int NUMTRIANGLES_SIMPLE = 60;
-// Controls the distance between each triangle
-const float B = 0.04;
-// Set the max triangle size
-const float MAX_TRIANGLE_SIZE = 0.08;
-// Set the min triangle size
-const float MIN_TRIANGLE_SIZE = 0.01;
-
-// Constants for Fermat's spiral
-const float RATIO = 137.508;
-// Controls the number of triangles drawn
-const int NUMTRIANGLES_FERMAT = 500;
-// Controls the scaling factor
-const float C = 0.003;
-// Controls the triangles size
-const float TRIANGLE_SIZE = 0.02;
-
 void Init() {
     // sets background color
     glClearColor(0.937, 0.937, 0.937 /*gray*/, 1.0 /*solid*/);
@@ -43,6 +21,28 @@ void Init() {
 }
 
 void Display() {
+    const bool FERMAT = true;
+    const float PI = 3.14159;
+
+    // Constants for simple spiral
+    // Controls the number of triangles drawn
+    const int NUMTRIANGLES_SIMPLE = 60;
+    // Controls the distance between each triangle
+    const float B = 0.04;
+    // Set the max triangle size
+    const float MAX_TRIANGLE_SIZE = 0.08;
+    // Set the min triangle size
+    const float MIN_TRIANGLE_SIZE = 0.01;
+
+    // Constants for Fermat's spiral
+    const float RATIO = 137.508;
+    // Controls the number of triangles drawn
+    const int NUMTRIANGLES_FERMAT = 500;
+    // Controls the scaling factor
+    const float C = 0.003;
+    // Controls the triangles size
+    const float TRIANGLE_SIZE = 0.02;
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     glm::mat4 model = IDENTITY_MATRIX;
