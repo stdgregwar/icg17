@@ -3,62 +3,46 @@
 #include <GLFW/glfw3.h>
 
 // contains helper functions such as shader compiler
-#include "icg_helper.h"
 
-#include "quad/quad.h"
+#include "Game.h"
+#include <iostream>
 
 using namespace glm;
-
-Quad sun;
-Quad earth;
-Quad moon;
+using namespace std;
+Game* game;
 
 void Init() {
     // sets background color
     glClearColor(0.1,0.1,0.1 /*white*/, 1.0 /*solid*/);
     glEnable (GL_BLEND); glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    sun.Init("sun.tga");
-    earth.Init("earth.tga");
-    moon.Init("moon.tga");
+    game = new Game(800,600);
 }
 
 void Display() {
-    static float time = 0;
-    time += 0.001;
     glClear(GL_COLOR_BUFFER_BIT);
-    float time_s = glfwGetTime();
-
-    float radius = 6;
-    float factor = 0.4;
-
-    mat4 view = scale(mat4(1),vec3(0.1));
-
-    mat4 mat = translate(mat4(1),vec3(1,0,0));
-    mat4 msun = glm::rotate(mat,time*20.f,vec3(0,0,1));
-    sun.Draw(msun,view);
-
-    mat4 earthPos = translate(mat4(1),vec3(cos(time)*radius,sin(time)*radius*factor,0));
-    mat4 mearth = glm::rotate(earthPos,time*365.25f,vec3(0,0,1));
-    mearth = scale(mearth,vec3(0.6));
-    earth.Draw(mearth,view);
-
-    float moonR = radius*0.3;
-    float mtime = time*27.32f;
-    mat4 moonPos = translate(earthPos,vec3(cos(mtime)*moonR,sin(mtime)*moonR,1));
-    mat4 moonRot = glm::rotate(moonPos,mtime,vec3(0,0,1));
-    moonRot = scale(moonRot,vec3(0.3));
-    moon.Draw(moonRot,view);
-
-    // compute the transformation matrices
-    // {stuff}.Draw({stuff}_modelmatrix);
+    game->draw();
 }
 
 void ErrorCallback(int error, const char* description) {
-    fputs(description, stderr);
+    cerr << string(description) << endl;
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+        game->right();
+    }
+    if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE) {
+        game->left();
+    }
+    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+        game->left();
+    }
+    if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE) {
+        game->right();
+    }
+    if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
+        game->space();
+    }
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
@@ -67,7 +51,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 int main(int argc, char *argv[]) {
     // GLFW Initialization
     if(!glfwInit()) {
-        fprintf(stderr, "Failed to initialize GLFW\n");
+        cerr << "Failed to initialize GLFW\n" << endl;;
         return EXIT_FAILURE;
     }
 
@@ -83,7 +67,7 @@ int main(int argc, char *argv[]) {
     // attempt to open the window: fails if required version unavailable
     // note some Intel GPUs do not support OpenGL 3.2
     // note update the driver of your graphic card
-    GLFWwindow* window = glfwCreateWindow(512, 512, "planets", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Arkanoid-Like", NULL, NULL);
     if(!window) {
         glfwTerminate();
         return EXIT_FAILURE;
@@ -110,6 +94,7 @@ int main(int argc, char *argv[]) {
 
     // render loop
     while(!glfwWindowShouldClose(window)) {
+        game->tick(glfwGetTime());
         Display();
         glfwSwapBuffers(window);
         glfwPollEvents();

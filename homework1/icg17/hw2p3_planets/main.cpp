@@ -24,10 +24,10 @@ void Init() {
 }
 
 void Display() {
-    static float time = 0;
-    time += 0.001;
+
     glClear(GL_COLOR_BUFFER_BIT);
     float time_s = glfwGetTime();
+    float time = time_s*0.1;
 
     float radius = 6;
     float factor = 0.4;
