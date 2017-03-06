@@ -45,20 +45,25 @@ void Game::draw() {
             }
         }
     }
+
+    mat4 ballModel = translate(mat4(),vec3(mBall.pos-vec2{13,13},0.f));
+    ballModel = scale(ballModel,vec3(26,26,1));
+    mBall.sprite.Draw(ballModel,mView);
 }
 
 void Game::tick(float time_s) {
     float dt = time_s-mLastTime;
     mLastTime = time_s;
+    mPal.pos += dt*mPal.speed;
     switch(mState) {
     case PLAYING:
         //integrate move
         mBall.pos += dt*mBall.speed;
-        mPal.pos += dt*mPal.speed;
+
         //Constraints
         //Pal
         mPal.pos.x = max(0.f,min(mWidth-mPal.width,mPal.pos.x));
-        if(mBall.pos.y <= mPal.pos.y) {
+        if(mBall.pos.y >= mPal.pos.y) {
             if(mBall.pos.x > mPal.pos.x && mBall.pos.x < mPal.pos.x+mPal.width) {
                 mBall.speed.y *= -1.f;
                 mBall.speed += 0.1f*mPal.speed; //Bounce on pal
@@ -74,19 +79,25 @@ void Game::tick(float time_s) {
         }
         break;
     case START:
+        mBall.pos = {mPal.pos.x+mPal.width/2,mPal.pos.y-16};
         break;
     }
 
 }
 
 void Game::space() {
-
+    if(mState == START) {
+        mState = PLAYING;
+        mBall.speed = {mPal.speed.x, -300};
+    }
 }
 
+static const float palSpeed = 400;
+
 void Game::left() {
-    mPal.speed.x -= 100;
+    mPal.speed.x -= palSpeed;
 }
 
 void Game::right() {
-    mPal.speed.x += 100;
+    mPal.speed.x += palSpeed;
 }
