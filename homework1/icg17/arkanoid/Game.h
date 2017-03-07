@@ -5,12 +5,10 @@
 
 #define BOARDW 16 //4/3 board
 #define BOARDH 12
-#define ROWS 7
-#define BLOCKW 32 //Pixels
-#define BLOCKH 16
+#define ROWS 5
 
 struct Block{
-    bool destroyed = false;
+    bool destroyed = true;
     static Quad sprite;
     glm::mat4 transform;
 };
@@ -29,6 +27,22 @@ struct Pal{
     float height;
 };
 
+struct iCoord{
+    int i,j;
+    iCoord up() {
+        return {i,(j-1+BOARDH)%BOARDH};
+    }
+    iCoord down() {
+        return {i,(j+1)%BOARDH};
+    }
+    iCoord left() {
+        return {(i-1+BOARDW)%BOARDW,j};
+    }
+    iCoord right() {
+        return {(i+1)%BOARDW,j};
+    }
+};
+
 typedef std::array<Block,BOARDH> Column;
 typedef std::array<Column,BOARDW> Board;
 
@@ -43,7 +57,7 @@ enum STATE {
  * This class is implemented correctly in descent C++ fashion,
  * this is exactly what you, makers of this course and project, should
  * promote when releasing handouts and template code. Doing everything in headers
- * is just ultra-ugly and implies problems when including files.
+ * is just ultra-ugly and implies problems when including files. G.H.
  */
 class Game
 {
@@ -54,6 +68,8 @@ public:
     void right();
     void space();
     void draw();
+    iCoord coordFor(const glm::vec2& pos);
+    Block& blockAt(const iCoord& coord);
 private:
     float mLastTime;
     int mWidth;
