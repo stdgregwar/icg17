@@ -69,19 +69,18 @@ class Quad {
 
             // create 1D texture (colormap)
             {
-                const int ColormapSize=3;
-                GLfloat tex[3*ColormapSize] = {/*red*/    1.0, 0.0, 0.0,
-                                               /*yellow*/ 1.0, 1.0, 0.0,
-                                               /*green*/  0.0, 1.0, 0.0};
-                glGenTextures(1, &texture_id_);
-                glBindTexture(GL_TEXTURE_1D, texture_id_);
-                glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, ColormapSize, 0, GL_RGB, GL_FLOAT, tex);
-                glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                GLuint tex_id = glGetUniformLocation(program_id_, "colormap");
-                glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
-                // check_error_gl();
+             const int ColormapSize=3;
+             GLfloat tex[3*ColormapSize] = {/*red*/ 1.0, 0.0, 0.0,
+             /*yellow*/ 1.0, 1.0, 0.0,
+             /*green*/ 0.0, 1.0, 0.0};
+             glGenTextures(1, &texture_id_);
+             glBindTexture(GL_TEXTURE_1D, texture_id_);
+             glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, ColormapSize, 0, GL_RGB, GL_FLOAT, tex);
+             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+             glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+             GLuint tex_id = glGetUniformLocation(program_id_, "colormap");
+             glUniform1i(tex_id, 0 /*GL_TEXTURE0*/);
             }
 
             // to avoid the current object being polluted

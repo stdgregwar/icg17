@@ -13,6 +13,8 @@ void Init() {
     // sets background color
     glClearColor(0.937, 0.937, 0.937 /*gray*/, 1.0 /*solid*/);
 
+
+
     quad.Init();
 }
 
