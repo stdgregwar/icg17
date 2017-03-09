@@ -48,16 +48,12 @@ mat4 OrthographicProjection(float left, float right, float bottom,
 mat4 PerspectiveProjection(float fovy, float aspect, float near, float far) {
     // TODO 1: Create a perspective projection matrix given the field of view,
     // aspect ratio, and near and far plane distances.
-//    mat4 projection = IDENTITY_MATRIX;
-    float top = near * tan(radians(fovy));
-//    float bottom = -top;
+    float top = near * tan(fovy/2.f);
     float right = top * aspect;
-//    float left = -right;
-//    return mat4(near/right,0.f,0.f,0.f,
-//                0.f,near/top,0.f,0.f,
-//                0.f,0.f,-(far+near)/(far-near),(-2*far*near)/(far-near),
-//                0.f,0.f,-1.f,0.f);
-    return perspective(fovy,aspect,near,far);
+    return mat4(near/right,0.f,0.f,0.f,
+                0.f,near/top,0.f,0.f,
+                0.f,0.f,-(far+near)/(far-near),-1.f,
+                0.f,0.f,-2*far*near/(far-near),0.f);
 }
 
 mat4 LookAt(vec3 eye, vec3 center, vec3 up) {
