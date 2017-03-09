@@ -149,6 +149,9 @@ void MouseButton(GLFWwindow* window, int button, int action, int mod) {
         old_trackball_matrix = trackball_matrix;
         // Store the current state of the model matrix.
     }
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        //trackball.endDrag();
+    }
 }
 
 void MousePos(GLFWwindow* window, double x, double y) {
@@ -157,7 +160,7 @@ void MousePos(GLFWwindow* window, double x, double y) {
         // TODO 3: Calculate 'trackball_matrix' given the return value of
         // trackball.Drag(...) and the value stored in 'old_trackball_matrix'.
         // See also the mouse_button(...) function.
-        // trackball_matrix = ...
+        trackball_matrix = trackball.Drag(p.x,p.y)*old_trackball_matrix;
     }
 
     // zoom
