@@ -48,8 +48,16 @@ mat4 OrthographicProjection(float left, float right, float bottom,
 mat4 PerspectiveProjection(float fovy, float aspect, float near, float far) {
     // TODO 1: Create a perspective projection matrix given the field of view,
     // aspect ratio, and near and far plane distances.
-    mat4 projection = IDENTITY_MATRIX;
-    return projection;
+//    mat4 projection = IDENTITY_MATRIX;
+    float top = near * tan(radians(fovy));
+//    float bottom = -top;
+    float right = top * aspect;
+//    float left = -right;
+//    return mat4(near/right,0.f,0.f,0.f,
+//                0.f,near/top,0.f,0.f,
+//                0.f,0.f,-(far+near)/(far-near),(-2*far*near)/(far-near),
+//                0.f,0.f,-1.f,0.f);
+    return perspective(fovy,aspect,near,far);
 }
 
 mat4 LookAt(vec3 eye, vec3 center, vec3 up) {
@@ -181,12 +189,12 @@ void SetupProjection(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, window_width, window_height);
 
     // TODO 1: Use a perspective projection instead;
-    // projection_matrix = PerspectiveProjection(45.0f,
-    //                                           (GLfloat)window_width / window_height,
-    //                                           0.1f, 100.0f);
-    GLfloat top = 1.0f;
-    GLfloat right = (GLfloat)window_width / window_height * top;
-    projection_matrix = OrthographicProjection(-right, right, -top, top, -10.0, 10.0f);
+    projection_matrix = PerspectiveProjection(45.0f,
+                                               (GLfloat)window_width / window_height,
+                                               0.1f, 100.0f);
+//    GLfloat top = 1.0f;
+//    GLfloat right = (GLfloat)window_width / window_height * top;
+//    projection_matrix = OrthographicProjection(-right, right, -top, top, -10.0, 10.0f);
 }
 
 void ErrorCallback(int error, const char* description) {
