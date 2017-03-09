@@ -50,10 +50,13 @@ mat4 PerspectiveProjection(float fovy, float aspect, float near, float far) {
     // aspect ratio, and near and far plane distances.
     float top = near * tan(fovy/2.f);
     float right = top * aspect;
-    return mat4(near/right,0.f,0.f,0.f,
-                0.f,near/top,0.f,0.f,
-                0.f,0.f,-(far+near)/(far-near),-1.f,
-                0.f,0.f,-2*far*near/(far-near),0.f);
+    mat4 projection = mat4(0.f);
+    projection[0][0] = near/right;
+    projection[1][1] = near/top;
+    projection[2][2] = -(far+near)/(far-near);
+    projection[3][2] = -2*far*near/(far-near);
+    projection[2][3] = -1.f;
+    return projection;
 }
 
 mat4 LookAt(vec3 eye, vec3 center, vec3 up) {
