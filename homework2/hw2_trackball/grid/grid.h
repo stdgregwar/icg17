@@ -48,9 +48,9 @@ class Grid {
                     }
                 }
 
-                for(int x = 0; x <= grid_dim-1; ++x)
+                for(int x = 0; x < grid_dim; ++x)
                 {
-                    for(int y = 0; y <= grid_dim-1; ++y)
+                    for(int y = 0; y < grid_dim; ++y)
                     {
 
                         int offset = x * (grid_dim+1) + y;
