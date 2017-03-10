@@ -40,17 +40,28 @@ class Grid {
                 // your grid should have the same dimension as that quad, i.e.,
                 // reach from [-1, -1] to [1, 1].
 
-                // vertex position of the triangles.
-                vertices.push_back(-1.0f); vertices.push_back( 1.0f);
-                vertices.push_back( 1.0f); vertices.push_back( 1.0f);
-                vertices.push_back( 1.0f); vertices.push_back(-1.0f);
-                vertices.push_back(-1.0f); vertices.push_back(-1.0f);
+                for(int x = 0; x <= grid_dim; ++x)
+                {
+                    for(int y = 0; y <= grid_dim; ++y)
+                    {
+                        vertices.push_back((float)x/(grid_dim/2.f)-1.f); vertices.push_back((float)-y/(grid_dim/2.f)+1.f);
+                    }
+                }
 
-                // and indices.
-                indices.push_back(0);
-                indices.push_back(1);
-                indices.push_back(3);
-                indices.push_back(2);
+                for(int x = 0; x <= grid_dim-1; ++x)
+                {
+                    for(int y = 0; y <= grid_dim-1; ++y)
+                    {
+
+                        int offset = x * (grid_dim+1) + y;
+                        indices.push_back(offset + 0);
+                        indices.push_back(offset + 1);
+                        indices.push_back(offset + grid_dim + 1);
+                        indices.push_back(offset + grid_dim + 1);
+                        indices.push_back(offset + 1);
+                        indices.push_back(offset + grid_dim + 1 + 1);
+                    }
+                }
 
                 num_indices_ = indices.size();
 
@@ -147,10 +158,10 @@ class Grid {
             // draw
             // TODO 5: for debugging it can be helpful to draw only the wireframe.
             // You can do that by uncommenting the next line.
-            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             // TODO 5: depending on how you set up your vertex index buffer, you
             // might have to change GL_TRIANGLE_STRIP to GL_TRIANGLES.
-            glDrawElements(GL_TRIANGLE_STRIP, num_indices_, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, num_indices_, GL_UNSIGNED_INT, 0);
 
             glBindVertexArray(0);
             glUseProgram(0);
