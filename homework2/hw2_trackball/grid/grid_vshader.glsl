@@ -8,8 +8,8 @@ out float cfac;
 uniform mat4 MVP;
 uniform float time;
 
-const float PI = 3.1459;
-const bool SINE = false;
+// Set to false to see nice waves
+const bool SINE = true;
 
 float waveform(float f) {
     return -abs(sin(f));
@@ -31,7 +31,7 @@ void main() {
     float height;
     if(SINE){
         height = sin(10*uv.x+10*uv.y+6.28*time)*0.03;
-        cfac = 0;
+        cfac = 1;
     } else {
         height = 0.3f;
         height += waveHeight(uv,-0.6f,40.f,0.5f)*0.04;
