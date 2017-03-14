@@ -26,6 +26,7 @@ mat4 trackball_matrix;
 mat4 old_trackball_matrix;
 mat4 cube_scale;
 mat4 quad_model_matrix;
+float oldY;
 
 Trackball trackball;
 
@@ -148,16 +149,16 @@ vec2 TransformScreenCoords(GLFWwindow* window, int x, int y) {
 }
 
 void MouseButton(GLFWwindow* window, int button, int action, int mod) {
+    double x_i, y_i;
+    glfwGetCursorPos(window, &x_i, &y_i);
+    vec2 p = TransformScreenCoords(window, x_i, y_i);
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        double x_i, y_i;
-        glfwGetCursorPos(window, &x_i, &y_i);
-        vec2 p = TransformScreenCoords(window, x_i, y_i);
         trackball.BeingDrag(p.x, p.y);
         old_trackball_matrix = trackball_matrix;
         // Store the current state of the model matrix.
     }
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-        //trackball.endDrag();
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        oldY = p.y;
     }
 }
 
@@ -177,6 +178,10 @@ void MousePos(GLFWwindow* window, double x, double y) {
         // should zoom out and it. For that you have to update the current
         // 'view_matrix' with a translation along the z axis.
         // view_matrix = ...
+
+        vec2 p = TransformScreenCoords(window,x,y);
+        view_matrix[3][2] += (p.y-oldY)*5;
+        oldY=p.y;
     }
 }
 

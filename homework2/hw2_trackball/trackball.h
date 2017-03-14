@@ -27,18 +27,8 @@ public:
       vec3 current_pos = vec3(x, y, 0.0f);
       ProjectOntoSurface(current_pos);
       vec3 rotAxis = cross(anchor_pos_,current_pos);
-      float angle = acos(dot(anchor_pos_,current_pos))*rotateSpeed;
-      rotAxis /= rotAxis.length(); //Normalize angle
-
-      mat4 rotation = rotAxis.length() > 0 ? glm::rotate(rotation_,angle,rotAxis) : mat4();
-      // TODO 3: Calculate the rotation given the projections of the anocher
-      // point and the current position. The rotation axis is given by the cross
-      // product of the two projected points, and the angle between them can be
-      // used as the magnitude of the rotation.
-      // you might want to scale the rotation magnitude by a scalar factor.
-      // p.s. No need for using complicated quaternions as suggested inthe wiki
-      // article.
-      return rotation;
+      float angle = asin(length(rotAxis))*rotateSpeed;
+      return glm::rotate(rotation_,angle,rotAxis);
     }
 
 private:
@@ -49,14 +39,16 @@ private:
     // The trackball radius is given by 'radius_'.
     void ProjectOntoSurface(vec3& p) const {
       // TODO 2: Implement this function. Read above link for details.
-        if(sqrt(p.x*p.x+p.y*p.y) < radius_) {
+        if(p.x*p.x+p.y*p.y < (radius_*radius_)*0.5) {
             p.z = sqrt(radius_ - (p.x*p.x + p.y*p.y));
         } else {
             p.z = (radius_*radius_*0.5f)/sqrt(p.x*p.x+p.y*p.y);
         }
+        p = normalize(p);
     }
 
     float radius_;
     vec3 anchor_pos_;
     mat4 rotation_;
+    bool hyperbolic;
 };

@@ -9,7 +9,7 @@ uniform mat4 MVP;
 uniform float time;
 
 // Set to false to see nice waves
-const bool SINE = true;
+const bool SINE = false;
 
 float waveform(float f) {
     return -abs(sin(f));
