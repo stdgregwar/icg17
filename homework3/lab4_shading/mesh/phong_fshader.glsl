@@ -9,8 +9,6 @@ uniform vec3 kd;
 uniform vec3 ks;
 uniform float alpha;
 
-uniform float alpha;
-
 in vec3 normal_mv;
 in vec3 light_dir;
 in vec3 view_dir;
