@@ -11,7 +11,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform vec3 light_pos;
 
-
+out vec3 I;
 
 void main() {
     mat4 MV = view * model;
@@ -24,4 +24,11 @@ void main() {
     // 3) compute the view direction view_dir.
     // 4) compute per vertex color
     //<<<<<<<<<< TODO <<<<<<<<<<<
+    vec3 normal_mv = (MV*vec4(vnormal,1.0)).xyz;
+    normal_mv = normalize(normal_mv);
+    vec3 light_dir = light_pos - (model * vec4(vpoint,1.0)).xyz;
+    light_dir = normalize(light_dir);
+    vec3 view_dir = normalize(vpoint_mv.xyz);
+    vec3 r = reflect(light_dir,normal_mv);
+    I = ka*La+kd*(max(dot(normal_mv,light_dir),0.f))*Ld+ks*(pow(max(dot(r,view_dir),0.f),alpha))*Ls;
 }
