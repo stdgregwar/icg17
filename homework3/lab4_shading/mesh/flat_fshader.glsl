@@ -1,20 +1,26 @@
 #version 330
 
+uniform vec3 La;
+uniform vec3 Ld;
+uniform vec3 Ls;
+
+uniform vec3 ka;
+uniform vec3 kd;
+uniform vec3 ks;
+
+uniform float alpha;
+
+in vec4 vpoint_mv;
+in vec3 light_dir, view_dir;
 
 out vec3 color;
 
-
 void main() {
-    color = vec3(0.0,0.0,0.0);
-    const vec3 COLORS[6] = vec3[](
-        vec3(1.0,0.0,0.0),
-        vec3(0.0,1.0,0.0),
-        vec3(0.0,0.0,1.0),
-        vec3(1.0,1.0,0.0),
-        vec3(0.0,1.0,1.0),
-        vec3(1.0,0.0,1.0));
-    int index = int( mod(gl_PrimitiveID,6) );
-    color = COLORS[index];
+    vec3 dx = dFdx(vpoint_mv.xyz);
+    vec3 dy = dFdy(vpoint_mv.xyz);
+    vec3 normal = normalize(cross(dx,dy));
+    vec3 light = normalize(light_dir);
+    vec3 view = normalize(view_dir);
 
     ///>>>>>>>>>> TODO >>>>>>>>>>>
     /// TODO 4.2: Flat shading.
@@ -23,4 +29,11 @@ void main() {
     /// 2) compute diffuse term.
     /// 3) compute specular term.
     ///<<<<<<<<<< TODO <<<<<<<<<<<
+
+    float diff = clamp(dot(normal,light),0,1);
+    vec3 ref = reflect(light,normal);
+    float spec = pow(clamp(dot(ref,view),0,1),alpha);
+
+    color = La*ka+Ld*kd*diff+Ls*ks*spec;
+   // color = Ld*kd*diff;
 }
