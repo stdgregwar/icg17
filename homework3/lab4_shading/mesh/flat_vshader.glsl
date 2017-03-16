@@ -13,7 +13,6 @@ uniform vec3 light_pos;
 void main() {
     mat4 MV = view * model;
     vpoint_mv = MV * vec4(vpoint, 1.0);
-    vec3 w_pos = (model*vec4(vpoint,1)).xyz;
     gl_Position = projection * vpoint_mv;
 
     //>>>>>>>>>> TODO >>>>>>>>>>>
@@ -22,6 +21,6 @@ void main() {
     // 2) compute the view direction view_dir.
     //<<<<<<<<<< TODO <<<<<<<<<<<
 
-    light_dir =  light_pos-w_pos;
+    light_dir =  light_pos-vpoint_mv.xyz;
     view_dir = vpoint_mv.xyz;
 }
