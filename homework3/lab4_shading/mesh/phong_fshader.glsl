@@ -7,6 +7,7 @@ uniform vec3 Ls;
 uniform vec3 ka;
 uniform vec3 kd;
 uniform vec3 ks;
+uniform float alpha;
 
 uniform float alpha;
 
