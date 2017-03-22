@@ -15,4 +15,14 @@ results of the dot products to the given texture.
 Very similar to toon shading, the only difference is that we used the diffuse
 and specular components as coordinates for the texture.
 # 4 Flat Shading
+Flat shading is a particular case of Phong shading where the normal is not interpolated from
+vertex attribute but computed on the fly in the fragment shader based on the local derivative
+of the surface in screen space (dFdx,dFdy), this technique is somehow costlier than the
+previous ones. And additional cost of evalutating the derivates could be avoided by the use
+of interpolation modifiers such as 'flat'. But apprently this was'nt the point of the exercise
+here.
 # 5 Spot Light Shading
+Spot light shading is also derived from Phong shading but with a fallof multiplicative term
+added to the light intensity formula. Taking one more uniform argument for the light direction
+we achieved directionnal lighting by inputing the divergence of the view vector in the fallof
+fonction and multiplying final light color by the obtained scalar.
