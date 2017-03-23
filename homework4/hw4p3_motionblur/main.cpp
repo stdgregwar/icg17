@@ -93,8 +93,13 @@ void ResizeCallback(GLFWwindow* window, int width, int height) {
 
     glViewport(0, 0, window_width, window_height);
     framebuffer.Cleanup();
-    framebuffer.Init(window_width, window_height);
-    screenquad.UpdateSize(window_width, window_height);
+    GLuint framebuffer_texture_id;
+    GLuint framebuffer_velocity_texture_id;
+    std::tie(framebuffer_texture_id, framebuffer_velocity_texture_id) =
+            framebuffer.Init(window_width, window_height, true /*interpolate*/);
+
+    screenquad.Init(window_width, window_height, framebuffer_texture_id,
+                    framebuffer_velocity_texture_id);
 }
 
 void ErrorCallback(int error, const char* description) {

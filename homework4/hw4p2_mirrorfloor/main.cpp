@@ -32,7 +32,8 @@ void Init(GLFWwindow* window) {
     cube.Init();
     // TODO: initialize framebuffer
     // TODO: initialize shinyfloor with the FB texture
-    shinyfloor.Init(/*???*/);
+    GLuint tex_id = framebuffer.Init(window_width,window_height);
+    shinyfloor.Init(tex_id);
 }
 
 void Display() {
@@ -45,11 +46,15 @@ void Display() {
     mat4 view = lookAt(cam_pos, cam_look, cam_up);
     mat4 view_projection = projection_matrix * view;
 
-    // TODO: mirror the camera position
-    // TODO: create new VP for mirrored camera
-    // TODO: render the cube using the mirrored camera
-    // HINT: this render will be done in the framebuffer texture (remember bind/unbind)
-    
+    mat4 mirror = scale(mat4(),vec3(1,1,-1));
+    mirror = projection_matrix * view * mirror;
+
+    framebuffer.Bind();
+    glViewport(0,0,window_width,window_height);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    cube.Draw(mirror);
+    framebuffer.Unbind();
+
     shinyfloor.Draw(view_projection);
     cube.Draw(view_projection);
 }
@@ -61,7 +66,8 @@ void resize_callback(GLFWwindow* window, int width, int height) {
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
     glViewport(0, 0, window_width, window_height);
     framebuffer.Cleanup();
-    framebuffer.Init(window_width, window_height);
+    GLuint tex_id = framebuffer.Init(window_width,window_height);
+    shinyfloor.Init(tex_id);
 }
 
 void ErrorCallback(int error, const char* description) {

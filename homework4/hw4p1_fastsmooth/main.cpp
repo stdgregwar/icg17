@@ -60,8 +60,8 @@ void Init(GLFWwindow* window) {
 //    // TODO: initialize fullscreen quad (see slides)
 //    glViewport(0,0,window_width, window_height);
 //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    screenquadx.updateVar(0);
-    screenquady.updateVar(0);
+    screenquadx.updateKernel(0);
+    screenquady.updateKernel(0);
     GLuint framebuffer_texture_id = framebufferx.Init(window_width, window_height);
     screenquadx.Init(window_width, window_height, framebuffer_texture_id);
     framebuffer_texture_id = framebuffery.Init(window_width, window_height);
@@ -81,12 +81,12 @@ void Display() {
     framebuffery.Bind();
     glViewport(0,0,window_width,window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    screenquadx.Draw({0,1});
+    screenquadx.Draw({1,0});
     framebuffery.Unbind();
 
     glViewport(0,0,window_width,window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    screenquady.Draw({1,0});
+    screenquady.Draw({0,1});
 }
 
 // gets called when the windows/framebuffer is resized.
@@ -115,11 +115,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     } else if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-        screenquadx.updateVar(0.25);
-        screenquady.updateVar(0.25);
+        screenquadx.updateKernel(0.25);
+        screenquady.updateKernel(0.25);
     } else if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-        screenquadx.updateVar(-0.25);
-        screenquady.updateVar(-0.25);
+        screenquadx.updateKernel(-0.25);
+        screenquady.updateKernel(-0.25);
     }
 }
 
