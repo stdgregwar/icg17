@@ -21,5 +21,7 @@ include(common/icg_settings.cmake)
 #add_subdirectory(hw4_shading)
 
 # week 5
+add_subdirectory(hw4p2_mirrorfloor)
+add_subdirectory(hw4p3_motionblur)
 add_subdirectory(hw5p1_fastsmooth)
 
