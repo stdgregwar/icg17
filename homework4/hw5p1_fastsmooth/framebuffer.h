@@ -10,6 +10,7 @@ class FrameBuffer {
         GLuint depth_render_buffer_id_;
         GLuint color_texture_id_;
 
+
     public:
         // warning: overrides viewport!!
         void Bind() {
@@ -78,6 +79,8 @@ class FrameBuffer {
 
             return color_texture_id_;
         }
+
+
 
         void Cleanup() {
             glDeleteTextures(1, &color_texture_id_);

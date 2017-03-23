@@ -12,6 +12,9 @@ class ScreenQuad {
         float screenquad_width_;
         float screenquad_height_;
 
+        float var = 2;
+        std::vector<float> kernel;
+
     public:
         void Init(float screenquad_width, float screenquad_height,
                   GLuint texture) {
@@ -100,7 +103,25 @@ class ScreenQuad {
             this->screenquad_height_ = screenquad_height;
         }
 
-        void Draw() {
+        void updateVar(float delta) {
+            var = std::max(0.f,var+delta);
+            const int W = 20;
+            kernel.resize(W);
+            float mean = (float)W/2;
+            float sum = 0.0; // For accumulating the kernel values
+            for (int x = 0; x < W; ++x) {
+
+                kernel[x] = var ? exp( -(pow((x-mean)/var, 2.0)) / (2 * var * var)) : (x == W/2+1) ? 1 : 0;
+                // Accumulate the kernel values
+                sum += kernel[x];
+            }
+
+            // Normalize the kernel
+            for (int x = 0; x < W; ++x)
+                    kernel[x] /= sum;
+        }
+
+        void Draw(const glm::vec2& dir) {
             glUseProgram(program_id_);
             glBindVertexArray(vertex_array_id_);
 
@@ -109,6 +130,9 @@ class ScreenQuad {
                         this->screenquad_width_);
             glUniform1f(glGetUniformLocation(program_id_, "tex_height"),
                         this->screenquad_height_);
+
+            glUniform1fv(glGetUniformLocation(program_id_,"kernel"),kernel.size(),kernel.data());
+            glUniform2fv(glGetUniformLocation(program_id_,"dir"),1,(GLfloat*)&dir);
 
             // bind texture
             glActiveTexture(GL_TEXTURE0);
