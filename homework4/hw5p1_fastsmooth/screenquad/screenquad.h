@@ -111,7 +111,7 @@ class ScreenQuad {
             float sum = 0.0; // For accumulating the kernel values
             for (int x = 0; x < W; ++x) {
 
-                kernel[x] = var ? exp( -(pow((x-mean)/var, 2.0)) / (2 * var * var)) : (x == W/2+1) ? 1 : 0;
+                kernel[x] = var ? exp( -(pow((x-mean)/var, 2.0)) / (2 * var * var)) : (x == W/2) ? 1 : 0;
                 // Accumulate the kernel values
                 sum += kernel[x];
             }
