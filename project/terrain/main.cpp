@@ -29,7 +29,7 @@ void Init(GLFWwindow* window) {
     glEnable(GL_MULTISAMPLE);
 
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
     GLuint hmap = framebuffer.Init(1024,1024);
     noiseGen.Init(window_width,window_height);
     terrain.Init(hmap);
@@ -39,22 +39,22 @@ void Display() {
     glViewport(0,0,window_width,window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    vec3 cam_pos(2.0f, 2.0f, 2.0f);
+    vec3 cam_pos(5.0f, 5.0f, 5.0f);
     vec3 cam_look(0.0f, 0.0f, 0.0f);
     vec3 cam_up(0.0f, 0.0f, 1.0f);
     mat4 view = lookAt(cam_pos, cam_look, cam_up);
     mat4 view_projection = projection_matrix * view;
 
-    mat4 scalem = scale(mat4(),vec3(1));
+    mat4 scalem = scale(mat4(),vec3(4));
 
-    float time = glfwGetTime();
+    float time = 0.3*glfwGetTime();
     glm::vec2 offset = {time,time};
 
     framebuffer.Bind();
     glViewport(0,0,framebuffer.width_,framebuffer.height_);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //cube.Draw(mirror);
-    noiseGen.Draw({0,0});
+    noiseGen.Draw(-offset);
     framebuffer.Unbind();
 
     glViewport(0,0,window_width,window_height);
@@ -65,7 +65,7 @@ void Display() {
 void resize_callback(GLFWwindow* window, int width, int height) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.1f, 1000.0f);
     glViewport(0, 0, window_width, window_height);
     framebuffer.Cleanup();
     framebuffer.Init(1024,1024);
