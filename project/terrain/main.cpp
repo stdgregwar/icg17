@@ -6,34 +6,33 @@
 #include "icg_helper.h"
 
 #include "framebuffer.h"
+#include "screenquad/screenquad.h"
 
 #include "floor/floor.h"
 #include "cube/cube.h"
+#include "terrain/grid.h"
 
 int window_width = 1280;
 int window_height = 720;
 
-FrameBuffer framebuffer;
-Cube cube;
-Floor shinyfloor;
+ScalarFrameBuffer framebuffer;
+NoiseGen noiseGen;
+Grid terrain;
 
 using namespace glm;
 
 mat4 projection_matrix;
 
 void Init(GLFWwindow* window) {
-    glClearColor(1.0, 1.0, 1.0 /*white*/, 1.0 /*solid*/);
+    glClearColor(0.0, 0.0, 0.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
 
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
-
-    cube.Init();
-    // TODO: initialize framebuffer
-    // TODO: initialize shinyfloor with the FB texture
-    GLuint tex_id = framebuffer.Init(window_width,window_height);
-    shinyfloor.Init(tex_id);
+    GLuint hmap = framebuffer.Init(1024,1024);
+    noiseGen.Init(window_width,window_height);
+    terrain.Init(hmap);
 }
 
 void Display() {
@@ -46,17 +45,20 @@ void Display() {
     mat4 view = lookAt(cam_pos, cam_look, cam_up);
     mat4 view_projection = projection_matrix * view;
 
-    mat4 mirror = scale(mat4(),vec3(1,1,-1));
-    mirror = projection_matrix * view * mirror;
+    mat4 scalem = scale(mat4(),vec3(1));
+
+    float time = glfwGetTime();
+    glm::vec2 offset = {time,time};
 
     framebuffer.Bind();
-    glViewport(0,0,window_width,window_height);
+    glViewport(0,0,framebuffer.width_,framebuffer.height_);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    cube.Draw(mirror);
+    //cube.Draw(mirror);
+    noiseGen.Draw({0,0});
     framebuffer.Unbind();
 
-    shinyfloor.Draw(view_projection);
-    cube.Draw(view_projection);
+    glViewport(0,0,window_width,window_height);
+    terrain.Draw(time,scalem,view,projection_matrix);
 }
 
 // Gets called when the windows/framebuffer is resized.
@@ -66,8 +68,7 @@ void resize_callback(GLFWwindow* window, int width, int height) {
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10.0f);
     glViewport(0, 0, window_width, window_height);
     framebuffer.Cleanup();
-    GLuint tex_id = framebuffer.Init(window_width,window_height);
-    shinyfloor.Init(tex_id);
+    framebuffer.Init(1024,1024);
 }
 
 void ErrorCallback(int error, const char* description) {

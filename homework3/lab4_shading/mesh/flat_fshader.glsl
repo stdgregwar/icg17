@@ -35,5 +35,6 @@ void main() {
     float spec = pow(clamp(dot(ref,view),0,1),alpha);
 
     color = La*ka+Ld*kd*diff+Ls*ks*spec;
+    color = normal;
    // color = Ld*kd*diff;
 }
