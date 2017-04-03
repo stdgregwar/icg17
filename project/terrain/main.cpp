@@ -3,13 +3,15 @@
 #include <GLFW/glfw3.h>
 
 // contains helper functions such as shader compiler
+#define STB_IMAGE_IMPLEMENTATION
+#define TINYOBJLOADER_IMPLEMENTATION
 #include "icg_helper.h"
 
-#include "framebuffer.h"
+#include "ScalarFrameBuffer.h"
 #include "NoiseGen/NoiseGen.h"
 #include "Camera.h"
 
-#include "terrain/terrain.h"
+#include "Terrain/Terrain.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -19,8 +21,8 @@ int window_height = 720;
 
 ScalarFrameBuffer framebuffer;
 NoiseGen noiseGen;
-Grid terrain;
 Camera cam({0,0,1});
+Terrain terrain;
 
 using namespace glm;
 
@@ -33,9 +35,9 @@ void Init(GLFWwindow* window) {
 
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
-    GLuint hmap = framebuffer.Init(grid_size,grid_size);
-    noiseGen.Init(window_width,window_height);
-    terrain.Init(hmap);
+    GLuint hmap = framebuffer.init(grid_size,grid_size);
+    noiseGen.init(window_width,window_height);
+    terrain.init(hmap);
 }
 
 void Display() {
@@ -55,15 +57,15 @@ void Display() {
 //    offset *= 2.f;
     offset += glm::vec2{-1000.f,231.f};
 
-    framebuffer.Bind();
-    glViewport(0,0,framebuffer.width_,framebuffer.height_);
+    framebuffer.bind();
+    glViewport(0,0,framebuffer.width,framebuffer.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //cube.Draw(mirror);
-    noiseGen.Draw(-offset);
-    framebuffer.Unbind();
+    noiseGen.draw(-offset);
+    framebuffer.unbind();
 
     glViewport(0,0,window_width,window_height);
-    terrain.Draw(time,scalem,view,projection_matrix);
+    terrain.draw(time,scalem,view,projection_matrix);
 }
 
 // Gets called when the windows/framebuffer is resized.
@@ -72,8 +74,8 @@ void resize_callback(GLFWwindow* window, int width, int height) {
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 1000.0f);
     glViewport(0, 0, window_width, window_height);
-    framebuffer.Cleanup();
-    terrain.Init(framebuffer.Init(grid_size,grid_size));
+    framebuffer.cleanup();
+    terrain.init(framebuffer.init(grid_size,grid_size));
 }
 
 void ErrorCallback(int error, const char* description) {

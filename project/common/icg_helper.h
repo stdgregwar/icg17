@@ -8,16 +8,18 @@
 #include <string>
 #include <cstdlib>
 #include <algorithm>
+#include <GL/glew.h>
+#include <GL/gl.h>
 
 // GL Error checking
 #include "check_error_gl.h"
 
 // Small library to load images
-#define STB_IMAGE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 // Small library to load obj files
-#define TINYOBJLOADER_IMPLEMENTATION
+//#define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
 // we use GLM for linear algebra
