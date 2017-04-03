@@ -7,6 +7,7 @@
 
 #include "framebuffer.h"
 #include "NoiseGen/NoiseGen.h"
+#include "Camera.h"
 
 #include "terrain/terrain.h"
 
@@ -19,6 +20,7 @@ int window_height = 720;
 ScalarFrameBuffer framebuffer;
 NoiseGen noiseGen;
 Grid terrain;
+Camera cam({0,0,1});
 
 using namespace glm;
 
@@ -43,13 +45,13 @@ void Display() {
     vec3 cam_pos(5.0f, 5.0f, 5.0f);
     vec3 cam_look(0.0f, 0.0f, 0.0f);
     vec3 cam_up(0.0f, 0.0f, 1.0f);
-    mat4 view = lookAt(cam_pos, cam_look, cam_up);
+    mat4 view = cam.view();//lookAt(cam_pos, cam_look, cam_up);
     mat4 view_projection = projection_matrix * view;
 
     mat4 scalem = scale(mat4(),vec3(4));
 
     float time = 0.3*glfwGetTime();
-    glm::vec2 offset = {time,time};
+    glm::vec2 offset = {0,0};
 //    offset *= 2.f;
     offset += glm::vec2{-1000.f,231.f};
 
@@ -82,6 +84,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
+    cam.onKey(window,key,scancode,action,mods);
+}
+
+void CursorCallback(GLFWwindow* window, double xpos, double ypos) {
+    cam.onMouse(window,xpos,ypos);
+}
+
+void update(float dt) {
+    cam.update(dt);
 }
 
 int main(int argc, char *argv[]) {
@@ -114,6 +125,7 @@ int main(int argc, char *argv[]) {
 
     /// Set the callback for escape key
     glfwSetKeyCallback(window, KeyCallback);
+    glfwSetCursorPosCallback(window,CursorCallback);
 
     glfwSetFramebufferSizeCallback(window, resize_callback);
 
@@ -128,8 +140,13 @@ int main(int argc, char *argv[]) {
     Init(window);
     KeyCallback(window, GLFW_KEY_KP_1, 0, 0, 0);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     /// Render loop & keyboard input
+    float lastTime = glfwGetTime();
     while(!glfwWindowShouldClose(window)){
+        float time = glfwGetTime();
+        update(time-lastTime);
+        lastTime=time;
         Display();
         glfwSwapBuffers(window);
         glfwPollEvents();
