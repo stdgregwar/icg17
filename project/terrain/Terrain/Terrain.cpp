@@ -1,8 +1,7 @@
 #include "Terrain.h"
 
-void Terrain::init(GLuint textureId) {
+void Terrain::init(int res) {
     // compile the shaders.
-    mHeightMapId = textureId;
 
     mProgramId = icg_helper::LoadShaders("terrain_vshader.glsl",
                                           "terrain_fshader.glsl");
@@ -18,18 +17,22 @@ void Terrain::init(GLuint textureId) {
 
     // vertex coordinates and indices
     {
-        std::vector<GLfloat> vertices;
+        std::vector<TerrainVertex> vertices;
         std::vector<GLuint> indices;
 
-        int gridDim = 1024;
+        int gridDim = res;
 
-        for(int x = 0; x <= gridDim; ++x)
+        for(int x = -1; x <= gridDim+1; ++x)
         {
-            for(int y = 0; y <= gridDim; ++y)
+            for(int y = -1; y <= gridDim+1; ++y)
             {
-                vertices.push_back((float)x/(gridDim/2.f)-1.f); vertices.push_back((float)-y/(gridDim/2.f)+1.f);
+                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -5 : 0;
+                glm::vec2 pos = {min(max((float)x/gridDim,0.f),1.f),min(max((float)y/gridDim,0.f),1.f)};
+                vertices.push_back({pos,shift});
             }
         }
+
+        gridDim+=2;
 
         for(int x = 0; x < gridDim; ++x)
         {
@@ -51,7 +54,7 @@ void Terrain::init(GLuint textureId) {
         // position buffer
         glGenBuffers(1, &mVertexBufferObjectPosition);
         glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObjectPosition);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(TerrainVertex),
                      &vertices[0], GL_STATIC_DRAW);
 
         // vertex indices
@@ -64,7 +67,12 @@ void Terrain::init(GLuint textureId) {
         GLuint locPosition = glGetAttribLocation(mProgramId, "position");
         glEnableVertexAttribArray(locPosition);
         glVertexAttribPointer(locPosition, 2, GL_FLOAT, DONT_NORMALIZE,
-                              ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+                              sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,pos));
+
+        GLuint locShift = glGetAttribLocation(mProgramId, "shift");
+        glEnableVertexAttribArray(locShift);
+        glVertexAttribPointer(locShift, 1, GL_FLOAT, DONT_NORMALIZE,
+                               sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,shift));
     }
 
 
@@ -112,14 +120,14 @@ void Terrain::cleanup() {
 
 void Terrain::draw(float time, const glm::mat4 &model,
           const glm::mat4 &view,
-          const glm::mat4 &projection) {
+          const glm::mat4 &projection, GLuint heightMap) const {
     glUseProgram(mProgramId);
     glBindVertexArray(mVertexArrayId);
 
     // bind textures
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mHeightMapId);
+    glBindTexture(GL_TEXTURE_2D, heightMap);
     glUniform1i(mHeightMapLoc,0);
 
     glActiveTexture(GL_TEXTURE1);
@@ -130,6 +138,7 @@ void Terrain::draw(float time, const glm::mat4 &model,
     glm::mat4 MVP = projection*view*model;
     glUniformMatrix4fv(mMVPId, ONE, DONT_TRANSPOSE, glm::value_ptr(MVP));
     glUniformMatrix4fv(glGetUniformLocation(mProgramId,"MV"), ONE, DONT_TRANSPOSE,glm::value_ptr(view*model));
+    glUniformMatrix4fv(glGetUniformLocation(mProgramId,"M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
 
     // pass the current time stamp to the shader.
     glUniform1f(glGetUniformLocation(mProgramId, "time"), time);

@@ -12,6 +12,7 @@
 #include "Camera.h"
 
 #include "Terrain/Terrain.h"
+#include "World.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -19,10 +20,10 @@ int grid_size = 1024;
 int window_width = 1280;
 int window_height = 720;
 
-ScalarFrameBuffer framebuffer;
-NoiseGen noiseGen;
-Camera cam({5,5,5},{-M_PI/4,-M_PI/4,-M_PI/4});
-Terrain terrain;
+
+Camera cam({0,0,20},{-M_PI/4,-M_PI/4,-M_PI/4});
+
+World world(32);
 
 using namespace glm;
 
@@ -35,9 +36,8 @@ void Init(GLFWwindow* window) {
 
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
-    GLuint hmap = framebuffer.init(grid_size,grid_size);
-    noiseGen.init(window_width,window_height);
-    terrain.init(hmap);
+
+    world.init();
 }
 
 void Display() {
@@ -57,15 +57,7 @@ void Display() {
     offset *= 5.f;
     offset += glm::vec2{-1000.f,231.f};
 
-    framebuffer.bind();
-    glViewport(0,0,framebuffer.width,framebuffer.height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //cube.Draw(mirror);
-    noiseGen.draw(-offset);
-    framebuffer.unbind();
-
-    glViewport(0,0,window_width,window_height);
-    terrain.draw(time,scalem,view,projection_matrix);
+    world.draw(time,view,projection_matrix);
 }
 
 // Gets called when the windows/framebuffer is resized.
@@ -74,8 +66,6 @@ void resize_callback(GLFWwindow* window, int width, int height) {
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 1000.0f);
     glViewport(0, 0, window_width, window_height);
-    framebuffer.cleanup();
-    terrain.init(framebuffer.init(grid_size,grid_size));
 }
 
 void ErrorCallback(int error, const char* description) {
@@ -95,6 +85,7 @@ void CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void update(float dt) {
     cam.update(dt);
+    world.update(dt,cam.wPos());
 }
 
 int main(int argc, char *argv[]) {
@@ -116,7 +107,7 @@ int main(int argc, char *argv[]) {
     /// Attempt to open the window: fails if required version unavailable
     /// @note some Intel GPUs do not support OpenGL 3.2
     /// @note update the driver of your graphic card
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "mirror_floor", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Procedural Terrain", NULL, NULL);
     if( !window ){
         glfwTerminate();
         exit(EXIT_FAILURE);

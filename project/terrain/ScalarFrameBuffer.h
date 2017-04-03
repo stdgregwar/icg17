@@ -12,6 +12,7 @@ private:
     GLuint mDepthRenderBufferId;
 public:
     // warning: overrides viewport!!
+    void attach(GLuint texture);
     void bind();
     void unbind();
     int init(int imageWidth, int imageHeight, bool useInterpolation = true);

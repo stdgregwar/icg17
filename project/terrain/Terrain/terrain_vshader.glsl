@@ -1,6 +1,7 @@
 #version 330
 
 in vec2 position;
+in float shift;
 
 out vec2 uv;
 out vec3 normal_mv;
@@ -13,6 +14,7 @@ uniform sampler1D color_map;
 
 uniform mat4 MVP;
 uniform mat4 MV;
+uniform mat4 M;
 
 const vec3 light_world = vec3(1,1,1);
 
@@ -36,11 +38,11 @@ vec3 fdiff(vec2 p) {
 }
 
 void main() {
-    uv = (position + vec2(1.0, 1.0)) * 0.2;
+    uv = (position + vec2(1.0, 1.0)) * 0.499999;
     float value = height(uv);
     base_color = texture(color_map,value/2.f).rgb;
 
-    vec3 pos_3d = vec3(position.x,position.y,value*0.1);
+    vec3 pos_3d = vec3(position.x,position.y,value*0.1+shift);
     normal_mv = normalize((MV*vec4(fdiff(uv),0)).xyz);
     view_dir = normalize((MV*vec4(pos_3d,1.0)).xyz);
     light_dir = (MV*vec4(light_world,0)).xyz;

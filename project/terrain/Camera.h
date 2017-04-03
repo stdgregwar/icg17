@@ -15,6 +15,7 @@ public:
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
     void onMouse(GLFWwindow* window, double xpos, double ypos);
     const glm::mat4& view() const;
+    glm::vec2 wPos() const;
 private:
     float mSSpeed;
     glm::vec3 mLSpeed;

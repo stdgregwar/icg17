@@ -6,7 +6,7 @@
 using namespace glm;
 using namespace std;
 
-Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mSSpeed(2), mPosition(pos), mLSpeed(0)
+Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mSSpeed(20), mPosition(pos), mLSpeed(0)
 {
 
 }
@@ -74,9 +74,13 @@ void Camera::onMouse(GLFWwindow* window, double xpos, double ypos) {
     float yrel = ypos-ly;
     ly = ypos;
 
-    mRotation+=vec3{-xrel,-yrel,0}*0.001f;
+    rotate(vec2{-xrel,-yrel}*0.001f);
 }
 
 const glm::mat4& Camera::view() const {
     return mView;
+}
+
+glm::vec2 Camera::wPos() const {
+    return {mPosition.x,mPosition.y};
 }

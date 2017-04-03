@@ -4,6 +4,11 @@
 
 class Terrain {
 
+    struct TerrainVertex{
+        glm::vec2 pos;
+        GLfloat   shift;
+    };
+
     private:
         GLuint mVertexArrayId;                // vertex array object
         GLuint mVertexBufferObjectPosition;  // memory buffer for positions
@@ -17,9 +22,9 @@ class Terrain {
         GLuint mMVPId;                         // model, view, proj matrix ID
 
     public:
-        void init(GLuint textureId);
+        void init(int res);
         void cleanup();
         void draw(float time, const glm::mat4 &model = IDENTITY_MATRIX,
                   const glm::mat4 &view = IDENTITY_MATRIX,
-                  const glm::mat4 &projection = IDENTITY_MATRIX);
+                  const glm::mat4 &projection = IDENTITY_MATRIX, GLuint heightMap = 0) const;
 };
