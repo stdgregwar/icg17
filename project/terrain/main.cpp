@@ -6,11 +6,11 @@
 #include "icg_helper.h"
 
 #include "framebuffer.h"
-#include "screenquad/screenquad.h"
+#include "NoiseGen/NoiseGen.h"
 
-#include "floor/floor.h"
-#include "cube/cube.h"
-#include "terrain/grid.h"
+#include "terrain/terrain.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 int grid_size = 512;
 int window_width = 1280;
