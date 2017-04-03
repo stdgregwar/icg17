@@ -8,7 +8,7 @@ public:
     int height_;
 private:
     GLuint framebuffer_object_id_;
-    GLuint color_texture_id_;
+    GLuint color_texture_id_ = 0;
     GLuint depth_render_buffer_id_;
 public:
     // warning: overrides viewport!!
@@ -26,7 +26,8 @@ public:
     int Init(int image_width, int image_height, bool use_interpolation = true) {
         this->width_ = image_width;
         this->height_ = image_height;
-
+        if(color_texture_id_)
+            glDeleteTextures(1,&color_texture_id_);
         // create color attachment
         {
             glGenTextures(1, &color_texture_id_);
@@ -75,7 +76,7 @@ public:
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0); // avoid pollution
         }
-
+        glBindTexture(GL_TEXTURE_2D, 0);
         return color_texture_id_;
     }
 

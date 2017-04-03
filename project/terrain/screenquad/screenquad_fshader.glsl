@@ -68,16 +68,16 @@ float multifractal(vec2 point, float H, float lacunarity, int
 }
 
 void main() {
-    float scale = 50;
-    vec2 p = gl_FragCoord.xy*0.001*scale + offset;
+        float scale = 2;
+        vec2 p = gl_FragCoord.xy*0.001*scale + offset;
 
-    //value += fbm(p,1)*20+10;
-    value += (multifractal(p*0.6,0.1,0.5,6,0.7)-10)*0.002;//*fbm(p*1,5)*0.5;
-    //value = max(0.1,value);
-    value += (value*0.2+0.2)*fbm(p*1,8)*2;
-    value /= scale;
-    //value = max(0,value);
-    //value = fbm(p,8);
-    //value = noise(p);
+        //value = fbm(p,1)*20+10;
+        value = (multifractal(p*0.6,0.1,0.5,6,0.7)-10)*0.8;//*fbm(p*1,5)*0.5;
+        value = max(0.1,value);
+        value += (value*0.08+1)*fbm(p*1,8)*4;
+        value /= scale;
+        //value = max(0,value);
+        //value = fbm(p,8);
+        //value = noise(p);
 }
 

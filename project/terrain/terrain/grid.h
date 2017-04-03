@@ -2,6 +2,7 @@
 #include "icg_helper.h"
 #include <glm/gtc/type_ptr.hpp>
 
+
 class Grid {
 
     private:
@@ -9,7 +10,10 @@ class Grid {
         GLuint vertex_buffer_object_position_;  // memory buffer for positions
         GLuint vertex_buffer_object_index_;     // memory buffer for indices
         GLuint program_id_;                     // GLSL shader program ID
-        GLuint height_map_id_;                     // texture ID
+        GLuint height_map_id_;                  // texture ID
+        GLuint height_map_loc_;                 // Uniform location for height map
+        GLuint color_map_id_;                   // Color map for the terain
+        GLuint color_map_loc_;                  // Uniform location for color map
         GLuint num_indices_;                    // number of vertices to render
         GLuint MVP_id_;                         // model, view, proj matrix ID
 
@@ -86,11 +90,42 @@ class Grid {
                                       ZERO_STRIDE, ZERO_BUFFER_OFFSET);
             }
 
+
             // other uniforms
             MVP_id_ = glGetUniformLocation(program_id_, "MVP");
-            glUniform1i(glGetUniformLocation(program_id_,"height_map"),0);
+            height_map_loc_ = glGetUniformLocation(program_id_,"height_map");
+            color_map_loc_ = glGetUniformLocation(program_id_, "color_map");
+
+            // Color map
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, height_map_id_);
+
+            glGenTextures(1, &color_map_id_);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_1D, color_map_id_);
+            const int ColormapSize=5;
+            unsigned char colors[3*ColormapSize] = {/*blue*/ 0, 129, 213,
+            /*yellow*/ 238, 225, 94,
+            /*green*/ 23, 154, 21,
+            /*grey*/ 119, 136, 119,
+            /*white*/ 249,249,249};
+            glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, ColormapSize, 0, GL_RGB, GL_UNSIGNED_BYTE, colors);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameterf( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameterf( GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
+//            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+
 
             // to avoid the current object being polluted
+            glBindTexture(GL_TEXTURE_1D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
             glBindVertexArray(0);
             glUseProgram(0);
         }
@@ -103,6 +138,7 @@ class Grid {
             glDeleteVertexArrays(1, &vertex_array_id_);
             glDeleteProgram(program_id_);
             glDeleteTextures(1, &height_map_id_);
+            glDeleteTextures(1, &color_map_id_);
         }
 
         void Draw(float time, const glm::mat4 &model = IDENTITY_MATRIX,
@@ -112,8 +148,16 @@ class Grid {
             glBindVertexArray(vertex_array_id_);
 
             // bind textures
+
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, height_map_id_);
+            glUniform1i(height_map_loc_,0);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_1D, color_map_id_);
+            glUniform1i(color_map_loc_,GL_TEXTURE1-GL_TEXTURE0);
+            // TODO complete2
+            // Color texture
 
             // setup MVP
             glm::mat4 MVP = projection*view*model;

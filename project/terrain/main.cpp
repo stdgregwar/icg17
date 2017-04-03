@@ -12,6 +12,7 @@
 #include "cube/cube.h"
 #include "terrain/grid.h"
 
+int grid_size = 512;
 int window_width = 1280;
 int window_height = 720;
 
@@ -30,7 +31,7 @@ void Init(GLFWwindow* window) {
 
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
-    GLuint hmap = framebuffer.Init(1024,1024);
+    GLuint hmap = framebuffer.Init(grid_size,grid_size);
     noiseGen.Init(window_width,window_height);
     terrain.Init(hmap);
 }
@@ -49,6 +50,8 @@ void Display() {
 
     float time = 0.3*glfwGetTime();
     glm::vec2 offset = {time,time};
+//    offset *= 2.f;
+    offset += glm::vec2{-1000.f,231.f};
 
     framebuffer.Bind();
     glViewport(0,0,framebuffer.width_,framebuffer.height_);
@@ -68,7 +71,7 @@ void resize_callback(GLFWwindow* window, int width, int height) {
     projection_matrix = perspective(45.0f, ratio, 0.1f, 1000.0f);
     glViewport(0, 0, window_width, window_height);
     framebuffer.Cleanup();
-    framebuffer.Init(1024,1024);
+    terrain.Init(framebuffer.Init(grid_size,grid_size));
 }
 
 void ErrorCallback(int error, const char* description) {

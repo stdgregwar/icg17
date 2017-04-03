@@ -4,6 +4,7 @@ in vec2 uv;
 in vec3 view_dir;
 in vec3 normal_mv;
 in vec3 light_dir;
+in vec3 base_color;
 
 out vec3 color;
 
@@ -24,5 +25,6 @@ void main() {
     float diff = clamp(dot(normal,light),0,1);
     vec3 ref = reflect(light,normal);
     float spec = pow(clamp(dot(ref,view),0,1),2);
-    color = vec3(0.01)+vec3(0.99)*diff;//+vec3(1,0.8,0.8)*spec;
+    color = base_color;
+    color *= vec3(0.01)+vec3(0.99)*diff;//+vec3(1,0.8,0.8)*spec;
 }
