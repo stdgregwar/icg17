@@ -26,5 +26,5 @@ void main() {
     vec3 ref = reflect(light,normal);
     float spec = pow(clamp(dot(ref,view),0,1),2);
     color = base_color;
-    color *= vec3(0.01)+vec3(0.99)*diff;//+vec3(1,0.8,0.8)*spec;
+    color *= vec3(0.1,0.2,0.2)+vec3(0.9)*diff;//+vec3(1,0.8,0.8)*spec;
 }

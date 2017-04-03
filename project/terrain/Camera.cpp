@@ -1,10 +1,12 @@
 #include "Camera.h"
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <unordered_map>
 
 using namespace glm;
+using namespace std;
 
-Camera::Camera(const vec3 &pos) : mRotation(0,0,0),mSSpeed(2), mPosition(pos), mLSpeed(0)
+Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mSSpeed(2), mPosition(pos), mLSpeed(0)
 {
 
 }
@@ -29,9 +31,11 @@ void Camera::update(float delta_s) {
 
 void Camera::rotate(glm::vec2 delta) {
     mRotation.x += delta.x;
-    static float rmax = M_PI/2-0.1;
-    static float rmin = -M_PI/2+0.1;
-    mRotation.y = min(rmax,max(rmin,delta.y+mRotation.y));
+    static float max = M_PI/2-0.1;
+    mRotation.y += delta.y;
+    if(abs(mRotation.y) > max) {
+        mRotation.y = sign(mRotation.y)*max;
+    }
 }
 
 void Camera::speed(glm::vec2 delta) {
@@ -39,18 +43,26 @@ void Camera::speed(glm::vec2 delta) {
     mLSpeed.y += delta.y;
 }
 
+
 void Camera::onKey(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if(action == GLFW_PRESS) {
-        switch(key) {
-        case GLFW_KEY_W:
-            speed({1,0});
-            break;
+    unordered_map<int,vec2> pressed{
+        {GLFW_KEY_W,{1,0}},
+        {GLFW_KEY_S,{-1,0}},
+        {GLFW_KEY_A,{0,-1}},
+        {GLFW_KEY_D,{0,1}}
+    };
+    if(pressed.count(key)) {
+        if(action == GLFW_PRESS) {
+            speed(pressed.at(key));
+        } else if (action == GLFW_RELEASE) {
+            speed(-pressed.at(key));
         }
-    } else {
-        switch(key) {
-        case GLFW_KEY_W:
-            speed({-1,0});
-            break;
+    }
+    if(key == GLFW_KEY_LEFT_SHIFT) {
+        if(action == GLFW_PRESS) {
+            mSSpeed *= 4;
+        } else if(action == GLFW_RELEASE) {
+            mSSpeed /= 4;
         }
     }
 }
@@ -62,7 +74,7 @@ void Camera::onMouse(GLFWwindow* window, double xpos, double ypos) {
     float yrel = ypos-ly;
     ly = ypos;
 
-    mRotation+=vec3{-xrel,yrel,0}*0.01f;
+    mRotation+=vec3{-xrel,-yrel,0}*0.001f;
 }
 
 const glm::mat4& Camera::view() const {

@@ -21,7 +21,7 @@ void Terrain::init(GLuint textureId) {
         std::vector<GLfloat> vertices;
         std::vector<GLuint> indices;
 
-        int gridDim = 512;
+        int gridDim = 1024;
 
         for(int x = 0; x <= gridDim; ++x)
         {

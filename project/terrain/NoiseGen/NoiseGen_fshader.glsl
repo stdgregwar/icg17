@@ -49,9 +49,9 @@ float fbm(vec2 x, int octaves) {
     // Rotate to reduce axial bias
     mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
     for (int i = 0; i < octaves; ++i) {
-        v += a * noise(x);
-        x = rot * x * 2.0 + shift;
-        a *= 0.5;
+	v += a * noise(x);
+	x = rot * x * 2.0 + shift;
+	a *= 0.5;
     }
     return v;
 }
@@ -61,23 +61,24 @@ float multifractal(vec2 point, float H, float lacunarity, int
 {
     float value = 1.0;
     for (int i = 0; i < octaves; i++) {
-        value *= ((1-abs(noise(point))) + offset) * pow(lacunarity, -H*i);
-        point *= lacunarity;
+	value *= ((1-abs(noise(point))) + offset) * pow(lacunarity, -H*i);
+	point *= lacunarity;
     }
     return value;
 }
 
 void main() {
-        float scale = 2;
-        vec2 p = gl_FragCoord.xy*0.001*scale + offset;
+        float scale = 10;
+	vec2 p = gl_FragCoord.xy*0.001*scale + offset;
 
-        //value = fbm(p,1)*20+10;
-        value = (multifractal(p*0.6,0.1,0.5,6,0.7)-10)*0.8;//*fbm(p*1,5)*0.5;
-        value = max(0.1,value);
-        value += (value*0.08+1)*fbm(p*1,8)*4;
-        value /= scale;
-        //value = max(0,value);
-        //value = fbm(p,8);
-        //value = noise(p);
+	//value = fbm(p,1)*20+10;
+	value = (multifractal(p*0.6,0.1,0.5,6,0.7)-10)*0.8;//*fbm(p*1,5)*0.5;
+	value = max(0.1,value);
+	value += (value*0.08+1)*fbm(p*1,8)*4;
+	value += fbm(p*0.05,3)*40+20;
+	value /= scale;
+	//value = max(0,value);
+
+	//value = noise(p);
 }
 

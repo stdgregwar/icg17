@@ -15,13 +15,13 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-int grid_size = 512;
+int grid_size = 1024;
 int window_width = 1280;
 int window_height = 720;
 
 ScalarFrameBuffer framebuffer;
 NoiseGen noiseGen;
-Camera cam({0,0,1});
+Camera cam({5,5,5},{-M_PI/4,-M_PI/4,-M_PI/4});
 Terrain terrain;
 
 using namespace glm;
@@ -29,7 +29,7 @@ using namespace glm;
 mat4 projection_matrix;
 
 void Init(GLFWwindow* window) {
-    glClearColor(0.0, 0.0, 0.0 /*white*/, 1.0 /*solid*/);
+    glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
 
@@ -53,8 +53,8 @@ void Display() {
     mat4 scalem = scale(mat4(),vec3(4));
 
     float time = 0.3*glfwGetTime();
-    glm::vec2 offset = {0,0};
-//    offset *= 2.f;
+    glm::vec2 offset = {time,time};
+    offset *= 5.f;
     offset += glm::vec2{-1000.f,231.f};
 
     framebuffer.bind();

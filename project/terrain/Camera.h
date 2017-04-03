@@ -7,7 +7,7 @@
 class Camera
 {
 public:
-    Camera(const glm::vec3& pos);
+    Camera(const glm::vec3& pos, const glm::vec3& orientation = {0,0,0});
     void setBaseSpeed(float speed);
     void update(float delta_s);
     void rotate(glm::vec2 delta);
