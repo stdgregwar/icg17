@@ -58,9 +58,11 @@ void NoiseGen::cleanup() {
     glDeleteVertexArrays(1, &mVertexArrayId);
 }
 
-void NoiseGen::draw(const glm::mat4& model) const {
+void NoiseGen::draw(const glm::mat4& model, float res) const {
     glUseProgram(mProgramId);
     glBindVertexArray(mVertexArrayId);
+
+    glUniform1f(glGetUniformLocation(mProgramId,"res"),res);
 
     glUniformMatrix4fv(glGetUniformLocation(mProgramId,"M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
     // draw

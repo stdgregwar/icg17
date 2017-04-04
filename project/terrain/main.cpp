@@ -21,9 +21,9 @@ int window_width = 1280;
 int window_height = 720;
 
 
-Camera cam({0,0,20},{-M_PI/4,-M_PI/4,-M_PI/4});
+Camera cam({400,500,20},{-M_PI/4,-M_PI/4,-M_PI/4});
 
-World world(32);
+World world(64);
 
 using namespace glm;
 

@@ -15,12 +15,12 @@ int Chunk::update(int res, long frameid, const NoiseGen& noise, const Terrain& t
     mRes = res;
 
 
-    mHmap = mNoiseBuffer.init(res,res);
+    mHmap = mNoiseBuffer.init(res+2,res+2);
     mNoiseBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mat4 model = translate(mat4(),vec3(mOffset,0));
     model = scale(model,vec3(mSize,mSize.x));
-    noise.draw(model);
+    noise.draw(model,res);
     mNoiseBuffer.unbind();
     mTerrain = &terrain;
     mReady = true;
@@ -30,7 +30,7 @@ int Chunk::update(int res, long frameid, const NoiseGen& noise, const Terrain& t
 void Chunk::draw(float time, const mat4 &view, const mat4 &projection) {
     if(!mReady) return;
     mat4 model = translate(mat4(),vec3(mOffset,0));
-    model = scale(model,vec3(mSize,mSize.x));
+    model = scale(model,vec3(mSize,mSize.x*(32/mSize.x)));
     mTerrain->draw(time,model,view,projection,mHmap);
 }
 

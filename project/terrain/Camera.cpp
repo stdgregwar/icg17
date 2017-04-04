@@ -22,7 +22,7 @@ void Camera::update(float delta_s) {
                  sin(rot.y)};
 
     vec3 up = vec3(0,0,1);
-    vec3 side = cross(look,up);
+    vec3 side = normalize(cross(look,up));
     vec3 wspeed = look*mLSpeed.x + side*mLSpeed.y;
 
     mPosition += wspeed*mSSpeed*delta_s;

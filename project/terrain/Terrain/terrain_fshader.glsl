@@ -1,10 +1,13 @@
 #version 330
 
+uniform sampler1D color_map;
+uniform sampler2D height_map;
+
 in vec2 uv;
 in vec3 view_dir;
 in vec3 normal_mv;
 in vec3 light_dir;
-in vec3 base_color;
+in float base_color;
 
 out vec3 color;
 
@@ -25,8 +28,9 @@ void main() {
     float diff = clamp(dot(normal,light),0,1);
     vec3 ref = reflect(light,normal);
     float spec = pow(clamp(dot(ref,view),0,1),2);
-    color = base_color;
+    color = texture(color_map,base_color).rgb;
     color *= vec3(0.1,0.2,0.2)+vec3(0.9)*diff;//+vec3(1,0.8,0.8)*spec;
-    float fog = exp(-0.001*gl_FragCoord.z/gl_FragCoord.w);
+    float fog = exp(-0.002*gl_FragCoord.z/gl_FragCoord.w);
     color = mix(vec3(0.7, 0.99, 1),color,fog);
+    color = vec3(texture(height_map,uv).r);
 }

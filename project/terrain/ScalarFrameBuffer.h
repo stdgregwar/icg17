@@ -14,6 +14,6 @@ public:
     // warning: overrides viewport!!
     void bind();
     void unbind();
-    int init(int imageWidth, int imageHeight, bool useInterpolation = true);
+    int init(int imageWidth, int imageHeight, bool useInterpolation = false);
     void cleanup();
 };

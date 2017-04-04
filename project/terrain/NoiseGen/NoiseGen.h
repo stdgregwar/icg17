@@ -9,7 +9,7 @@ public:
     NoiseGen(float size);
     void init(float size);
     void cleanup();
-    void draw(const glm::mat4 &model) const;
+    void draw(const glm::mat4 &model, float res = 256) const;
 private:
     GLuint mVertexArrayId;        // vertex array object
     GLuint mProgramId;             // GLSL shader program ID

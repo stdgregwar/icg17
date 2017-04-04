@@ -3,6 +3,7 @@
 void Terrain::init(int res) {
     // compile the shaders.
 
+    mRes = res;
     mProgramId = icg_helper::LoadShaders("terrain_vshader.glsl",
                                           "terrain_fshader.glsl");
     if(!mProgramId) {
@@ -147,6 +148,7 @@ void Terrain::draw(float time, const glm::mat4 &model,
 
     // pass the current time stamp to the shader.
     glUniform1f(glGetUniformLocation(mProgramId, "time"), time);
+    glUniform1f(glGetUniformLocation(mProgramId, "res"), mRes);
 
     // drawing the grid
     glDrawElements(GL_TRIANGLES, mNumIndices, GL_UNSIGNED_INT, 0);

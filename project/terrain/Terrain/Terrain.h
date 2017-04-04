@@ -20,6 +20,7 @@ class Terrain {
         GLuint mColorMapLoc;                  // Uniform location for color map
         GLuint mNumIndices;                    // number of vertices to render
         GLuint mMVPId;                         // model, view, proj matrix ID
+        int mRes;
 
     public:
         void init(int res);

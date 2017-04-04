@@ -28,7 +28,7 @@ private:
     float mChunkSize;
     int mViewDistance;
     long mFrameID;
-    int mMaxRes = 256;
+    int mMaxRes = 32;
 };
 
 #endif // WORLD_H
