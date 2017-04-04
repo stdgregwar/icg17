@@ -17,9 +17,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 int grid_size = 1024;
-int window_width = 1600;
-int window_height = 900;
-
+int window_width = 1280;
+int window_height = 720;
+int old_ww;
+int old_wh;
 
 Camera cam({789,234,20},{-M_PI/4,-M_PI/4,-M_PI/4});
 
@@ -78,9 +79,36 @@ void ErrorCallback(int error, const char* description) {
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    static bool fullscreen = false;
+    static int old_ww = window_width;
+    static int old_wh = window_height;
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    } else if(key == GLFW_KEY_F11 && action == GLFW_RELEASE) {
+        // Get the desktop resolution.
+        const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+
+
+       int desktopWidth = mode->width;
+       int desktopHeight = mode->height;
+
+       fullscreen = !fullscreen;
+
+        if ( fullscreen ) {
+            // Set window size for "fullscreen windowed" mode to the desktop resolution.
+            old_ww = window_width;
+            old_wh = window_height;
+            glfwSetWindowSize(window,desktopWidth, desktopHeight);
+            // Move window to the upper left corner.
+            glfwSetWindowPos(window,0, 0);
+        } else {
+            // Use start-up values for "windowed" mode.
+            glfwSetWindowSize(window,old_ww, old_wh);
+            //glfwSetWindowPos(originalPosX, originalPosY);
+        }
     }
+
     cam.onKey(window,key,scancode,action,mods);
 }
 
