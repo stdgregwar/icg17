@@ -3,7 +3,7 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16), mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(256)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16), mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(512)
 {
 
 }
@@ -23,7 +23,7 @@ void World::init() {
 void World::update(float dt,const glm::vec2& worldPos) {
     i32vec2 center = worldPos/mChunkSize;
 
-    int maxTasks = 16;
+    int maxTasks = 8;
     for(int i = 0; i<maxTasks && mToDo.size();) {
         ChunkTask& t = mToDo.front();
         switch (t.type) {
@@ -40,7 +40,7 @@ void World::update(float dt,const glm::vec2& worldPos) {
         }
         case ChunkTask::DELETE:
             mChunks.erase(t.chunk);
-            i++;
+            //i++;
             break;
         default:
             break;
@@ -57,7 +57,6 @@ void World::update(float dt,const glm::vec2& worldPos) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
             int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
-            dist;
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist

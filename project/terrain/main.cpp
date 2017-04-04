@@ -17,13 +17,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 int grid_size = 1024;
-int window_width = 1280;
-int window_height = 720;
+int window_width = 1600;
+int window_height = 900;
 
 
 Camera cam({789,234,20},{-M_PI/4,-M_PI/4,-M_PI/4});
 
-World world(64);
+World world(128);
 
 using namespace glm;
 
@@ -38,7 +38,7 @@ void Init(GLFWwindow* window) {
     glCullFace(GL_BACK);
 
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.1f, 1000000.0f);
 
     world.init();
 }
@@ -69,7 +69,7 @@ void Display() {
 void resize_callback(GLFWwindow* window, int width, int height) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 1000.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.1f, 1000000.0f);
     glViewport(0, 0, window_width, window_height);
 }
 
