@@ -3,7 +3,7 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16), mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(512)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16), mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(256)
 {
 
 }

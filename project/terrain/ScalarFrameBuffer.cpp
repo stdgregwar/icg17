@@ -75,3 +75,7 @@ void ScalarFrameBuffer::cleanup() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0 /*UNBIND*/);
     glDeleteFramebuffers(1, &mFramebufferObjectId);
 }
+
+ScalarFrameBuffer::~ScalarFrameBuffer() {
+    cleanup();
+}

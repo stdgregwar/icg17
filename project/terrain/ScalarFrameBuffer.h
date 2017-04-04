@@ -16,4 +16,5 @@ public:
     void unbind();
     int init(int imageWidth, int imageHeight, bool useInterpolation = true);
     void cleanup();
+    ~ScalarFrameBuffer();
 };
