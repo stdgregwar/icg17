@@ -156,12 +156,9 @@ void Terrain::draw(float time, const glm::mat4 &model,
     glUniform1f(glGetUniformLocation(mProgramId, "res"), mRes);
 
     // drawing the grid
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawElements(GL_TRIANGLES, mNumIndices, GL_UNSIGNED_INT, 0);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glUniform1f(glGetUniformLocation(mProgramId, "time"), 3);
-    glDrawElements(GL_TRIANGLES, mNumIndices, GL_UNSIGNED_INT, 0);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 
     glBindVertexArray(0);
     glUseProgram(0);
