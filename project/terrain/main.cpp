@@ -21,7 +21,7 @@ int window_width = 1280;
 int window_height = 720;
 
 
-Camera cam({400,500,20},{-M_PI/4,-M_PI/4,-M_PI/4});
+Camera cam({789,234,20},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 World world(64);
 
@@ -34,11 +34,13 @@ void Init(GLFWwindow* window) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
 
     world.init();
-
 }
 
 void Display() {

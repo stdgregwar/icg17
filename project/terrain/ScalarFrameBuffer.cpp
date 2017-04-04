@@ -13,8 +13,8 @@ void ScalarFrameBuffer::unbind() {
 }
 
 int ScalarFrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolation) {
-    this->width = imageWidth;
-    this->height = imageHeight;
+    width = imageWidth;
+    height = imageHeight;
     if(mColorTextureId)
         cleanup();
     // create color attachment

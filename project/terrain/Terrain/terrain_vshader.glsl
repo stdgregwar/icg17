@@ -15,12 +15,12 @@ uniform mat4 MVP;
 uniform mat4 MV;
 uniform mat4 M;
 uniform float res;
+uniform float time;
 
 const vec3 light_world = vec3(1,1,1);
 
 float height(vec2 p) {
-    p*=1-(2/res); //Align with texture margin
-    p+=(1/res);
+
     return texture(height_map,p).r*1;
 }
 
@@ -35,12 +35,16 @@ vec3 fdiff(vec2 p) {
     // deduce terrain normal
     norm.x = hL - hR;
     norm.y = hD - hU;
-    norm.z = 500*d;
+    norm.z = 100*d;
     return normalize(norm);
 }
 
 void main() {
-    uv = (position + vec2(1.0, 1.0)) * 0.5;
+    uv = (position);
+    float tres = res+2;
+    uv*=1-(2/tres); //Align with texture margin
+    uv+=(1/tres);
+
     float value = height(uv);
     base_color = value*0.09;
 

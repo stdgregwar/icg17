@@ -28,10 +28,10 @@ void NoiseGen::init(float size) {
 
     // vertex coordinates
     {
-        const GLfloat vertex_point[] = { /*V1*/ -1.0f, -1.0f, 0.0f,
-                                         /*V2*/ +1.0f, -1.0f, 0.0f,
-                                         /*V3*/ -1.0f, +1.0f, 0.0f,
-                                         /*V4*/ +1.0f, +1.0f, 0.0f};
+        const GLfloat vertex_point[] = { /*V1*/ -1.0f, -1.0f,
+                                         /*V2*/ +1.0f, -1.0f,
+                                         /*V3*/ -1.0f, +1.0f,
+                                         /*V4*/ +1.0f, +1.0f};
         // buffer
         glGenBuffers(1, &mVertexBufferObject);
         glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
@@ -41,7 +41,7 @@ void NoiseGen::init(float size) {
         // attribute
         GLuint vertex_point_id = glGetAttribLocation(mProgramId, "vpoint");
         glEnableVertexAttribArray(vertex_point_id);
-        glVertexAttribPointer(vertex_point_id, 3, GL_FLOAT, DONT_NORMALIZE,
+        glVertexAttribPointer(vertex_point_id, 2, GL_FLOAT, DONT_NORMALIZE,
                               ZERO_STRIDE, ZERO_BUFFER_OFFSET);
     }
 

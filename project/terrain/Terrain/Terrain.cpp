@@ -23,9 +23,12 @@ void Terrain::init(int res) {
 
         int gridDim = res;
 
-        for(int x = -1; x <= gridDim+1; ++x)
+        bool seams = true;
+        int start = seams ? -1 : 0;
+        int end = seams ? gridDim+1 : gridDim;
+        for(int x = start; x <= end; ++x)
         {
-            for(int y = -1; y <= gridDim+1; ++y)
+            for(int y = start; y <= end; ++y)
             {
                 float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -0.5 : 0;
                 glm::vec2 pos = {min(max((float)x/gridDim,0.f),1.f),min(max((float)y/gridDim,0.f),1.f)};
@@ -33,7 +36,7 @@ void Terrain::init(int res) {
             }
         }
 
-        gridDim+=2;
+        if(seams) gridDim+=2;
 
         for(int x = 0; x < gridDim; ++x)
         {
@@ -41,12 +44,14 @@ void Terrain::init(int res) {
             {
 
                 int offset = x * (gridDim+1) + y;
+                indices.push_back(offset + gridDim + 1);
+                indices.push_back(offset + 1);
                 indices.push_back(offset + 0);
-                indices.push_back(offset + 1);
-                indices.push_back(offset + gridDim + 1);
-                indices.push_back(offset + gridDim + 1);
-                indices.push_back(offset + 1);
                 indices.push_back(offset + gridDim + 1 + 1);
+                indices.push_back(offset + 1);
+                indices.push_back(offset + gridDim + 1);
+
+
             }
         }
 
@@ -151,7 +156,12 @@ void Terrain::draw(float time, const glm::mat4 &model,
     glUniform1f(glGetUniformLocation(mProgramId, "res"), mRes);
 
     // drawing the grid
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawElements(GL_TRIANGLES, mNumIndices, GL_UNSIGNED_INT, 0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glUniform1f(glGetUniformLocation(mProgramId, "time"), 3);
+    glDrawElements(GL_TRIANGLES, mNumIndices, GL_UNSIGNED_INT, 0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glBindVertexArray(0);
     glUseProgram(0);

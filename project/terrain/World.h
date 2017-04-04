@@ -11,6 +11,19 @@
 typedef std::unordered_map<glm::i32vec2,Chunk> Chunks;
 typedef std::unordered_map<int,Terrain> Terrains;
 
+struct ChunkTask {
+    enum Type{
+        CREATE,
+        UPDATE,
+        DELETE
+    };
+    Type type;
+    glm::i32vec2 chunk;
+    std::function<int(Chunk* c)> task;
+};
+
+typedef std::list<ChunkTask> Tasks;
+
 class World
 {
 public:
@@ -19,16 +32,17 @@ public:
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
+    void pushTask(ChunkTask task);
 private:
     Terrains mTerrains;
-    std::list<std::function<int()>> mToDo;
+    Tasks mToDo;
     Chunks mChunks;
     NoiseGen mNoise;
     glm::i32vec2 mPreviousCenter;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;
-    int mMaxRes = 32;
+    int mMaxRes;
 };
 
 #endif // WORLD_H

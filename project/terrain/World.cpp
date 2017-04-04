@@ -3,7 +3,7 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(2), mFrameID(0), mPreviousCenter(5000,5000)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(12), mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(128)
 {
 
 }
@@ -25,7 +25,26 @@ void World::update(float dt,const glm::vec2& worldPos) {
 
     int maxTasks = 16;
     for(int i = 0; i<maxTasks && mToDo.size();) {
-        i+=mToDo.front()();
+        ChunkTask& t = mToDo.front();
+        switch (t.type) {
+        case ChunkTask::CREATE:
+            //TODO
+            break;
+        case ChunkTask::UPDATE:{
+            auto it = mChunks.find(t.chunk);
+            if(it == mChunks.end()) {
+                throw std::runtime_error("Update on null chunk!");
+            }
+            i+=t.task(&it->second);
+            break;
+        }
+        case ChunkTask::DELETE:
+            mChunks.erase(t.chunk);
+            i++;
+            break;
+        default:
+            break;
+        }
         mToDo.pop_front();
     }
 
@@ -37,7 +56,7 @@ void World::update(float dt,const glm::vec2& worldPos) {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-1),6);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
             dist;
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
@@ -51,21 +70,26 @@ void World::update(float dt,const glm::vec2& worldPos) {
                 it = p.first;
             }
             Chunk* c = &it->second;
-            mToDo.push_back(
-                        [this,c,res](){
-                            return c->update(res,mFrameID,mNoise,mTerrains.at(res));
-                        });
+            c->setFrameID(mFrameID);
+            pushTask({
+                         ChunkTask::UPDATE,
+                         cpos,
+                        [this,res](Chunk* c){
+                            return c->update(res,mNoise,mTerrains.at(res));
+                        }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
         }
     }
-
-    /*for(Chunks::iterator it = mChunks.begin(); it != mChunks.end();) {
-        if(it->second.frameID() != mFrameID) {
-            it = mChunks.erase(it);
-        } else {
-            it++;
+    for(Chunks::value_type& p : mChunks) {
+        if(p.second.frameID() != mFrameID) {
+            pushTask({ChunkTask::DELETE,p.second.pos()/mChunkSize,nullptr});
         }
-    }*/
+    }
+}
+
+void World::pushTask(ChunkTask task) {
+    mToDo.remove_if([&task](ChunkTask& ct){return ct.chunk == task.chunk && ct.type != ChunkTask::CREATE;});
+    mToDo.push_back(task);
 }
 
 void World::draw(float time, const mat4 &view, const mat4 &projection) {

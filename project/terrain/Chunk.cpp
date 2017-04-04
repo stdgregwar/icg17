@@ -9,8 +9,7 @@ Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size) : mOffset(offset), 
 
 }
 
-int Chunk::update(int res, long frameid, const NoiseGen& noise, const Terrain& terrain) {
-    mFrameId = frameid;
+int Chunk::update(int res, const NoiseGen& noise, const Terrain& terrain) {
     if(mRes == res) return 0;
     mRes = res;
 
@@ -25,6 +24,10 @@ int Chunk::update(int res, long frameid, const NoiseGen& noise, const Terrain& t
     mTerrain = &terrain;
     mReady = true;
     return 1;
+}
+
+void Chunk::setFrameID(long id) {
+    mFrameId = id;
 }
 
 void Chunk::draw(float time, const mat4 &view, const mat4 &projection) {

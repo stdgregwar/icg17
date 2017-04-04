@@ -2,7 +2,7 @@
 
 uniform sampler1D color_map;
 uniform sampler2D height_map;
-
+uniform float time;
 in vec2 uv;
 in vec3 view_dir;
 in vec3 normal_mv;
@@ -32,5 +32,4 @@ void main() {
     color *= vec3(0.1,0.2,0.2)+vec3(0.9)*diff;//+vec3(1,0.8,0.8)*spec;
     float fog = exp(-0.002*gl_FragCoord.z/gl_FragCoord.w);
     color = mix(vec3(0.7, 0.99, 1),color,fog);
-    color = vec3(texture(height_map,uv).r);
 }

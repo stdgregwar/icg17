@@ -10,9 +10,11 @@ class Chunk
 {
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
-    int update(int res, long frameid, const NoiseGen &noise, const Terrain& terrain);
+    int update(int res, const NoiseGen &noise, const Terrain& terrain);
     void draw(float time, const glm::mat4 &view, const glm::mat4 &projection);
+    void setFrameID(long id);
     long frameID() { return mFrameId;}
+    const glm::vec2& pos() const {return mOffset;}
     ~Chunk();
 private:
     bool mReady;
