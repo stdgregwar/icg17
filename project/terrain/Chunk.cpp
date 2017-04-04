@@ -9,20 +9,22 @@ Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size) : mOffset(offset), 
 
 }
 
-void Chunk::update(int res, long frameid, const NoiseGen& noise, const Terrain& terrain) {
+int Chunk::update(int res, long frameid, const NoiseGen& noise, const Terrain& terrain) {
     mFrameId = frameid;
-    if(mRes == res) return;
+    if(mRes == res) return 0;
     mRes = res;
 
 
     mHmap = mNoiseBuffer.init(res,res);
     mNoiseBuffer.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mat4 model = translate(mat4(),vec3(mOffset,0));
     model = scale(model,vec3(mSize,mSize.x));
     noise.draw(model);
     mNoiseBuffer.unbind();
     mTerrain = &terrain;
     mReady = true;
+    return 1;
 }
 
 void Chunk::draw(float time, const mat4 &view, const mat4 &projection) {

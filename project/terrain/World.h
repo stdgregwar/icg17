@@ -21,14 +21,14 @@ public:
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
 private:
     Terrains mTerrains;
-    std::list<std::function<void()>> mToDo;
+    std::list<std::function<int()>> mToDo;
     Chunks mChunks;
     NoiseGen mNoise;
     glm::i32vec2 mPreviousCenter;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;
-    int mMaxRes = 1024;
+    int mMaxRes = 256;
 };
 
 #endif // WORLD_H

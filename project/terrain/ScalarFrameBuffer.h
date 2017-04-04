@@ -7,12 +7,11 @@ public:
     int width;
     int height;
 private:
-    GLuint mFramebufferObjectId;
+    GLuint mFramebufferObjectId=0;
     GLuint mColorTextureId = 0;
-    GLuint mDepthRenderBufferId;
+    GLuint mDepthRenderBufferId=0;
 public:
     // warning: overrides viewport!!
-    void attach(GLuint texture);
     void bind();
     void unbind();
     int init(int imageWidth, int imageHeight, bool useInterpolation = true);

@@ -16,7 +16,7 @@ int ScalarFrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolati
     this->width = imageWidth;
     this->height = imageHeight;
     if(mColorTextureId)
-        glDeleteTextures(1,&mColorTextureId);
+        cleanup();
     // create color attachment
     {
         glGenTextures(1, &mColorTextureId);

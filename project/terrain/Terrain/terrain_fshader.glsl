@@ -27,4 +27,6 @@ void main() {
     float spec = pow(clamp(dot(ref,view),0,1),2);
     color = base_color;
     color *= vec3(0.1,0.2,0.2)+vec3(0.9)*diff;//+vec3(1,0.8,0.8)*spec;
+    float fog = exp(-0.001*gl_FragCoord.z/gl_FragCoord.w);
+    color = mix(vec3(0.7, 0.99, 1),color,fog);
 }

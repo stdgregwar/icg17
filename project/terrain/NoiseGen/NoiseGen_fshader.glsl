@@ -2,7 +2,7 @@
 
 in vec3 w_pos;
 
-uniform float screenWidth;
+uniform float res;
 out float value;
 
 #define PI 3.14159265358979323846
@@ -69,8 +69,9 @@ float multifractal(vec2 point, float H, float lacunarity, int
 
 void main() {
         float s = 10;
-	//vec2 n_uv = (gl_FragCoord.xy+vec2(1,1))*0.5;
-	vec2 p = w_pos.xy*0.01*s;
+        vec2 n_uv = w_pos.xy;
+        //vec2 n_uv = (gl_FragCoord.xy+vec2(1,1))*0.5;
+        vec2 p = n_uv*0.01*s;
 
 	//value = fbm(p,1)*20+10;
 	value = (multifractal(p*0.6,0.1,0.5,6,0.7)-10)*0.8;//*fbm(p*1,5)*0.5;
@@ -78,6 +79,7 @@ void main() {
 	value += (value*0.08+1)*fbm(p*1,8)*4;
 	value += fbm(p*0.05,3)*40+20;
 	value /= s;
+        //value = p.x*20;
 	//value = max(0,value);
 
 	//value = noise(p);

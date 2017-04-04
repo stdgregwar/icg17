@@ -26,7 +26,7 @@ void Terrain::init(int res) {
         {
             for(int y = -1; y <= gridDim+1; ++y)
             {
-                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -5 : 0;
+                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -0.5 : 0;
                 glm::vec2 pos = {min(max((float)x/gridDim,0.f),1.f),min(max((float)y/gridDim,0.f),1.f)};
                 vertices.push_back({pos,shift});
             }
@@ -65,11 +65,17 @@ void Terrain::init(int res) {
 
         // position shader attribute
         GLuint locPosition = glGetAttribLocation(mProgramId, "position");
+        if(locPosition == -1) {
+            throw std::runtime_error("failed to bind attrib position");
+        }
         glEnableVertexAttribArray(locPosition);
         glVertexAttribPointer(locPosition, 2, GL_FLOAT, DONT_NORMALIZE,
                               sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,pos));
 
         GLuint locShift = glGetAttribLocation(mProgramId, "shift");
+        if(locShift == -1) {
+            throw std::runtime_error("failed to bind attrib shift");
+        }
         glEnableVertexAttribArray(locShift);
         glVertexAttribPointer(locShift, 1, GL_FLOAT, DONT_NORMALIZE,
                                sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,shift));
@@ -125,7 +131,6 @@ void Terrain::draw(float time, const glm::mat4 &model,
     glBindVertexArray(mVertexArrayId);
 
     // bind textures
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, heightMap);
     glUniform1i(mHeightMapLoc,0);

@@ -38,7 +38,7 @@ vec3 fdiff(vec2 p) {
 }
 
 void main() {
-    uv = (position + vec2(1.0, 1.0)) * 0.499999;
+    uv = (position + vec2(1.0, 1.0)) * 0.5;
     float value = height(uv);
     base_color = texture(color_map,value/2.f).rgb;
 

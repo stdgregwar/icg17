@@ -3,13 +3,13 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(7), mFrameID(0), mPreviousCenter(5000,5000)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(14), mFrameID(0), mPreviousCenter(5000,5000)
 {
 
 }
 
 void World::init() {
-    mNoise.init(mChunkSize);
+    mNoise.init(mMaxRes);
     int res = mMaxRes;
     while(res > 2) {
         mTerrains.emplace(std::piecewise_construct,
@@ -23,9 +23,9 @@ void World::init() {
 void World::update(float dt,const glm::vec2& worldPos) {
     i32vec2 center = worldPos/mChunkSize;
 
-    int maxTasks = 32;
-    for(int i = 0; i<maxTasks && mToDo.size(); i++) {
-        mToDo.front()();
+    int maxTasks = 16;
+    for(int i = 0; i<maxTasks && mToDo.size();) {
+        i+=mToDo.front()();
         mToDo.pop_front();
     }
 
@@ -37,7 +37,8 @@ void World::update(float dt,const glm::vec2& worldPos) {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-1),7);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-1),6);
+            dist;
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist
@@ -52,7 +53,7 @@ void World::update(float dt,const glm::vec2& worldPos) {
             Chunk* c = &it->second;
             mToDo.push_back(
                         [this,c,res](){
-                            c->update(res,mFrameID,mNoise,mTerrains.at(res));
+                            return c->update(res,mFrameID,mNoise,mTerrains.at(res));
                         });
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
         }

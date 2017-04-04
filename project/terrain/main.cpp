@@ -38,6 +38,7 @@ void Init(GLFWwindow* window) {
     projection_matrix = perspective(45.0f, ratio, 0.1f, 10000.0f);
 
     world.init();
+
 }
 
 void Display() {
@@ -56,6 +57,8 @@ void Display() {
     glm::vec2 offset = {time,time};
     offset *= 5.f;
     offset += glm::vec2{-1000.f,231.f};
+
+
 
     world.draw(time,view,projection_matrix);
 }
@@ -139,10 +142,10 @@ int main(int argc, char *argv[]) {
     while(!glfwWindowShouldClose(window)){
         float time = glfwGetTime();
         update(time-lastTime);
-        lastTime=time;
         Display();
         glfwSwapBuffers(window);
         glfwPollEvents();
+        lastTime=time;
     }
     /// Close OpenGL window and terminate GLFW
     glfwDestroyWindow(window);

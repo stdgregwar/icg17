@@ -45,28 +45,6 @@ void NoiseGen::init(float size) {
                               ZERO_STRIDE, ZERO_BUFFER_OFFSET);
     }
 
-    // texture coordinates
-    {
-        const GLfloat vertexTextureCoordinates[] = { /*V1*/ 0.0f, 0.0f,
-                                                       /*V2*/ 1.0f, 0.0f,
-                                                       /*V3*/ 0.0f, 1.0f,
-                                                       /*V4*/ 1.0f, 1.0f};
-
-        // buffer
-        glGenBuffers(1, &mVertexBufferObject);
-        glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexTextureCoordinates),
-                     vertexTextureCoordinates, GL_STATIC_DRAW);
-
-        // attribute
-        GLuint vertexTextureCoordId = glGetAttribLocation(mProgramId,
-                                                             "vtexcoord");
-        glEnableVertexAttribArray(vertexTextureCoordId);
-        glVertexAttribPointer(vertexTextureCoordId, 2, GL_FLOAT,
-                              DONT_NORMALIZE, ZERO_STRIDE,
-                              ZERO_BUFFER_OFFSET);
-    }
-
     // to avoid the current object being polluted
     glBindVertexArray(0);
     glUseProgram(0);
@@ -83,10 +61,6 @@ void NoiseGen::cleanup() {
 void NoiseGen::draw(const glm::mat4& model) const {
     glUseProgram(mProgramId);
     glBindVertexArray(mVertexArrayId);
-
-    // window size uniforms
-        glUniform1f(glGetUniformLocation(mProgramId, "res"),
-                    this->mSize);
 
     glUniformMatrix4fv(glGetUniformLocation(mProgramId,"M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
     // draw
