@@ -3,8 +3,8 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(14),
-    mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
 {
 
 }
@@ -23,7 +23,6 @@ void World::init() {
 
 void World::update(float dt,const glm::vec2& worldPos) {
     i32vec2 center = worldPos/mChunkSize;
-
     int remaining = mToDo.size();
     for(int i = 0; i<mTaskPerFrame && mToDo.size();) {
         ChunkTask& t = mToDo.front();
@@ -49,9 +48,21 @@ void World::update(float dt,const glm::vec2& worldPos) {
         mToDo.pop_front();
     }
 
-    if(mPreviousCenter == center) return;
+    if(mCenter != center) {
+        mCenter = center;
+        updateChunks();
+    }
 
-    mPreviousCenter = center;
+    if(mToDo.size()-remaining > mViewDistance*mTaskPerFrame) {
+        mTaskPerFrame = std::min(mViewDistance*mViewDistance,mTaskPerFrame+mViewDistance/8);
+    } else {
+        mTaskPerFrame = std::max(4, mTaskPerFrame-1);
+    }
+    cout << "taskspf " << mTaskPerFrame << endl;
+}
+
+void World::updateChunks() {
+    i32vec2 center = mCenter;
     mFrameID++;
     int maxRes = mMaxRes;
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
@@ -85,8 +96,6 @@ void World::update(float dt,const glm::vec2& worldPos) {
             pushTask({ChunkTask::DELETE,p.second.pos()/mChunkSize,nullptr});
         }
     }
-    mTaskPerFrame = mToDo.size() > remaining ? mTaskPerFrame*2: std::min(2,mTaskPerFrame/2);
-    cout << "taskspf " << mTaskPerFrame << endl;
 }
 
 void World::pushTask(ChunkTask task) {

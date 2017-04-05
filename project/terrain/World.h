@@ -31,6 +31,7 @@ public:
     void init();
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
+    void updateChunks();
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
     void pushTask(ChunkTask task);
 private:
@@ -38,7 +39,7 @@ private:
     Tasks mToDo;
     Chunks mChunks;
     NoiseGen mNoise;
-    glm::i32vec2 mPreviousCenter;
+    glm::i32vec2 mCenter;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;
