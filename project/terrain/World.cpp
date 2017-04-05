@@ -3,7 +3,8 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16), mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(256)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(14),
+    mFrameID(0), mPreviousCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
 {
 
 }
@@ -23,8 +24,8 @@ void World::init() {
 void World::update(float dt,const glm::vec2& worldPos) {
     i32vec2 center = worldPos/mChunkSize;
 
-    int maxTasks = 8;
-    for(int i = 0; i<maxTasks && mToDo.size();) {
+    int remaining = mToDo.size();
+    for(int i = 0; i<mTaskPerFrame && mToDo.size();) {
         ChunkTask& t = mToDo.front();
         switch (t.type) {
         case ChunkTask::CREATE:
@@ -84,6 +85,8 @@ void World::update(float dt,const glm::vec2& worldPos) {
             pushTask({ChunkTask::DELETE,p.second.pos()/mChunkSize,nullptr});
         }
     }
+    mTaskPerFrame = mToDo.size() > remaining ? mTaskPerFrame*2: std::min(2,mTaskPerFrame/2);
+    cout << "taskspf " << mTaskPerFrame << endl;
 }
 
 void World::pushTask(ChunkTask task) {

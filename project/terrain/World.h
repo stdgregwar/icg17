@@ -43,6 +43,7 @@ private:
     int mViewDistance;
     long mFrameID;
     int mMaxRes;
+    int mTaskPerFrame;
 };
 
 #endif // WORLD_H
