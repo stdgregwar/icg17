@@ -4,19 +4,43 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(256), mTaskPerFrame(8)
 {
 
 }
 
 void World::init() {
+    mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
+//    vector<unsigned char> colors = {/*blue*/ 0, 129, 213,
+//                                    /*yellow*/ 238, 225, 94,
+//                                    /*green*/ 23, 154, 21,
+//                                    /*grey*/ 119, 136, 119,
+//                                    /*white*/ 249,249,249};
+    vector<unsigned char> colors = {/*blue*/ 0, 0, 255,
+                                    /*yellow*/ 0, 255, 255,
+                                    /*yellow*/ 0, 255, 255,
+                                    /*yellow*/ 0, 255, 255,
+                                    /*green*/ 0, 255, 0,
+                                    /*green*/ 0, 255, 0,
+                                    /*green*/ 0, 255, 0,
+                                    /*green*/ 0, 255, 0,
+                                    /*grey*/ 255, 0, 0};
+                                    ///*white*/ 255,255,0};
+    mTerrainMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
+    {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
+    mTerrainMaterial.addTexture(GL_TEXTURE2,"grass.jpg","grass",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
+    mTerrainMaterial.addTexture(GL_TEXTURE3,"pebbles.jpg","pebbles",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
+    mTerrainMaterial.addTexture(GL_TEXTURE4,"sand.jpg","sand",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
+    mTerrainMaterial.addTexture(GL_TEXTURE5,"cliffs.jpg","cliffs",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
+    mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
+    mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
     mNoise.init(mMaxRes);
     int res = mMaxRes;
     while(res > 2) {
         mTerrains.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
-                          std::forward_as_tuple());
-        mTerrains[res].init(res);
+                          std::forward_as_tuple(mTerrainMaterial));
+        mTerrains.at(res).init(res);
         res = res >> 1;
     }
 }
@@ -54,11 +78,11 @@ void World::update(float dt,const glm::vec2& worldPos) {
     }
 
     if(mToDo.size()-remaining > mViewDistance*mTaskPerFrame) {
-        mTaskPerFrame = std::min(mViewDistance*mViewDistance,mTaskPerFrame+mViewDistance/8);
+        mTaskPerFrame = std::min(mViewDistance*mViewDistance,mTaskPerFrame+1);
     } else {
-        mTaskPerFrame = std::max(4, mTaskPerFrame-1);
+        mTaskPerFrame = std::max(4, mTaskPerFrame-2);
     }
-    cout << "taskspf " << mTaskPerFrame << endl;
+    //cout << "taskspf " << mTaskPerFrame << endl;
 }
 
 void World::updateChunks() {
@@ -76,8 +100,8 @@ void World::updateChunks() {
                 vec2 size = {mChunkSize,mChunkSize};
 
                 pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
-                                std::forward_as_tuple(cpos),
-                                std::forward_as_tuple(worldOffset,size));
+                                                                std::forward_as_tuple(cpos),
+                                                                std::forward_as_tuple(worldOffset,size));
                 it = p.first;
             }
             Chunk* c = &it->second;
@@ -85,9 +109,9 @@ void World::updateChunks() {
             pushTask({
                          ChunkTask::UPDATE,
                          cpos,
-                        [this,res](Chunk* c){
-                            return c->update(res,mNoise,mTerrains.at(res));
-                        }});
+                         [this,res](Chunk* c){
+                             return c->update(res,mNoise,mTerrains.at(res));
+                         }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
         }
     }
@@ -104,7 +128,9 @@ void World::pushTask(ChunkTask task) {
 }
 
 void World::draw(float time, const mat4 &view, const mat4 &projection) {
+    mTerrainMaterial.bind();
     for(auto& p : mChunks) {
         p.second.draw(time,view,projection);
     }
+    mTerrainMaterial.unbind();
 }

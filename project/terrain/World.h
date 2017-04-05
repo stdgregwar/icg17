@@ -35,6 +35,7 @@ public:
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
     void pushTask(ChunkTask task);
 private:
+    Material mTerrainMaterial;
     Terrains mTerrains;
     Tasks mToDo;
     Chunks mChunks;

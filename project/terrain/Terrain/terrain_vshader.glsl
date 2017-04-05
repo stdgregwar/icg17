@@ -5,6 +5,8 @@ in float shift;
 
 out vec2 uv;
 out vec3 normal_mv;
+out vec3 normal_m;
+out vec3 w_pos;
 out vec3 view_dir;
 out vec3 light_dir;
 out float base_color;
@@ -20,7 +22,6 @@ uniform float time;
 const vec3 light_world = vec3(1,1,1);
 
 float height(vec2 p) {
-
     return texture(height_map,p).r*1;
 }
 
@@ -49,7 +50,10 @@ void main() {
     base_color = value*0.09;
 
     vec3 pos_3d = vec3(position.x,position.y,value*0.1+shift);
-    normal_mv = normalize((MV*vec4(fdiff(uv),0)).xyz);
+    w_pos = (M*vec4(pos_3d,1)).xyz;
+    vec3 n = fdiff(uv);
+    normal_mv = normalize((MV*vec4(n,0)).xyz);
+    normal_m = normalize((M*vec4(n,0)).xyz);
     view_dir = normalize((MV*vec4(pos_3d,1.0)).xyz);
     light_dir = (MV*vec4(light_world,0)).xyz;
     gl_Position = MVP* vec4(pos_3d,1.0);

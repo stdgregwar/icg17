@@ -4,6 +4,7 @@ file(GLOB_RECURSE HEADERS "*.h")
 
 # these files are copied only once
 file(GLOB TEXTURES
+    Terrain/*.jpg
    )
 copy_files_once(${TEXTURES})
 

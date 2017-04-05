@@ -1,17 +1,14 @@
 #include "Terrain.h"
 
+Terrain::Terrain(Material& m) : mMaterial(m)
+{
+
+}
+
 void Terrain::init(int res) {
-    // compile the shaders.
-
     mRes = res;
-    mProgramId = icg_helper::LoadShaders("terrain_vshader.glsl",
-                                          "terrain_fshader.glsl");
-    if(!mProgramId) {
-        exit(EXIT_FAILURE);
-    }
 
-    glUseProgram(mProgramId);
-
+    mMaterial.bind();
     // vertex one vertex array
     glGenVertexArrays(1, &mVertexArrayId);
     glBindVertexArray(mVertexArrayId);
@@ -70,7 +67,7 @@ void Terrain::init(int res) {
                      &indices[0], GL_STATIC_DRAW);
 
         // position shader attribute
-        GLuint locPosition = glGetAttribLocation(mProgramId, "position");
+        GLuint locPosition = mMaterial.attrLocation("position");
         if(locPosition == -1) {
             throw std::runtime_error("failed to bind attrib position");
         }
@@ -78,7 +75,7 @@ void Terrain::init(int res) {
         glVertexAttribPointer(locPosition, 2, GL_FLOAT, DONT_NORMALIZE,
                               sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,pos));
 
-        GLuint locShift = glGetAttribLocation(mProgramId, "shift");
+        GLuint locShift = mMaterial.attrLocation("shift");
         if(locShift == -1) {
             throw std::runtime_error("failed to bind attrib shift");
         }
@@ -89,34 +86,12 @@ void Terrain::init(int res) {
 
 
     // other uniforms
-    mMVPId = glGetUniformLocation(mProgramId, "MVP");
-    mHeightMapLoc = glGetUniformLocation(mProgramId,"height_map");
-    mColorMapLoc = glGetUniformLocation(mProgramId, "color_map");
+    mMVPId = mMaterial.uniformLocation("MVP");
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mHeightMapId);
+    mHeightMapLoc = mMaterial.uniformLocation("height_map");
 
-    // Color map
-    glGenTextures(1, &mColorMapId);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_1D, mColorMapId);
-    const int colormapSize=5;
-    unsigned char colors[3*colormapSize] = {/*blue*/ 0, 129, 213,
-    /*yellow*/ 238, 225, 94,
-    /*green*/ 23, 154, 21,
-    /*grey*/ 119, 136, 119,
-    /*white*/ 249,249,249};
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, colormapSize, 0, GL_RGB, GL_UNSIGNED_BYTE, colors);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf( GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    // to avoid the current object being polluted
-    glBindTexture(GL_TEXTURE_1D, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
-    glUseProgram(0);
+    mMaterial.unbind();
 }
 
 void Terrain::cleanup() {
@@ -133,7 +108,7 @@ void Terrain::cleanup() {
 void Terrain::draw(float time, const glm::mat4 &model,
           const glm::mat4 &view,
           const glm::mat4 &projection, GLuint heightMap) const {
-    glUseProgram(mProgramId);
+    //mMaterial.bind();
     glBindVertexArray(mVertexArrayId);
 
     // bind textures
@@ -141,19 +116,15 @@ void Terrain::draw(float time, const glm::mat4 &model,
     glBindTexture(GL_TEXTURE_2D, heightMap);
     glUniform1i(mHeightMapLoc,0);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_1D, mColorMapId);
-    glUniform1i(mColorMapLoc,GL_TEXTURE1-GL_TEXTURE0);
-
     // setup MVP
     glm::mat4 MVP = projection*view*model;
     glUniformMatrix4fv(mMVPId, ONE, DONT_TRANSPOSE, glm::value_ptr(MVP));
-    glUniformMatrix4fv(glGetUniformLocation(mProgramId,"MV"), ONE, DONT_TRANSPOSE,glm::value_ptr(view*model));
-    glUniformMatrix4fv(glGetUniformLocation(mProgramId,"M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
+    glUniformMatrix4fv(mMaterial.uniformLocation("MV"), ONE, DONT_TRANSPOSE,glm::value_ptr(view*model));
+    glUniformMatrix4fv(mMaterial.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
 
     // pass the current time stamp to the shader.
-    glUniform1f(glGetUniformLocation(mProgramId, "time"), time);
-    glUniform1f(glGetUniformLocation(mProgramId, "res"), mRes);
+    glUniform1f(mMaterial.uniformLocation("time"), time);
+    glUniform1f(mMaterial.uniformLocation("res"), mRes);
 
     // drawing the grid
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -161,5 +132,5 @@ void Terrain::draw(float time, const glm::mat4 &model,
 
 
     glBindVertexArray(0);
-    glUseProgram(0);
+    //mMaterial.unbind();
 }
