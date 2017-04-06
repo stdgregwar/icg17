@@ -6,7 +6,7 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(8),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(256), mTaskPerFrame(8)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
 {
 
 }
@@ -50,7 +50,7 @@ void World::init(const i32vec2 &screenSize) {
         mWaters.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mWaterMaterial));
-        mWaters.at(res).init(res/2,false);
+        mWaters.at(res).init(1,false);
         res = res >> 1;
     }
 
@@ -64,6 +64,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE1,texMirror,"mirror");
+    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal");
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
@@ -154,6 +155,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMirror.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CLIP_DISTANCE0);
+    glEnable(GL_CLIP_PLANE0);
     glFrontFace(GL_CW);
     mTerrainMaterial.bind();
     for(auto& p : mChunks) {
@@ -170,8 +172,11 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mTerrainMaterial.unbind();
 
+    glEnable (GL_BLEND);
     mWaterMaterial.bind();
     for(auto& p : mChunks) {
         p.second.drawWater(time,view,projection);
     }
+    mWaterMaterial.unbind();
+    glDisable (GL_BLEND);
 }

@@ -17,7 +17,7 @@ in vec3 light_dir;
 in vec3 w_pos;
 in float base_color;
 
-out vec3 color;
+out vec4 color;
 
 void main() {
     vec3 normal = normalize(normal_mv);
@@ -40,22 +40,22 @@ void main() {
     vec3 b_color = texture(color_map,base_color+no).rgb;
 
     float dist = pow(clamp(1-distance(b_color,(vec3(0,1,0))),0,1),0.7);
-    color = texture(grass,w_pos.xy*0.25).rgb*dist*1.1;
+    color = texture(grass,w_pos.xy*0.25)*dist*1.1;
 
     dist = clamp(1-distance(b_color,(vec3(0,0,1))),0,1);
-    color += texture(pebbles,w_pos.xy*0.25).rgb*dist;
+    color += texture(pebbles,w_pos.xy*0.25)*dist;
 
     dist = clamp(1-distance(b_color,(vec3(0,1,1))),0,1);
-    color += texture(sand,w_pos.xy*0.25).rgb*dist;
+    color += texture(sand,w_pos.xy*0.25)*dist;
 
     dist = clamp(1-distance(b_color,(vec3(1,0,0))),0,1);
-    color += texture(snow,w_pos.xy*0.25).rgb*dist*2;
+    color += texture(snow,w_pos.xy*0.25)*dist*2;
 
     float fac = pow(dot(normal_m,vec3(0,0,1)),4);
-    vec3 rock = texture(cliffs,w_pos.xy*0.125).rgb;
+    vec4 rock = texture(cliffs,w_pos.xy*0.125);
     color = mix(rock,color,fac);
 
-    color *= vec3(0.2,0.3,0.3)+vec3(1.1)*diff;//+vec3(1,0.8,0.8)*spec;
+    color *= vec4(0.2,0.3,0.3,1)+vec4(1.1)*diff;//+vec3(1,0.8,0.8)*spec;
     float fog = exp(-0.002*gl_FragCoord.z/gl_FragCoord.w);
-    color = mix(vec3(0.7, 0.99, 1),color,fog);
+    color = mix(vec4(0.7, 0.99, 1,1),color,fog);
 }

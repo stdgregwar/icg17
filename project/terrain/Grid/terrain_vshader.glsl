@@ -56,5 +56,6 @@ void main() {
     normal_m = normalize((M*vec4(n,0)).xyz);
     view_dir = normalize((MV*vec4(pos_3d,1.0)).xyz);
     light_dir = (MV*vec4(light_world,0)).xyz;
+    gl_ClipDistance[0] = dot(vec4(w_pos,1),vec4(0,0,1,0.1));
     gl_Position = MVP* vec4(pos_3d,1.0);
 }
