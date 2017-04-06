@@ -16,6 +16,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#ifndef M_PI
+#define M_PI 3.1415
+#endif
+
 int grid_size = 1024;
 int window_width = 1280;
 int window_height = 720;

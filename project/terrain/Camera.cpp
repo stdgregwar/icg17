@@ -3,6 +3,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <unordered_map>
 
+#ifndef M_PI
+#define M_PI 3.1415
+#endif
+
 using namespace glm;
 using namespace std;
 
