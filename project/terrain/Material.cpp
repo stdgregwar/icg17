@@ -9,8 +9,8 @@ Material::Material(const std::string& vshader, const std::string& fshader) {
 }
 
 void Material::init(const string& vshader, const string& fshader) {
-    mProgramId = icg_helper::LoadShaders("terrain_vshader.glsl",
-                                              "terrain_fshader.glsl");
+    mProgramId = icg_helper::LoadShaders(vshader.c_str(),
+                                              fshader.c_str());
 
     if(!mProgramId) {
         throw std::runtime_error("could not get shaders \"" + vshader + "\" and/or \"" + fshader + "\" to compile");
@@ -75,6 +75,21 @@ GLuint Material::addTexture(GLuint target, GLuint no, const void* data, GLuint f
                         });
     return tid;
 }
+
+GLuint Material::addTexture(GLuint target, GLuint no,GLuint texId,const string& uName) {
+    glUseProgram(mProgramId);
+    glActiveTexture(no);
+    glBindTexture(target, texId);
+    mTextures.push_back({
+                            uName,
+                            texId,
+                            target,
+                            no,
+                            uniformLocation(uName)
+                        });
+    return texId;
+}
+
 
 void Material::bind() {
     glUseProgram(mProgramId);

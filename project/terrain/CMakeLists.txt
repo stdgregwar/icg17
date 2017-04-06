@@ -4,7 +4,7 @@ file(GLOB_RECURSE HEADERS "*.h")
 
 # these files are copied only once
 file(GLOB TEXTURES
-    Terrain/*.jpg
+    Grid/*.jpg
    )
 copy_files_once(${TEXTURES})
 
@@ -12,7 +12,7 @@ copy_files_once(${TEXTURES})
 # you build (ie, you want the shaders there)
 file(GLOB SHADERS
   NoiseGen/*.glsl
-  Terrain/*.glsl)
+  Grid/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})

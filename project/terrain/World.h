@@ -5,11 +5,12 @@
 #include <glm/gtx/hash.hpp>
 #include "Chunk.h"
 #include "NoiseGen/NoiseGen.h"
+#include "FrameBuffer.h"
 #include <list>
 #include <functional>
 
 typedef std::unordered_map<glm::i32vec2,Chunk> Chunks;
-typedef std::unordered_map<int,Terrain> Terrains;
+typedef std::unordered_map<int,Grid> Grids;
 
 struct ChunkTask {
     enum Type{
@@ -28,19 +29,24 @@ class World
 {
 public:
     World(float chunkSize);
-    void init();
+    void init(const glm::i32vec2& screenSize);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
     void pushTask(ChunkTask task);
+    void setScreenSize(const glm::i32vec2& screenSize);
 private:
     Material mTerrainMaterial;
-    Terrains mTerrains;
+    Material mWaterMaterial;
+    Grids mTerrains;
+    Grids mWaters;
     Tasks mToDo;
     Chunks mChunks;
     NoiseGen mNoise;
     glm::i32vec2 mCenter;
+    glm::i32vec2 mScreenSize;
+    FrameBuffer mMirror;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;

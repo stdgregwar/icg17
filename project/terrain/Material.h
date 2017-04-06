@@ -21,6 +21,7 @@ public:
     GLuint uniformLocation(const string& name);
     GLuint addTexture(GLuint no, const string& filename, const string& uName, GLuint filter = GL_LINEAR,GLuint repeat=GL_REPEAT,bool genMipmaps = false);
     GLuint addTexture(GLuint target, GLuint no, const void* data, GLuint format,GLuint type, const vector<size_t>& dim, const string& uName, GLuint filter = GL_LINEAR,GLuint repeat=GL_REPEAT,bool genMipmaps = false);
+    GLuint addTexture(GLuint target, GLuint no,GLuint texId,const string& uName);
     void bind();
     void unbind();
     ~Material();

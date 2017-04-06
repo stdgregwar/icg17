@@ -1,15 +1,18 @@
 #include "World.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(8),
     mFrameID(0), mCenter(5000,5000), mMaxRes(256), mTaskPerFrame(8)
 {
 
 }
 
-void World::init() {
+void World::init(const i32vec2 &screenSize) {
+    // Terrain material initialization
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
 //    vector<unsigned char> colors = {/*blue*/ 0, 129, 213,
 //                                    /*yellow*/ 238, 225, 94,
@@ -35,14 +38,32 @@ void World::init() {
     mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
     mNoise.init(mMaxRes);
+
+    setScreenSize(screenSize);
+
     int res = mMaxRes;
     while(res > 2) {
         mTerrains.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mTerrainMaterial));
         mTerrains.at(res).init(res);
+        mWaters.emplace(std::piecewise_construct,
+                          std::forward_as_tuple(res),
+                          std::forward_as_tuple(mWaterMaterial));
+        mWaters.at(res).init(res/2,false);
         res = res >> 1;
     }
+
+
+}
+
+void World::setScreenSize(const glm::i32vec2& screenSize) {
+    mScreenSize = screenSize;
+    GLuint texMirror = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
+    // Water material initialization
+    mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
+    // Frame buffer for mirror effect initialization
+    mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE1,texMirror,"mirror");
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
@@ -110,7 +131,7 @@ void World::updateChunks() {
                          ChunkTask::UPDATE,
                          cpos,
                          [this,res](Chunk* c){
-                             return c->update(res,mNoise,mTerrains.at(res));
+                             return c->update(res,mNoise,mTerrains.at(res),mWaters.at(res));
                          }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
         }
@@ -128,9 +149,29 @@ void World::pushTask(ChunkTask task) {
 }
 
 void World::draw(float time, const mat4 &view, const mat4 &projection) {
+    mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
+    double eq[] = {0.0,0.0,1.0,0.1};
+    mMirror.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_CLIP_DISTANCE0);
+    glFrontFace(GL_CW);
     mTerrainMaterial.bind();
     for(auto& p : mChunks) {
-        p.second.draw(time,view,projection);
+        p.second.drawTerrain(time,mirror,projection);
     }
     mTerrainMaterial.unbind();
+    glFrontFace(GL_CCW);
+    glDisable(GL_CLIP_DISTANCE0);
+    mMirror.unbind();
+    glViewport(0,0,mScreenSize.x,mScreenSize.y);
+    mTerrainMaterial.bind();
+    for(auto& p : mChunks) {
+        p.second.drawTerrain(time,view,projection);
+    }
+    mTerrainMaterial.unbind();
+
+    mWaterMaterial.bind();
+    for(auto& p : mChunks) {
+        p.second.drawWater(time,view,projection);
+    }
 }

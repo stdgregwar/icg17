@@ -1,11 +1,11 @@
-#include "Terrain.h"
+#include "Grid.h"
 
-Terrain::Terrain(Material& m) : mMaterial(m)
+Grid::Grid(Material& m) : mMaterial(m)
 {
 
 }
 
-void Terrain::init(int res) {
+void Grid::init(int res, bool seams) {
     mRes = res;
 
     mMaterial.bind();
@@ -15,12 +15,11 @@ void Terrain::init(int res) {
 
     // vertex coordinates and indices
     {
-        std::vector<TerrainVertex> vertices;
+        std::vector<GridVertex> vertices;
         std::vector<GLuint> indices;
 
         int gridDim = res;
 
-        bool seams = true;
         int start = seams ? -1 : 0;
         int end = seams ? gridDim+1 : gridDim;
         for(int x = start; x <= end; ++x)
@@ -57,7 +56,7 @@ void Terrain::init(int res) {
         // position buffer
         glGenBuffers(1, &mVertexBufferObjectPosition);
         glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObjectPosition);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(TerrainVertex),
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GridVertex),
                      &vertices[0], GL_STATIC_DRAW);
 
         // vertex indices
@@ -73,7 +72,7 @@ void Terrain::init(int res) {
         }
         glEnableVertexAttribArray(locPosition);
         glVertexAttribPointer(locPosition, 2, GL_FLOAT, DONT_NORMALIZE,
-                              sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,pos));
+                              sizeof(GridVertex), (void*)offsetof(GridVertex,pos));
 
         GLuint locShift = mMaterial.attrLocation("shift");
         if(locShift == -1) {
@@ -81,7 +80,7 @@ void Terrain::init(int res) {
         }
         glEnableVertexAttribArray(locShift);
         glVertexAttribPointer(locShift, 1, GL_FLOAT, DONT_NORMALIZE,
-                               sizeof(TerrainVertex), (void*)offsetof(TerrainVertex,shift));
+                               sizeof(GridVertex), (void*)offsetof(GridVertex,shift));
     }
 
 
@@ -94,18 +93,15 @@ void Terrain::init(int res) {
     mMaterial.unbind();
 }
 
-void Terrain::cleanup() {
+void Grid::cleanup() {
     glBindVertexArray(0);
     glUseProgram(0);
     glDeleteBuffers(1, &mVertexBufferObjectPosition);
     glDeleteBuffers(1, &mVertexBufferObjectIndex);
     glDeleteVertexArrays(1, &mVertexArrayId);
-    glDeleteProgram(mProgramId);
-    glDeleteTextures(1, &mHeightMapId);
-    glDeleteTextures(1, &mColorMapId);
 }
 
-void Terrain::draw(float time, const glm::mat4 &model,
+void Grid::draw(float time, const glm::mat4 &model,
           const glm::mat4 &view,
           const glm::mat4 &projection, GLuint heightMap) const {
     //mMaterial.bind();

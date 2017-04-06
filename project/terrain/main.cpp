@@ -11,7 +11,7 @@
 #include "NoiseGen/NoiseGen.h"
 #include "Camera.h"
 
-#include "Terrain/Terrain.h"
+#include "Grid/Grid.h"
 #include "World.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -41,7 +41,7 @@ void Init(GLFWwindow* window) {
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 1000000.0f);
 
-    world.init();
+    world.init({window_width,window_height});
 }
 
 void Display() {
@@ -72,6 +72,7 @@ void resize_callback(GLFWwindow* window, int width, int height) {
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 1000000.0f);
     glViewport(0, 0, window_width, window_height);
+    world.setScreenSize({width,height});
 }
 
 void ErrorCallback(int error, const char* description) {
