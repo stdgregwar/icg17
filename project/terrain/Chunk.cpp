@@ -42,7 +42,7 @@ void Chunk::drawWater(float time, const mat4 &view, const mat4 &projection) {
     if(!mReady) return;
     mat4 model = translate(mat4(),vec3(mOffset,0));
     model = scale(model,vec3(mSize,mSize.x*(32/mSize.x)));
-    mWater->draw(time,model,view,projection,mHmap);
+    mWater->draw(time,model,view,projection,mHmap,mRes);
 }
 
 Chunk::~Chunk() {

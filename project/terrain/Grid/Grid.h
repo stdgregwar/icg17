@@ -15,7 +15,7 @@ public:
     void cleanup();
     void draw(float time, const glm::mat4 &model = IDENTITY_MATRIX,
               const glm::mat4 &view = IDENTITY_MATRIX,
-              const glm::mat4 &projection = IDENTITY_MATRIX, GLuint heightMap = 0) const;
+              const glm::mat4 &projection = IDENTITY_MATRIX, GLuint heightMap = 0, GLuint texRes = -1) const;
 private:
     Material& mMaterial;
     GLuint mVertexArrayId;                // vertex array object

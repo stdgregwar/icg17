@@ -12,6 +12,8 @@ void Material::init(const string& vshader, const string& fshader) {
     mProgramId = icg_helper::LoadShaders(vshader.c_str(),
                                               fshader.c_str());
 
+    mTextures.clear();
+
     if(!mProgramId) {
         throw std::runtime_error("could not get shaders \"" + vshader + "\" and/or \"" + fshader + "\" to compile");
     }

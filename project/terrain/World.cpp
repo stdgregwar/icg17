@@ -50,7 +50,7 @@ void World::init(const i32vec2 &screenSize) {
         mWaters.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mWaterMaterial));
-        mWaters.at(res).init(1,false);
+        mWaters.at(res).init(res,false);
         res = res >> 1;
     }
 
@@ -61,13 +61,17 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mScreenSize = screenSize;
     GLuint texMirror;
     GLuint depthMiror;
+    GLuint texMain;
+    GLuint depthMain;
     std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
-    mMain.init(mScreenSize.x,mScreenSize.y);
+    std::tie(texMain,depthMain) = mMain.init(mScreenSize.x,mScreenSize.y);
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE1,texMirror,"mirror");
     mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal");
+    mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,texMain,"refract_col");
+    mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,depthMain,"refract_depth");
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
@@ -158,7 +162,6 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMirror.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CLIP_DISTANCE0);
-    glEnable(GL_CLIP_PLANE0);
     glFrontFace(GL_CW);
     mTerrainMaterial.bind();
     for(auto& p : mChunks) {
@@ -168,18 +171,24 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glFrontFace(GL_CCW);
     glDisable(GL_CLIP_DISTANCE0);
     mMirror.unbind();
-    glViewport(0,0,mScreenSize.x,mScreenSize.y);
+
+    mMain.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mTerrainMaterial.bind();
     for(auto& p : mChunks) {
         p.second.drawTerrain(time,view,projection);
     }
     mTerrainMaterial.unbind();
+    mMain.unbind();
 
-    glEnable (GL_BLEND);
+    mMain.blit(GL_BACK);
+
+    glViewport(0,0,mScreenSize.x,mScreenSize.y);
+    //glEnable (GL_BLEND);
     mWaterMaterial.bind();
     for(auto& p : mChunks) {
         p.second.drawWater(time,view,projection);
     }
     mWaterMaterial.unbind();
-    glDisable (GL_BLEND);
+    //glDisable (GL_BLEND);
 }

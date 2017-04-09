@@ -13,6 +13,7 @@ private:
 public:
     // warning: overrides viewport!!
     void bind();
+    void blit(GLuint fb);
     void unbind();
     std::pair<int,int> init(int imageWidth, int imageHeight, bool useInterpolation = true);
 
