@@ -9,12 +9,13 @@ public:
 private:
     GLuint mFramebufferObjectId=0;
     GLuint mColorTextureId = 0;
-    GLuint mDepthRenderBufferId=0;
+    GLuint mDepthTextureId=0;
 public:
     // warning: overrides viewport!!
     void bind();
     void unbind();
-    int init(int imageWidth, int imageHeight, bool useInterpolation = true);
+    std::pair<int,int> init(int imageWidth, int imageHeight, bool useInterpolation = true);
+
     void cleanup();
     ~FrameBuffer();
 };

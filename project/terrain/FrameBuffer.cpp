@@ -12,10 +12,10 @@ void FrameBuffer::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-int FrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolation) {
+std::pair<int, int> FrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolation) {
     width = imageWidth;
     height = imageHeight;
-    if(mColorTextureId)
+    if(mColorTextureId || mDepthTextureId)
         cleanup();
     // create color attachment
     {
@@ -42,10 +42,24 @@ int FrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolation) {
 
     // create render buffer (for depth channel)
     {
-        glGenRenderbuffers(1, &mDepthRenderBufferId);
-        glBindRenderbuffer(GL_RENDERBUFFER, mDepthRenderBufferId);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, width, height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glGenTextures(1, &mDepthTextureId);
+        glBindTexture(GL_TEXTURE_2D, mDepthTextureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        if(useInterpolation) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        }
+
+        // create texture for the color attachment
+        // see Table.2 on
+        // khronos.org/opengles/sdk/docs/man3/docbook4/xhtml/glTexImage2D.xml
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0,
+                     GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
     }
 
     // tie it all together
@@ -56,8 +70,10 @@ int FrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolation) {
                                GL_COLOR_ATTACHMENT0 /*location = 0*/,
                                GL_TEXTURE_2D, mColorTextureId,
                                0 /*level*/);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                                 GL_RENDERBUFFER, mDepthRenderBufferId);
+        glFramebufferTexture2D(GL_FRAMEBUFFER,
+                               GL_DEPTH_ATTACHMENT /*location = 0*/,
+                               GL_TEXTURE_2D, mDepthTextureId,
+                               0 /*level*/);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
                 GL_FRAMEBUFFER_COMPLETE) {
@@ -66,12 +82,13 @@ int FrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolation) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // avoid pollution
     }
     glBindTexture(GL_TEXTURE_2D, 0);
-    return mColorTextureId;
+    return std::pair<int,int>(mColorTextureId,mDepthTextureId);
 }
 
 void FrameBuffer::cleanup() {
     glDeleteTextures(1, &mColorTextureId);
-    glDeleteRenderbuffers(1, &mDepthRenderBufferId);
+    glDeleteTextures(1, &mDepthTextureId);
+    //glDeleteRenderbuffers(1, &mDepthRenderBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, 0 /*UNBIND*/);
     glDeleteFramebuffers(1, &mFramebufferObjectId);
 }

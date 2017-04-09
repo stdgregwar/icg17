@@ -47,6 +47,7 @@ private:
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;
     FrameBuffer mMirror;
+    FrameBuffer mMain;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;

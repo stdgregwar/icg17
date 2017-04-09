@@ -59,7 +59,10 @@ void World::init(const i32vec2 &screenSize) {
 
 void World::setScreenSize(const glm::i32vec2& screenSize) {
     mScreenSize = screenSize;
-    GLuint texMirror = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
+    GLuint texMirror;
+    GLuint depthMiror;
+    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
+    mMain.init(mScreenSize.x,mScreenSize.y);
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
