@@ -27,6 +27,8 @@ void World::init(const i32vec2 &screenSize) {
                                     /*green*/ 0, 255, 0,
                                     /*green*/ 0, 255, 0,
                                     /*green*/ 0, 255, 0,
+                                    /*green*/ 0, 255, 0,
+                                    /*green*/ 0, 255, 0,
                                     /*grey*/ 255, 0, 0};
                                     ///*white*/ 255,255,0};
     mTerrainMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
@@ -125,7 +127,7 @@ void World::updateChunks() {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-1),4);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist

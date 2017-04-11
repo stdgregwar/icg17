@@ -37,7 +37,7 @@ vec3 fdiff(vec2 p) {
     // deduce terrain normal
     norm.x = hL - hR;
     norm.y = hD - hU;
-    norm.z = 1200*d;
+    norm.z = 1800*d;
     return normalize(norm);
 }
 
@@ -75,7 +75,7 @@ void main() {
     dist = clamp(1-distance(b_color,(vec3(1,0,0))),0,1);
     color += texture(snow,w_pos.xy*0.25)*dist*2;
 
-    float fac = pow(dot(normal_m,vec3(0,0,1)),4);
+    float fac = pow(dot(normal_m,vec3(0,0,1)),8);
     vec4 rock = texture(cliffs,w_pos.xy*0.125);
     color = mix(rock,color,fac);
 

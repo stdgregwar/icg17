@@ -42,7 +42,6 @@ void main() {
     normal = normalize(normal);
     //normal = vec3(0,0,1);
     vec3 v_normal = normalize((MV*vec4(normal,0)).xyz);
-
     float w_depth = texture(refract_depth,screenUV).r/texture(refract_col,screenUV).a;
 
     float fogexp = -0.008;
@@ -52,24 +51,28 @@ void main() {
 
 
     float frebias = 0;
-    float frenelpow = 1;
+    float frenelpow = 4;
     float fre = 1-dot(view_dir,v_normal);
     fre = 1-clamp(frebias+(1-frebias)*pow(fre,frenelpow),0,1);
 
     float bord = abs(-(height(uv)));
     bord = clamp(1-pow(diff,6),0,1);
-    float fac = clamp(bord,0,1);
+    float fac = clamp(bord*2,0,1);
 
     vec3 refl = texture(mirror,gl_FragCoord.xy/size+normal.xy*0.2*fac).rgb;
-    vec3 refr = mix(texture(refract_col,gl_FragCoord.xy/msize+normal.xy*fac*0.2).rgb,vec3(0.1,0.2,0.2),bord);
+
+    float fog2 = exp(-0.0008*gl_FragCoord.z/gl_FragCoord.w);
+
+    vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
+    vec3 refr = mix(texture(refract_col,gl_FragCoord.xy/msize+normal.xy*fac*0.2).rgb,waterFog,bord);
     //color = mix(refr,refl,fre*0.25);
 
     color = mix(refl,refr,fre);
 
     color = mix(refr,color,bord);
 
-    float fog2 = exp(-0.00008*gl_FragCoord.z/gl_FragCoord.w);
-    color = mix(vec3(0.7, 0.99, 1),color,fog2);
+    //float fog2 = exp(-0.00008*gl_FragCoord.z/gl_FragCoord.w);
+    //color = mix(vec3(0.7, 0.99, 1),color,fog2);
     //color = refr;
     //color = nrefl;
     //color = normal;

@@ -47,7 +47,7 @@ void main() {
     uv+=vec2(1/tres);
 
     float value = height(uv);
-    base_color = value*0.09;
+    base_color = value*0.04;
 
     vec3 pos_3d = vec3(position.x,position.y,value*0.1+shift);
     w_pos = (M*vec4(pos_3d,1)).xyz;
