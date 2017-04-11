@@ -64,7 +64,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     GLuint depthMiror;
     GLuint texMain;
     GLuint depthMain;
-    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
+    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     std::tie(texMain,depthMain) = mMain.init(mScreenSize.x,mScreenSize.y);
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
@@ -162,14 +162,15 @@ void World::pushTask(ChunkTask task) {
 
 void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
-    double eq[] = {0.0,0.0,1.0,0.1};
     mMirror.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CLIP_DISTANCE0);
     glFrontFace(GL_CW);
     mTerrainMaterial.bind();
-    for(auto& p : mChunks) {
-        p.second.drawTerrain(time,mirror,projection);
+    for(Chunks::value_type& p : mChunks) {
+        if((p.first-mCenter).length() < mViewDistance/2) {
+            p.second.drawTerrain(time,mirror,projection);
+        }
     }
     mTerrainMaterial.unbind();
     glFrontFace(GL_CCW);
