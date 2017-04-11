@@ -68,7 +68,7 @@ float multifractal(vec2 point, float H, float lacunarity, int
 }
 
 void main() {
-        float s = 10;
+        float s = 4;
 	vec2 n_uv = w_pos.xy;
 	//vec2 n_uv = (gl_FragCoord.xy+vec2(1,1))*0.5;
 	vec2 p = n_uv*0.01*s;

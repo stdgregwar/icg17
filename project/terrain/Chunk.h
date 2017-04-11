@@ -5,12 +5,13 @@
 #include "Grid/Grid.h"
 #include "ScalarFrameBuffer.h"
 
-#include "NoiseGen/NoiseGen.h"
+#include "ScreenQuad/ScreenQuad.h"
+
 class Chunk
 {
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
-    int update(int res, const NoiseGen &noise, const Grid& terrain, const Grid& water);
+    int update(int res, const ScreenQuad &noise, const Grid& terrain, const Grid& water);
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection);
     void setFrameID(long id);

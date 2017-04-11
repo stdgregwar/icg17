@@ -5,8 +5,8 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(8),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8)
 {
 
 }
@@ -37,7 +37,8 @@ void World::init(const i32vec2 &screenSize) {
     mTerrainMaterial.addTexture(GL_TEXTURE5,"cliffs.jpg","cliffs",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
-    mNoise.init(mMaxRes);
+    mNoise.init("NoiseGen_vshader.glsl","NoiseGen_fshader.glsl",mMaxRes);
+
 
     setScreenSize(screenSize);
 
@@ -50,7 +51,7 @@ void World::init(const i32vec2 &screenSize) {
         mWaters.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mWaterMaterial));
-        mWaters.at(res).init(res,false);
+        mWaters.at(res).init(1,false);
         res = res >> 1;
     }
 
@@ -63,7 +64,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     GLuint depthMiror;
     GLuint texMain;
     GLuint depthMain;
-    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
+    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     std::tie(texMain,depthMain) = mMain.init(mScreenSize.x,mScreenSize.y);
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
@@ -72,6 +73,9 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,texMain,"refract_col");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,depthMain,"refract_depth");
+    mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
+    mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,texMain,"buffer_color");
+    mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,depthMain,"buffer_depth");
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
@@ -121,7 +125,7 @@ void World::updateChunks() {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-1),4);
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist
@@ -182,6 +186,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMain.unbind();
 
     mMain.blit(GL_BACK);
+    //mScreen.draw();
 
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
     //glEnable (GL_BLEND);

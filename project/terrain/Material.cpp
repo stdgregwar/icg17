@@ -19,11 +19,11 @@ void Material::init(const string& vshader, const string& fshader) {
     }
 }
 
-GLuint Material::attrLocation(const string& name) {
+GLuint Material::attrLocation(const string& name) const {
     return glGetAttribLocation(mProgramId,name.c_str());
 }
 
-GLuint Material::uniformLocation(const string& name) {
+GLuint Material::uniformLocation(const string& name) const {
     return glGetUniformLocation(mProgramId,name.c_str());
 }
 
@@ -93,16 +93,16 @@ GLuint Material::addTexture(GLuint target, GLuint no,GLuint texId,const string& 
 }
 
 
-void Material::bind() {
+void Material::bind() const {
     glUseProgram(mProgramId);
-    for(Texture& t : mTextures) {
+    for(const Texture& t : mTextures) {
         glActiveTexture(t.no);
         glBindTexture(t.target, t.id);
         glUniform1i(t.loc,t.no-GL_TEXTURE0);
     }
 }
 
-void Material::unbind() {
+void Material::unbind() const {
     glUseProgram(0);
 }
 

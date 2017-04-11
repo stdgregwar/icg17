@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <glm/gtx/hash.hpp>
 #include "Chunk.h"
-#include "NoiseGen/NoiseGen.h"
+#include "ScreenQuad/ScreenQuad.h"
 #include "FrameBuffer.h"
 #include <list>
 #include <functional>
@@ -43,7 +43,8 @@ private:
     Grids mWaters;
     Tasks mToDo;
     Chunks mChunks;
-    NoiseGen mNoise;
+    ScreenQuad mNoise;
+    ScreenQuad mScreen;
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;
     FrameBuffer mMirror;

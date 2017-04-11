@@ -26,7 +26,7 @@ void Grid::init(int res, bool seams) {
         {
             for(int y = start; y <= end; ++y)
             {
-                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -0.5 : 0;
+                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -5 : 0;
                 glm::vec2 pos = {min(max((float)x/gridDim,0.f),1.f),min(max((float)y/gridDim,0.f),1.f)};
                 vertices.push_back({pos,shift});
             }

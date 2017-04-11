@@ -9,18 +9,42 @@ uniform sampler2D sand;
 uniform sampler2D snow;
 uniform sampler2D noise;
 uniform float time;
+uniform float res;
+uniform mat4 MV;
+uniform mat4 M;
 in vec2 uv;
 in vec3 view_dir;
 in vec3 normal_mv;
-in vec3 normal_m;
+//in vec3 normal_m;
 in vec3 light_dir;
 in vec3 w_pos;
 in float base_color;
 
 out vec4 color;
 
+float height(vec2 p) {
+    return texture(height_map,p).r;
+}
+
+vec3 fdiff(vec2 p) {
+    float d = 0.125f/res;
+    float hL = height(p - vec2(d,0));
+    float hR = height(p + vec2(d,0));
+    float hD = height(p - vec2(0,d));
+    float hU = height(p + vec2(0,d));
+
+    vec3 norm;
+    // deduce terrain normal
+    norm.x = hL - hR;
+    norm.y = hD - hU;
+    norm.z = 400*d;
+    return normalize(norm);
+}
+
 void main() {
-    vec3 normal = normalize(normal_mv);
+    vec3 n = fdiff(uv);
+    vec3 normal_m = normalize((M*vec4(n,0)).xyz);
+    vec3 normal = normalize((MV*vec4(n,0)).xyz);
     vec3 light = normalize(light_dir);
     vec3 view = normalize(view_dir);
 
@@ -56,7 +80,7 @@ void main() {
     color = mix(rock,color,fac);
 
     color *= vec4(0.2,0.3,0.3,1)+vec4(1.1)*diff;//+vec3(1,0.8,0.8)*spec;
-    float fog = exp(-0.002*gl_FragCoord.z/gl_FragCoord.w);
+    float fog = exp(-0.0008*gl_FragCoord.z/gl_FragCoord.w);
     color = mix(vec4(0.7, 0.99, 1,1),color,fog);
     color.a = gl_FragCoord.w;
 }

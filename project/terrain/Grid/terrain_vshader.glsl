@@ -22,7 +22,7 @@ uniform float time;
 const vec3 light_world = vec3(1,1,1);
 
 float height(vec2 p) {
-    return texture(height_map,p).r*1;
+    return texture(height_map,p).r;
 }
 
 vec3 fdiff(vec2 p) {
@@ -44,7 +44,7 @@ void main() {
     uv = (position);
     float tres = res+2;
     uv*=1-(2/tres); //Align with texture margin
-    uv+=(1/tres);
+    uv+=vec2(1/tres);
 
     float value = height(uv);
     base_color = value*0.09;

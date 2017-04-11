@@ -8,7 +8,6 @@
 #include "icg_helper.h"
 
 #include "ScalarFrameBuffer.h"
-#include "NoiseGen/NoiseGen.h"
 #include "Camera.h"
 
 #include "Grid/Grid.h"
@@ -22,15 +21,16 @@ int window_height = 720;
 int old_ww;
 int old_wh;
 
-Camera cam({789,234,20},{-M_PI/4,-M_PI/4,-M_PI/4});
+Camera cam({789,234,150},{-M_PI/4,-M_PI/4,-M_PI/4});
 
-World world(128);
+World world(256);
 
 using namespace glm;
 
 mat4 projection_matrix;
 
 void Init(GLFWwindow* window) {
+    cam.setBaseSpeed(100);
     glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
