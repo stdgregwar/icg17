@@ -6,7 +6,7 @@
 using namespace glm;
 using namespace std;
 
-Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mSSpeed(20), mPosition(pos), mLSpeed(0)
+Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mTargetRotation(orientation),mSSpeed(20), mPosition(pos), mLSpeed(0)
 {
 
 }
@@ -16,6 +16,8 @@ void Camera::setBaseSpeed(float speed) {
 }
 
 void Camera::update(float delta_s) {
+    mRotation = mRotation + (mTargetRotation - mRotation) * 10.f * delta_s;
+
     vec3& rot = mRotation;
     vec3 look = {cos(rot.y)*cos(rot.x),
                  cos(rot.y)*sin(rot.x),
@@ -25,16 +27,17 @@ void Camera::update(float delta_s) {
     vec3 side = normalize(cross(look,up));
     vec3 wspeed = look*mLSpeed.x + side*mLSpeed.y;
 
-    mPosition += wspeed*mSSpeed*delta_s;
+    mTargetPosition += wspeed*mSSpeed*delta_s;
+    mPosition = mPosition + (mTargetPosition - mPosition) * 10.f * delta_s;
     mView = lookAt(mPosition,mPosition+look,up);
 }
 
 void Camera::rotate(glm::vec2 delta) {
-    mRotation.x += delta.x;
+    mTargetRotation.x += delta.x;
     static float max = M_PI/2-0.1;
-    mRotation.y += delta.y;
-    if(abs(mRotation.y) > max) {
-        mRotation.y = sign(mRotation.y)*max;
+    mTargetRotation.y += delta.y;
+    if(abs(mTargetRotation.y) > max) {
+        mTargetRotation.y = sign(mTargetRotation.y)*max;
     }
 }
 

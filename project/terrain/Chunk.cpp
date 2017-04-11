@@ -15,7 +15,7 @@ int Chunk::update(int res, const ScreenQuad &noise, const Grid& terrain, const G
     mRes = res;
 
 
-    mHmap = mNoiseBuffer.init(res*4+2,res*4+2);
+    mHmap = mNoiseBuffer.init(res*8+2,res*8+2);
     mNoiseBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mat4 model = translate(mat4(),vec3(mOffset,0));

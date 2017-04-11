@@ -28,15 +28,16 @@ vec3 normalFromTex(sampler2D tex, vec2 coords) {
 }
 
 void main() {
-    vec2 size = textureSize(mirror,0)*2;
+    vec2 size = textureSize(mirror,0)*4;
     vec2 msize = textureSize(refract_col,0);
     vec2 screenUV = gl_FragCoord.xy/msize;
     vec3 view = normalize(view_dir);
     float disp = sin(time*5+sin(w_pos.x+w_pos.y));
     float ttime = time * 0.1;
     vec3 normal = normalFromTex(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
-    normal *= normalFromTex(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
-    normal += vec3(0,0,5);
+    normal += normalFromTex(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
+    normal += normalFromTex(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
+    normal += vec3(0,0,15);
     normal = normalize(normal);
     //normal = vec3(0,0,1);
     vec3 v_normal = normalize((MV*vec4(normal,0)).xyz);
@@ -48,22 +49,24 @@ void main() {
     float diff = 1-(fog-wfog)*2/fog;
 
 
-    float frebias = -0.2;
-    float frenelpow = 1.3;
+    float frebias = -0.5;
+    float frenelpow = 1.5;
     float fre = 1-dot(view_dir,v_normal);
     fre = max(0,frebias+(1-frebias)*pow(fre,frenelpow));
 
     float bord = abs(-(height(uv)));
+    bord = clamp(1-pow(diff,4),0,1);
     float fac = clamp(bord,0,1);
 
     vec3 refl = texture(mirror,gl_FragCoord.xy/size+normal.xy*0.2*fac).rgb;
-    vec3 refr = texture(refract_col,gl_FragCoord.xy/msize+normal.xy*fac*0.2).rgb;
+    vec3 refr = mix(texture(refract_col,gl_FragCoord.xy/msize+normal.xy*fac*0.2).rgb,vec3(0.1,0.2,0.2),bord);
     //color = mix(refr,refl,fre*0.25);
 
 
 
-    color = mix(refl,refr*vec3(0.7,0.7,0.8)*diff,fre*0.25);
-    color = mix(refr,color,clamp(bord*4,0,1));
+    color = mix(refl,refr,fre*0.25);
+
+    color = mix(refr,color,bord);
 
     //float fog2 = exp(-0.0008*gl_FragCoord.z/gl_FragCoord.w);
     //color = mix(vec3(0.7, 0.99, 1),color,fog2);
@@ -71,5 +74,5 @@ void main() {
     //color = nrefl;
     //color = normal;
     //color = vec4(texture(refract_depth,).r);
-    //color = vec3(diff);
+    //color = vec3(bord);
 }

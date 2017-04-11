@@ -20,6 +20,8 @@ private:
     float mSSpeed;
     glm::vec3 mLSpeed;
     glm::vec3 mPosition;
+    glm::vec3 mTargetPosition;
+    glm::vec3 mTargetRotation;
     glm::vec3 mRotation;
     glm::mat4 mView;
 };

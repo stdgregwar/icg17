@@ -64,7 +64,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     GLuint depthMiror;
     GLuint texMain;
     GLuint depthMain;
-    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/2,mScreenSize.y/2);
+    std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/4,mScreenSize.y/4);
     std::tie(texMain,depthMain) = mMain.init(mScreenSize.x,mScreenSize.y);
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
