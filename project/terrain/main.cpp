@@ -30,7 +30,7 @@ using namespace glm;
 mat4 projection_matrix;
 
 void Init(GLFWwindow* window) {
-    cam.setBaseSpeed(100);
+    cam.setBaseSpeed(400);
     glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -170,6 +170,7 @@ int main(int argc, char *argv[]) {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     /// Render loop & keyboard input
+    glfwSwapInterval(1);
     float lastTime = glfwGetTime();
     while(!glfwWindowShouldClose(window)){
         float time = glfwGetTime();

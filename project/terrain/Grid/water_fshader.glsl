@@ -27,6 +27,14 @@ vec3 normalFromTex(sampler2D tex, vec2 coords) {
     return (texture(tex,coords).rgb*2)-1;
 }
 
+vec3 chromatic(sampler2D tex,vec2 base, vec2 main,vec2 r, vec2 g,vec2 b, float f) {
+    vec3 color;
+    color.r = texture(tex,base+(main+r*0.001)*f).r;
+    color.g = texture(tex,base+(main+g*0.001)*f).g;
+    color.b = texture(tex,base+(main+b*0.001)*f).b;
+    return color;
+}
+
 void main() {
     vec3 view_dir = -normalize((MV*pos_3d).xyz);
     vec2 size = textureSize(mirror,0)*2;
@@ -38,7 +46,7 @@ void main() {
     vec3 normal = normalFromTex(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
     normal += normalFromTex(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
     normal += normalFromTex(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
-    normal += vec3(0,0,60);
+    normal += vec3(0,0,300);
     normal = normalize(normal);
     //normal = vec3(0,0,1);
     vec3 v_normal = normalize((MV*vec4(normal,0)).xyz);
@@ -59,12 +67,12 @@ void main() {
     bord = clamp(1-pow(diff,6),0,1);
     float fac = clamp(bord*2,0,1);
 
-    vec3 refl = texture(mirror,gl_FragCoord.xy/size+normal.xy*0.2*fac).rgb;
+    vec3 refl = texture(mirror,gl_FragCoord.xy/size+normal.xy*0.9*fac).rgb;
 
     float fog2 = exp(-0.0008*gl_FragCoord.z/gl_FragCoord.w);
 
     vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
-    vec3 refr = mix(texture(refract_col,gl_FragCoord.xy/msize+normal.xy*fac*0.2).rgb,waterFog,bord);
+    vec3 refr = mix(chromatic(refract_col,screenUV,normal.xy,vec2(0,1),vec2(-1,0),vec2(1,0),fac*0.9).rgb,waterFog,bord);
     //color = mix(refr,refl,fre*0.25);
 
     color = mix(refl,refr,fre);
