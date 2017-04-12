@@ -39,7 +39,7 @@ float snoise(vec2 v){
 }
 
 float noise(vec2 p) {
-    return snoise(p);
+    return snoise(p+vec2(532,123));
 }
 
 float fbm(vec2 x, int octaves) {

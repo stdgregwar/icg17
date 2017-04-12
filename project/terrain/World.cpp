@@ -6,7 +6,7 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8)
 {
 
 }
@@ -188,15 +188,15 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mTerrainMaterial.unbind();
     mMain.unbind();
 
-    mMain.blit(GL_BACK);
-    //mScreen.draw();
+    //mMain.blit(GL_BACK);
+    mScreen.draw();
 
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
-    //glEnable (GL_BLEND);
+    glDisable(GL_CULL_FACE);
     mWaterMaterial.bind();
     for(auto& p : mChunks) {
         p.second.drawWater(time,view,projection);
     }
     mWaterMaterial.unbind();
-    //glDisable (GL_BLEND);
+    glEnable(GL_CULL_FACE);
 }
