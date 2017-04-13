@@ -21,6 +21,10 @@ int window_height = 720;
 int old_ww;
 int old_wh;
 
+#ifndef M_PI
+#define M_PI 3.1415
+#endif
+
 Camera cam({789,234,150},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 World world(256);
