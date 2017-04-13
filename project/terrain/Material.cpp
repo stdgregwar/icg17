@@ -39,7 +39,9 @@ GLuint Material::addTexture(GLuint no, const string& filename, const string& uNa
     if(image == nullptr) {
         throw std::runtime_error("Failed to load texture");
     }
-    addTexture(GL_TEXTURE_2D,no,image,nb_component == 3 ? GL_RGB : GL_RGBA,GL_UNSIGNED_BYTE,{width,height},uName,filter,repeat,genMipmaps);
+    unsigned int uwidth = width;
+    unsigned int uheight = height;
+    addTexture(GL_TEXTURE_2D,no,image,nb_component == 3 ? GL_RGB : GL_RGBA,GL_UNSIGNED_BYTE,{uwidth,uheight},uName,filter,repeat,genMipmaps);
     stbi_image_free(image);
 }
 
