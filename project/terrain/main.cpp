@@ -42,7 +42,7 @@ void Init(GLFWwindow* window) {
     float ratio = window_width / (float) window_height;
     projection_matrix = perspective(45.0f, ratio, 0.1f, 100000.0f);
 
-    world.init({window_width,window_height});
+    world.init({window_width,window_height},window);
 }
 
 void Display() {

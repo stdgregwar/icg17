@@ -10,21 +10,43 @@ Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size) : mOffset(offset), 
 
 }
 
-int Chunk::update(int res, const ScreenQuad &noise, const Grid& terrain, const Grid &water) {
+void Chunk::update(float delta_s) {
+    if(mTexFuture.valid()) {
+        if(mTexFuture.wait_for(std::chrono::microseconds(1)) == future_status::ready) {
+            //Texture is available!
+            mHmap = mTexFuture.get();
+            mRes = mNextRes;
+            mTerrain = mNextTerrain;
+            mWater = mNextWater;
+            mReady = true;
+        }
+    }
+}
+
+int Chunk::updateRes(int res, TexGenerator &texGen, const Grid& terrain, const Grid &water) {
+
+
     if(mRes == res) return 0;
-    mRes = res;
+    mNextRes = res;
+    mNextTerrain = &terrain;
+    mNextWater = &water;
 
-
-    mHmap = mNoiseBuffer.init(res*8+2,res*8+2);
+    //if(mTexFuture.valid()) mTexFuture.get(); //Throw future result
+    mTexFuture = texGen.getTexture({res*8+2,res*8+2},
+                                   [res,this](ScreenQuad& q){
+                                        mat4 model = translate(mat4(),vec3(mOffset,0));
+                                        model = scale(model,vec3(mSize,mSize.x));
+                                        q.draw(model,res);}
+                                   );
+    /*mHmap = mNoiseBuffer.init(res*8+2,res*8+2);
     mNoiseBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mat4 model = translate(mat4(),vec3(mOffset,0));
     model = scale(model,vec3(mSize,mSize.x));
     noise.draw(model,res);
-    mNoiseBuffer.unbind();
-    mTerrain = &terrain;
-    mWater = &water;
-    mReady = true;
+    mNoiseBuffer.unbind();*/
+
+    //mReady = true;
     return 1;
 }
 

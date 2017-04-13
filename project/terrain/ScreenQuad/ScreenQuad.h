@@ -8,7 +8,7 @@ class ScreenQuad {
 public:
     ScreenQuad(const string& vshader, const string& fshader,float size);
     ScreenQuad();
-    void init(const string& vshader, const string& fshader,float size);
+    void init(const string& vshader, const string& fshader,float size = 256);
     Material& material() {return mMaterial;}
     void cleanup();
     void draw(const glm::mat4 &model = glm::mat4(), float res = 256) const;

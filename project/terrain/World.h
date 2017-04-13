@@ -29,7 +29,7 @@ class World
 {
 public:
     World(float chunkSize);
-    void init(const glm::i32vec2& screenSize);
+    void init(const glm::i32vec2& screenSize, GLFWwindow *window);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
@@ -43,7 +43,7 @@ private:
     Grids mWaters;
     Tasks mToDo;
     Chunks mChunks;
-    ScreenQuad mNoise;
+    TexGenerator mNoise;
     ScreenQuad mScreen;
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;

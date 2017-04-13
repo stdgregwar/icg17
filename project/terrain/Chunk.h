@@ -6,12 +6,14 @@
 #include "ScalarFrameBuffer.h"
 
 #include "ScreenQuad/ScreenQuad.h"
+#include "TexGenerator.h"
 
 class Chunk
 {
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
-    int update(int res, const ScreenQuad &noise, const Grid& terrain, const Grid& water);
+    void update(float delta_s);
+    int updateRes(int res, TexGenerator &texGen, const Grid& terrain, const Grid& water);
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection);
     void setFrameID(long id);
@@ -28,6 +30,12 @@ private:
     int mRes;
     glm::vec2 mOffset;
     glm::vec2 mSize;
+
+    TexFuture mTexFuture;
+    int mNextRes;
+    const Grid* mNextTerrain;
+    const Grid* mNextWater;
+
 };
 
 #endif // CHUNK_H

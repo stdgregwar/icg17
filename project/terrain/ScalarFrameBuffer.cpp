@@ -70,7 +70,7 @@ int ScalarFrameBuffer::init(int imageWidth, int imageHeight, bool useInterpolati
 }
 
 void ScalarFrameBuffer::cleanup() {
-    //glDeleteTextures(1, &mColorTextureId);
+    //glDeleteTextures(1, &mColorTextureId); //Don't orphan textures
     glDeleteRenderbuffers(1, &mDepthRenderBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, 0 /*UNBIND*/);
     glDeleteFramebuffers(1, &mFramebufferObjectId);

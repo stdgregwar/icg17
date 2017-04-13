@@ -6,12 +6,12 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(512)
 {
 
 }
 
-void World::init(const i32vec2 &screenSize) {
+void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
 //    vector<unsigned char> colors = {/*blue*/ 0, 129, 213,
@@ -39,7 +39,7 @@ void World::init(const i32vec2 &screenSize) {
     mTerrainMaterial.addTexture(GL_TEXTURE5,"cliffs.jpg","cliffs",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
-    mNoise.init("NoiseGen_vshader.glsl","NoiseGen_fshader.glsl",mMaxRes);
+    mNoise.init(window,"NoiseGen_vshader.glsl","NoiseGen_fshader.glsl");
 
 
     setScreenSize(screenSize);
@@ -56,8 +56,6 @@ void World::init(const i32vec2 &screenSize) {
         mWaters.at(res).init(1,false);
         res = res >> 1;
     }
-
-
 }
 
 void World::setScreenSize(const glm::i32vec2& screenSize) {
@@ -83,12 +81,19 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 void World::update(float dt,const glm::vec2& worldPos) {
     i32vec2 center = worldPos/mChunkSize;
     int remaining = mToDo.size();
-    for(int i = 0; i<mTaskPerFrame && mToDo.size();) {
+    //mTaskPerFrame = std::max(8,remaining / 30);
+    for(int i = 0; i< mTaskPerFrame && mToDo.size();) {
         ChunkTask& t = mToDo.front();
         switch (t.type) {
-        case ChunkTask::CREATE:
-            //TODO
+        case ChunkTask::CREATE: {
+            vec2 worldOffset = vec2(t.chunk)*mChunkSize;
+            vec2 size = {mChunkSize,mChunkSize};
+            pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
+                                                            std::forward_as_tuple(t.chunk),
+                                                            std::forward_as_tuple(worldOffset,size));
             break;
+            //i++;
+        }
         case ChunkTask::UPDATE:{
             auto it = mChunks.find(t.chunk);
             if(it == mChunks.end()) {
@@ -112,11 +117,16 @@ void World::update(float dt,const glm::vec2& worldPos) {
         updateChunks();
     }
 
-    if(mToDo.size()-remaining > mViewDistance*mTaskPerFrame) {
-        mTaskPerFrame = std::min(mViewDistance*mViewDistance,mTaskPerFrame+1);
+    /*if(mToDo.size()-remaining > mViewDistance*mTaskPerFrame) {
+        mTaskPerFrame = std::min(mViewDistance*mViewDistance,mTaskPerFrame+4);
     } else {
-        mTaskPerFrame = std::max(4, mTaskPerFrame-2);
+        mTaskPerFrame = std::max(4, mTaskPerFrame-1);
+    }*/
+
+    for(Chunks::value_type& p : mChunks) {
+        p.second.update(dt);
     }
+
     //cout << "taskspf " << mTaskPerFrame << endl;
 }
 
@@ -133,21 +143,28 @@ void World::updateChunks() {
             if(it == mChunks.end()) { //Chunk does not exist
                 vec2 worldOffset = vec2(cpos)*mChunkSize;
                 vec2 size = {mChunkSize,mChunkSize};
+                /*pushTask({
+                             ChunkTask::CREATE,
+                             cpos,
+                             nullptr
+                         });*/
 
                 pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
                                                                 std::forward_as_tuple(cpos),
                                                                 std::forward_as_tuple(worldOffset,size));
                 it = p.first;
             }
+
             Chunk* c = &it->second;
             c->setFrameID(mFrameID);
             pushTask({
                          ChunkTask::UPDATE,
                          cpos,
                          [this,res](Chunk* c){
-                             return c->update(res,mNoise,mTerrains.at(res),mWaters.at(res));
+                             return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res));
                          }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
+            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res));
         }
     }
     for(Chunks::value_type& p : mChunks) {
@@ -170,7 +187,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glFrontFace(GL_CW);
     mTerrainMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < mViewDistance/2) {
+        if((p.first-mCenter).length() < mViewDistance/4) {
             p.second.drawTerrain(time,mirror,projection);
         }
     }

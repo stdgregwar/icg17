@@ -13,32 +13,29 @@
 #include <GLFW/glfw3.h>
 #include <glm/vec3.hpp>
 
+#include "ScreenQuad/ScreenQuad.h"
+
 typedef std::promise<GLuint> TexPromise;
-typedef std::future<GLuint> TexFuture;
-typedef std::function<void(GLuint prog, GLuint fbo)> FboSetup;
-typedef std::unordered_map<string,GLuint> Programs;
+typedef std::shared_future<GLuint> TexFuture;
+typedef std::function<void(ScreenQuad& rd)> RenderFunc;
+typedef std::lock_guard<std::mutex> Lock;
 
 class TexGenerator
 {
     struct Job {
         TexPromise promise;
-        GLuint bufferType;
         glm::ivec2 size;
-        string shaders;
-        FboSetup setup;
+        RenderFunc render;
     };
     typedef std::queue<Job> Jobs;
 public:
     TexGenerator();
-    void init(GLFWwindow* parentWindow);
+    void init(GLFWwindow* parentWindow, const string &vshader, const string &fshader);
     void start();
     void stop();
-    TexFuture getTexture(GLuint bufferType,
-                         const glm::ivec2 size,
-                         const string& vshader,
-                         const string& fshader,
-                         const FboSetup& setup);
-    GLuint program(const std::string& shader);
+    TexFuture getTexture(const glm::ivec2 size,
+                         const RenderFunc& render);
+    ~TexGenerator();
 private:
     void work();
     std::atomic<bool> mContinue;
@@ -46,7 +43,9 @@ private:
     Jobs mJobs;
     std::mutex mJobsMutex;
     GLFWwindow* mWindow;
-    Programs mPrograms;
+    string mVShader;
+    string mFShader;
+    ScreenQuad mGenerator;
 };
 
 #endif // GLWORKER_H
