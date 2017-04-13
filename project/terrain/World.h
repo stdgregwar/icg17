@@ -5,6 +5,7 @@
 #include <glm/gtx/hash.hpp>
 #include "Chunk.h"
 #include "ScreenQuad/ScreenQuad.h"
+#include "Skybox/Skybox.h"
 #include "FrameBuffer.h"
 #include <list>
 #include <functional>
@@ -39,6 +40,7 @@ public:
 private:
     Material mTerrainMaterial;
     Material mWaterMaterial;
+    Skybox mSkybox;
     Grids mTerrains;
     Grids mWaters;
     Tasks mToDo;

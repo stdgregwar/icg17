@@ -92,6 +92,47 @@ GLuint Material::addTexture(GLuint target, GLuint no,GLuint texId,const string& 
     return texId;
 }
 
+GLuint Material::addCubeTexture(GLuint target, GLuint no, vector<const GLchar*> faces,const string& uName) {
+    glUseProgram(mProgramId);
+    GLuint texId;
+    glGenTextures(1,&texId);
+    glActiveTexture(no);
+
+    int width, height;
+    unsigned char* image;
+    int nb_component;
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP,texId);
+    for(GLuint i = 0; i < faces.size(); i++) {
+        // TODO check if faces[i] okay as char
+        image = stbi_load(faces[i], &width,
+                          &height, &nb_component, 0);
+        if(image == nullptr) {
+            throw std::runtime_error("Failed to load texture");
+        }
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,nb_component == 3 ? GL_RGB : GL_RGBA,
+                     width, height, 0, nb_component == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, image);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    mTextures.push_back({
+                            uName,
+                            texId,
+                            target,
+                            no,
+                            uniformLocation(uName)
+                        });
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+
+    return texId;
+
+}
+
 
 void Material::bind() const {
     glUseProgram(mProgramId);

@@ -6,6 +6,7 @@ file(GLOB_RECURSE HEADERS "*.h")
 file(GLOB TEXTURES
     Grid/*.jpg
     Grid/*.png
+    Skybox/*.jpg
    )
 copy_files_once(${TEXTURES})
 
@@ -13,7 +14,8 @@ copy_files_once(${TEXTURES})
 # you build (ie, you want the shaders there)
 file(GLOB SHADERS
   ScreenQuad/*.glsl
-  Grid/*.glsl)
+  Grid/*.glsl
+  Skybox/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})

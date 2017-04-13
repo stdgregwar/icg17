@@ -21,7 +21,7 @@ int window_height = 720;
 int old_ww;
 int old_wh;
 
-Camera cam({789,234,150},{-M_PI/4,-M_PI/4,-M_PI/4});
+Camera cam({0,0,0},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 World world(256);
 

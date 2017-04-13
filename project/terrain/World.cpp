@@ -41,6 +41,8 @@ void World::init(const i32vec2 &screenSize) {
     mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
     mNoise.init("NoiseGen_vshader.glsl","NoiseGen_fshader.glsl",mMaxRes);
 
+    GLuint skyBoxTex = mSkybox.init();
+    mTerrainMaterial.addTexture(GL_TEXTURE_CUBE_MAP,GL_TEXTURE8,skyBoxTex,"skybox");
 
     setScreenSize(screenSize);
 
@@ -163,11 +165,14 @@ void World::pushTask(ChunkTask task) {
 }
 
 void World::draw(float time, const mat4 &view, const mat4 &projection) {
+    mSkybox.draw(view, projection);
+
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
     mMirror.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_CLIP_DISTANCE0);
     glFrontFace(GL_CW);
+    mSkybox.draw(mirror, projection);
+    glEnable(GL_CLIP_DISTANCE0);
     mTerrainMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < mViewDistance/2) {
@@ -175,8 +180,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mTerrainMaterial.unbind();
-    glFrontFace(GL_CCW);
     glDisable(GL_CLIP_DISTANCE0);
+    glFrontFace(GL_CCW);
     mMirror.unbind();
 
     mMain.bind();
