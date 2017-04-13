@@ -8,6 +8,7 @@ uniform sampler2D pebbles;
 uniform sampler2D sand;
 uniform sampler2D snow;
 uniform sampler2D noise;
+uniform samplerCube skybox;
 uniform float time;
 uniform float res;
 uniform mat4 MV;
