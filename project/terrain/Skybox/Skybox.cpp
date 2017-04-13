@@ -8,12 +8,12 @@ Skybox::Skybox()
 GLuint Skybox::init() {
     mMaterial.init("Skybox_vshader.glsl", "Skybox_fshader.glsl");
     vector<const GLchar*> faces;
-    faces.push_back("right.jpg");
-    faces.push_back("left.jpg");
-    faces.push_back("bottom.jpg");
-    faces.push_back("top.jpg");
-    faces.push_back("back.jpg");
-    faces.push_back("front.jpg");
+    faces.push_back("right_water.png");
+    faces.push_back("left_water.png");
+    faces.push_back("bottom_water.png");
+    faces.push_back("top_water.png");
+    faces.push_back("back_water.png");
+    faces.push_back("front_water.png");
     GLuint texId = mMaterial.addCubeTexture(GL_TEXTURE_CUBE_MAP,GL_TEXTURE0,faces,"skybox");
 
     GLfloat skyboxVertices[] = {
