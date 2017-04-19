@@ -69,9 +69,10 @@ void main() {
 
     vec3 refl = texture(mirror,gl_FragCoord.xy/size+normal.xy*0.9*fac).rgb;
 
-    float fog2 = exp(-0.0008*gl_FragCoord.z/gl_FragCoord.w);
+    float fog2 = exp(-0.0004*gl_FragCoord.z/gl_FragCoord.w);
 
-    vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
+    //vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
+    vec3 waterFog = mix(vec3(1),vec3(0.1,0.2,0.2),fog2);
     vec3 refr = mix(chromatic(refract_col,screenUV,normal.xy,vec2(0,1),vec2(-1,0),vec2(1,0),fac*0.9).rgb,waterFog,bord);
     //color = mix(refr,refl,fre*0.25);
 

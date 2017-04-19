@@ -6,7 +6,8 @@
 
 using namespace glm;
 
-Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size) : mOffset(offset), mSize(size), mRes(-1), mReady(false) {
+Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
+    : mOffset(offset), mSize(size), mRes(-1), mReady(false), mTexJob(nullptr) {
 
 }
 
@@ -19,6 +20,7 @@ void Chunk::update(float delta_s) {
             mTerrain = mNextTerrain;
             mWater = mNextWater;
             mReady = true;
+            mTexJob = nullptr;
         }
     }
 }
@@ -32,21 +34,17 @@ int Chunk::updateRes(int res, TexGenerator &texGen, const Grid& terrain, const G
     mNextWater = &water;
 
     //if(mTexFuture.valid()) mTexFuture.get(); //Throw future result
+    //if(mTexJob) mTexJob->valid = false; //invalidate previous job
+    TexGenerator::Job* job;
     mTexFuture = texGen.getTexture({res*8+2,res*8+2},
                                    [res,this](ScreenQuad& q){
                                         mat4 model = translate(mat4(),vec3(mOffset,0));
                                         model = scale(model,vec3(mSize,mSize.x));
-                                        q.draw(model,res);}
+                                        q.draw(model,res);},
+                                   job
                                    );
-    /*mHmap = mNoiseBuffer.init(res*8+2,res*8+2);
-    mNoiseBuffer.bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mat4 model = translate(mat4(),vec3(mOffset,0));
-    model = scale(model,vec3(mSize,mSize.x));
-    noise.draw(model,res);
-    mNoiseBuffer.unbind();*/
-
-    //mReady = true;
+    //if(mTexJob) mTexJob->valid = false;
+    mTexJob = job;
     return 1;
 }
 

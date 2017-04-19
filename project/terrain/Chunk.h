@@ -31,6 +31,7 @@ private:
     glm::vec2 mOffset;
     glm::vec2 mSize;
 
+    TexGenerator::Job* mTexJob;
     TexFuture mTexFuture;
     int mNextRes;
     const Grid* mNextTerrain;

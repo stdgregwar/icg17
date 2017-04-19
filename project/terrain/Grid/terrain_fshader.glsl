@@ -81,7 +81,8 @@ void main() {
     color = mix(rock,color,fac);
 
     color *= vec4(0.2,0.3,0.3,1)+vec4(1.1)*diff;//+vec3(1,0.8,0.8)*spec;
-    float fog = exp(-0.0008*gl_FragCoord.z/gl_FragCoord.w);
-    color = mix(vec4(0.7, 0.99, 1,1),color,fog);
+    float fog = exp(-0.0004*gl_FragCoord.z/gl_FragCoord.w);
+    //color = mix(vec4(0.7, 0.99, 1,1),color,fog);
+    color = mix(vec4(1),color,fog);
     color.a = gl_FragCoord.w;
 }

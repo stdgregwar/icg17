@@ -22,19 +22,24 @@ typedef std::lock_guard<std::mutex> Lock;
 
 class TexGenerator
 {
+public:
     struct Job {
+        Job(const glm::ivec2& size, const RenderFunc& render)
+            : size(size), render(render), valid(true), promise(TexPromise())
+        {}
         TexPromise promise;
         glm::ivec2 size;
         RenderFunc render;
+        bool valid;
     };
     typedef std::queue<Job> Jobs;
-public:
+
     TexGenerator();
     void init(GLFWwindow* parentWindow, const string &vshader, const string &fshader);
     void start();
     void stop();
     TexFuture getTexture(const glm::ivec2 size,
-                         const RenderFunc& render);
+                         const RenderFunc& render, Job*& handle);
     ~TexGenerator();
 private:
     void work();

@@ -27,13 +27,11 @@ void TexGenerator::stop() {
 
 TexFuture TexGenerator::getTexture(
                      const glm::ivec2 size,
-                     const RenderFunc& render) {
+                     const RenderFunc& render,
+                     Job*& handle) {
     Lock l(mJobsMutex);
-    mJobs.emplace(Job{
-                      TexPromise(),
-                      size,
-                      render
-                  });
+    mJobs.emplace(size,render);
+    handle = &mJobs.back();
     return mJobs.back().promise.get_future();
 }
 
@@ -49,20 +47,25 @@ void TexGenerator::work() {
         mJobsMutex.lock();
         Job& j = mJobs.front();
         mJobsMutex.unlock();
-        ScalarFrameBuffer fb;
-        GLuint tex = fb.init(j.size.x,j.size.y);
-        fb.bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        j.render(mGenerator);
-        fb.unbind();
-        glFinish(); //Ensure texture is fully loaded
+        GLuint tex;
+        //if(j.valid) {
+            ScalarFrameBuffer fb;
+            tex = fb.init(j.size.x,j.size.y);
+            fb.bind();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            j.render(mGenerator);
+            fb.unbind();
+            glFinish(); //Ensure texture is fully loaded
+        //} else {
+        //    tex = 0;
+        //}
         try{
             j.promise.set_value(tex); //Return the texture to the asker
         } catch(std::future_error e) {
-            //We dont care
+            cerr << e.what() << endl;
         }
         { //Lock and pop job
-            std::lock_guard<std::mutex> l(mJobsMutex);
+            Lock l(mJobsMutex);
             mJobs.pop();
         }
     }
