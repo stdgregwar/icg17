@@ -14,6 +14,8 @@ World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
+    mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
+
 //    vector<unsigned char> colors = {/*blue*/ 0, 129, 213,
 //                                    /*yellow*/ 238, 225, 94,
 //                                    /*green*/ 23, 154, 21,
@@ -33,6 +35,8 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
                                     ///*white*/ 255,255,0};
     mTerrainMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
+    mGrassMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
+    {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
     mTerrainMaterial.addTexture(GL_TEXTURE2,"grass.jpg","grass",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE3,"pebbles.jpg","pebbles",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE4,"sand.jpg","sand",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
@@ -47,11 +51,15 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     setScreenSize(screenSize);
 
     int res = mMaxRes;
-    while(res > 2) {
+    while(res > 1) {
         mTerrains.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mTerrainMaterial));
         mTerrains.at(res).init(res);
+        mGrass.emplace(std::piecewise_construct,
+                          std::forward_as_tuple(res),
+                          std::forward_as_tuple(mGrassMaterial));
+        mGrass.at(res).init(res);
         mWaters.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mWaterMaterial));
@@ -139,7 +147,7 @@ void World::updateChunks() {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist
@@ -163,7 +171,7 @@ void World::updateChunks() {
                          ChunkTask::UPDATE,
                          cpos,
                          [this,res](Chunk* c){
-                             return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res));
+                             return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
                          }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
             //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res));
@@ -208,6 +216,11 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         p.second.drawTerrain(time,view,projection);
     }
     mTerrainMaterial.unbind();
+    mGrassMaterial.bind();
+    for(auto& p : mChunks) {
+        p.second.drawGrass(time,view,projection);
+    }
+    mGrassMaterial.unbind();
     mMain.unbind();
 
     //mMain.blit(GL_BACK);

@@ -19,19 +19,21 @@ void Chunk::update(float delta_s) {
             mRes = mNextRes;
             mTerrain = mNextTerrain;
             mWater = mNextWater;
+            mGrass = mNextGrass;
             mReady = true;
             mTexJob = nullptr;
         }
     }
 }
 
-int Chunk::updateRes(int res, TexGenerator &texGen, const Grid& terrain, const Grid &water) {
+int Chunk::updateRes(int res, TexGenerator &texGen, const Grid& terrain, const Grid &water, const Grid &grass) {
 
 
     if(mRes == res) return 0;
     mNextRes = res;
     mNextTerrain = &terrain;
     mNextWater = &water;
+    mNextGrass = &grass;
 
     //if(mTexFuture.valid()) mTexFuture.get(); //Throw future result
     //if(mTexJob) mTexJob->valid = false; //invalidate previous job
@@ -57,6 +59,13 @@ void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection) {
     mat4 model = translate(mat4(),vec3(mOffset,0));
     model = scale(model,vec3(mSize,mSize.x*(32/mSize.x)));
     mTerrain->draw(time,model,view,projection,mHmap,mRes);
+}
+
+void Chunk::drawGrass(float time, const mat4 &view, const mat4 &projection) {
+    if(!mReady) return;
+    mat4 model = translate(mat4(),vec3(mOffset,0));
+    model = scale(model,vec3(mSize,mSize.x*(32/mSize.x)));
+    mGrass->draw(time,model,view,projection,mHmap,mRes);
 }
 
 void Chunk::drawWater(float time, const mat4 &view, const mat4 &projection) {

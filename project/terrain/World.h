@@ -40,9 +40,11 @@ public:
 private:
     Material mTerrainMaterial;
     Material mWaterMaterial;
+    Material mGrassMaterial;
     Skybox mSkybox;
     Grids mTerrains;
     Grids mWaters;
+    Grids mGrass;
     Tasks mToDo;
     Chunks mChunks;
     TexGenerator mNoise;

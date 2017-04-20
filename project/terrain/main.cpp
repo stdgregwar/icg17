@@ -44,7 +44,7 @@ void Init(GLFWwindow* window) {
     glCullFace(GL_BACK);
 
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 100000.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.5f, 10000.0f);
 
     world.init({window_width,window_height},window);
 }
@@ -75,7 +75,7 @@ void Display() {
 void resize_callback(GLFWwindow* window, int width, int height) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 100000.0f);
+    projection_matrix = perspective(45.0f, ratio, 0.5f, 10000.0f);
     glViewport(0, 0, window_width, window_height);
     world.setScreenSize({width,height});
 }

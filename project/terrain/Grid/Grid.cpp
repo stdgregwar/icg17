@@ -26,7 +26,7 @@ void Grid::init(int res, bool seams) {
         {
             for(int y = start; y <= end; ++y)
             {
-                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -5 : 0;
+                float shift = (x == -1 || y == -1 || y == gridDim+1 || x == gridDim+1) ? -0.5 : 0;
                 glm::vec2 pos = {min(max((float)x/gridDim,0.f),1.f),min(max((float)y/gridDim,0.f),1.f)};
                 vertices.push_back({pos,shift});
             }
@@ -116,6 +116,10 @@ void Grid::draw(float time, const glm::mat4 &model,
     glm::mat4 MVP = projection*view*model;
     glUniformMatrix4fv(mMVPId, ONE, DONT_TRANSPOSE, glm::value_ptr(MVP));
     glUniformMatrix4fv(mMaterial.uniformLocation("MV"), ONE, DONT_TRANSPOSE,glm::value_ptr(view*model));
+    glUniformMatrix4fv(mMaterial.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
+    glUniformMatrix4fv(mMaterial.uniformLocation("iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
+    glUniformMatrix4fv(mMaterial.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
+    glUniformMatrix4fv(mMaterial.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
     glUniformMatrix4fv(mMaterial.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
 
     // pass the current time stamp to the shader.
@@ -123,9 +127,9 @@ void Grid::draw(float time, const glm::mat4 &model,
     glUniform1f(mMaterial.uniformLocation("res"), texRes == -1 ? mRes : texRes);
 
     // drawing the grid
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //lPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawElements(GL_TRIANGLES, mNumIndices, GL_UNSIGNED_INT, 0);
-
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
     glBindVertexArray(0);
     //mMaterial.unbind();

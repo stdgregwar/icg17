@@ -17,6 +17,7 @@ public:
     Material();
     Material(const string& vshader, const string& fshader);
     void init(const string& vshader, const string& fshader);
+    void init(const string& vshader, const string& fshader, const string& gshader);
     GLuint attrLocation(const string& name) const;
     GLuint uniformLocation(const string& name) const;
     GLuint addTexture(GLuint no, const string& filename, const string& uName, GLuint filter = GL_LINEAR_MIPMAP_LINEAR,GLuint repeat=GL_REPEAT,bool genMipmaps = true);

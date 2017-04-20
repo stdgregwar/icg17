@@ -6,6 +6,7 @@ out vec3 color;
 in vec3 w_pos;
 in vec4 pos_3d;
 in vec2 uv;
+in vec3 light_dir;
 
 uniform float res;
 uniform mat4 MV;
@@ -27,16 +28,18 @@ vec3 normalFromTex(sampler2D tex, vec2 coords) {
     return (texture(tex,coords).rgb*2)-1;
 }
 
+/// Compute chromatic aberration given deltas in some directions
 vec3 chromatic(sampler2D tex,vec2 base, vec2 main,vec2 r, vec2 g,vec2 b, float f) {
     vec3 color;
-    color.r = texture(tex,base+(main+r*0.001)*f).r;
-    color.g = texture(tex,base+(main+g*0.001)*f).g;
-    color.b = texture(tex,base+(main+b*0.001)*f).b;
+    color.r = texture(tex,base+(main+r*0.1)*f).r;
+    color.g = texture(tex,base+(main+g*0.1)*f).g;
+    color.b = texture(tex,base+(main+b*0.1)*f).b;
     return color;
 }
 
 void main() {
     vec3 view_dir = -normalize((MV*pos_3d).xyz);
+    vec3 light = normalize(light_dir);
     vec2 size = textureSize(mirror,0)*2;
     vec2 msize = textureSize(refract_col,0);
     vec2 screenUV = gl_FragCoord.xy/msize;
@@ -46,7 +49,7 @@ void main() {
     vec3 normal = normalFromTex(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
     normal += normalFromTex(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
     normal += normalFromTex(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
-    normal += vec3(0,0,300);
+    normal += vec3(0,0,20);
     normal = normalize(normal);
     //normal = vec3(0,0,1);
     vec3 v_normal = normalize((MV*vec4(normal,0)).xyz);
@@ -59,26 +62,40 @@ void main() {
 
 
     float frebias = 0;
-    float frenelpow = 4;
-    float fre = 1-dot(view_dir,v_normal);
+    float frenelpow = 2;
+    float fre = 1-dot(view_dir,v_normal)*0.5;
     fre = 1-clamp(frebias+(1-frebias)*pow(fre,frenelpow),0,1);
 
     float bord = abs(-(height(uv)));
     bord = clamp(1-pow(diff,6),0,1);
     float fac = clamp(bord*2,0,1);
 
-    vec3 refl = texture(mirror,gl_FragCoord.xy/size+normal.xy*0.9*fac).rgb;
+    vec3 flat_normal_view = normalize((MV*vec4(0,0,1,0)).xyz);
+
+    vec3 rwon = reflect(view_dir,flat_normal_view);
+    vec3 rwn = reflect(view_dir,v_normal);
+    vec3 rdiff = rwn-rwon; //Making diff of reflection with and without normal mapping to estimate displace in reflect lookup
+    vec3 refl = texture(mirror,gl_FragCoord.xy/size+rdiff.xy*0.02*fac).rgb;
 
     float fog2 = exp(-0.0004*gl_FragCoord.z/gl_FragCoord.w);
 
     //vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
-    vec3 waterFog = mix(vec3(1),vec3(0.1,0.2,0.2),fog2);
-    vec3 refr = mix(chromatic(refract_col,screenUV,normal.xy,vec2(0,1),vec2(-1,0),vec2(1,0),fac*0.9).rgb,waterFog,bord);
+    vec3 waterFog = mix(vec3(1),vec3(0.1,0.2,0.2),fog2); //Compute underwater fog color
+    float ior = 1;
+    vec3 rewon = refract(view_dir,flat_normal_view,ior);
+    vec3 rewn = refract(view_dir,v_normal,ior);
+    vec3 rediff = rewn-rewon; //Making diff of refraction with and without normal mapping to estimate displace in refract lookup
+    vec3 refr = mix(chromatic(refract_col,screenUV,rediff.xy,vec2(0,1),vec2(-1,0),vec2(1,0),fac*0.02).rgb,waterFog,bord);
     //color = mix(refr,refl,fre*0.25);
 
-    color = mix(refl,refr,fre);
 
-    color = mix(refr,color,bord);
+    color = mix(refl,refr,fre); //Mix refl/refr using frenel factor
+
+    const float alpha = 20;
+    float spec = pow(clamp(dot(rwn,light),0,1),alpha);
+    color = mix(color,vec3(1),spec); //Adding specular refl
+    color = mix(refr,color,bord); //Remix refraction at spots where water is shallow to avoid hard edges
+
 
     //float fog2 = exp(-0.00008*gl_FragCoord.z/gl_FragCoord.w);
     //color = mix(vec3(0.7, 0.99, 1),color,fog2);
@@ -86,5 +103,5 @@ void main() {
     //color = nrefl;
     //color = normal;
     //color = vec4(texture(refract_depth,).r);
-    //color = vec3(bord);
+    //color = (rediff+vec3(1))*0.5;
 }

@@ -19,6 +19,17 @@ void Material::init(const string& vshader, const string& fshader) {
     }
 }
 
+void Material::init(const string& vshader, const string& fshader, const string& gshader) {
+    mProgramId = icg_helper::LoadShaders(vshader.c_str(),
+                                              fshader.c_str(),gshader.c_str());
+
+    mTextures.clear();
+
+    if(!mProgramId) {
+        throw std::runtime_error("could not get shaders \"" + vshader + "\" , " + gshader + " and/or \"" + fshader + "\" to compile" );
+    }
+}
+
 GLuint Material::attrLocation(const string& name) const {
     return glGetAttribLocation(mProgramId,name.c_str());
 }
