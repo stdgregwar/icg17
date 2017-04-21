@@ -59,7 +59,7 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
         mGrass.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mGrassMaterial));
-        mGrass.at(res).init(res);
+        mGrass.at(res).init(res,false);
         mWaters.emplace(std::piecewise_construct,
                           std::forward_as_tuple(res),
                           std::forward_as_tuple(mWaterMaterial));
@@ -216,6 +216,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         p.second.drawTerrain(time,view,projection);
     }
     mTerrainMaterial.unbind();
+    glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(auto& p : mChunks) {
         p.second.drawGrass(time,view,projection);

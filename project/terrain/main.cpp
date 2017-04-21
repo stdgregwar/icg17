@@ -34,7 +34,7 @@ using namespace glm;
 mat4 projection_matrix;
 
 void Init(GLFWwindow* window) {
-    cam.setBaseSpeed(400);
+    cam.setBaseSpeed(40);
     glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
