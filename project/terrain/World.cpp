@@ -6,7 +6,7 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(512)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(512)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -80,7 +80,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE1,texMirror,"mirror");
-    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal");
+    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal",GL_LINEAR_MIPMAP_LINEAR);
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,texMain,"refract_col");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,depthMain,"refract_depth");
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
@@ -147,7 +147,7 @@ void World::updateChunks() {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist
@@ -219,7 +219,9 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(auto& p : mChunks) {
-        p.second.drawGrass(time,view,projection);
+        //if((p.first-mCenter).length() < 4) {
+            p.second.drawGrass(time,mirror,projection);
+        //}
     }
     mGrassMaterial.unbind();
     mMain.unbind();

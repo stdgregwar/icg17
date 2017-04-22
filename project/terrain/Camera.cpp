@@ -20,7 +20,7 @@ void Camera::setBaseSpeed(float speed) {
 }
 
 void Camera::update(float delta_s) {
-    mRotation = mRotation + (mTargetRotation - mRotation) * 10.f * delta_s;
+    mRotation = mRotation + (mTargetRotation - mRotation) * std::min(10.f * delta_s,1.f);
 
     vec3& rot = mRotation;
     vec3 look = {cos(rot.y)*cos(rot.x),
@@ -32,7 +32,7 @@ void Camera::update(float delta_s) {
     vec3 wspeed = look*mLSpeed.x + side*mLSpeed.y;
 
     mTargetPosition += wspeed*mSSpeed*delta_s;
-    mPosition = mPosition + (mTargetPosition - mPosition) * 10.f * delta_s;
+    mPosition = mPosition + (mTargetPosition - mPosition) * std::min(10.f * delta_s,1.f);
     mView = lookAt(mPosition,mPosition+look,up);
 }
 

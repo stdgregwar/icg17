@@ -1,6 +1,8 @@
 #version 330
 
 #define amount 6
+#define dist 20
+#define adist 15
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices=108) out;
@@ -17,6 +19,7 @@ out vData {
     vec3 normal_m;
     vec3 w_pos;
     float base_color;
+    float alpha;
 } vertex;
 
 uniform mat4 VP;
@@ -80,7 +83,10 @@ void main()
               vec3 normal = normal0 * (1-jfa) * (1-ifa) + normal1 * ifa + normal2 * jfa;
               normal = normalize(normal);
               float normalFac = 1-pow(1-dot(normal,vec3(0,0,1)),4);
-              if(distance(bpos,vPos) < 20 && bpos.z > 0) {
+              float bdist = distance(bpos,vPos);
+              if(bdist < dist && bpos.z > 0) {
+                float alpha = clamp((dist-bdist)/(dist-adist),0,1);
+                vertex.alpha = alpha;
                 bladeAt(bpos+vec3(rand2(bpos.xy)*0.5,0),normal,baseSize*normalFac);
               }
           }

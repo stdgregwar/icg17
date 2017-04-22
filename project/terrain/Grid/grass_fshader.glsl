@@ -5,6 +5,7 @@ in vData {
     vec3 normal_m;
     vec3 w_pos;
     float base_color;
+    float alpha;
 } vertex;
 
 out vec3 color;
