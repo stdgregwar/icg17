@@ -1,5 +1,6 @@
 #version 330
 
+
 #define amount 10
 #define dist 20
 #define adist 15
@@ -88,9 +89,10 @@ void main()
 
   const float baseSize = 1;
 
+
   for(int i = 0; i < tamount; i++) {
       for(int j = 0; j < tamount; j++) {
-	  if(j+i <= amount) {
+	  if(j+i <= tamount) {
 	      float ifa = float(i)/tamount;
 	      float jfa = float(j)/tamount;
 	      vec3 bpos = vertices[0].w_pos + v1 * i + v2 * j;
