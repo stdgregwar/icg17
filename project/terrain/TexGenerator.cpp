@@ -44,6 +44,7 @@ void TexGenerator::work() {
             std::this_thread::sleep_for(std::chrono::milliseconds(33));
             continue;
         }
+        //cout << "Have " << mJobs.size() << " tex to gen" << endl;
         mJobsMutex.lock();
         Job& j = mJobs.front();
         mJobsMutex.unlock();
@@ -56,6 +57,7 @@ void TexGenerator::work() {
             j.render(mGenerator);
             fb.unbind();
             glFinish(); //Ensure texture is fully loaded
+            std::this_thread::sleep_for(std::chrono::milliseconds(max(1,int(100-mJobs.size()))));
         //} else {
         //    tex = 0;
         //}
@@ -72,5 +74,5 @@ void TexGenerator::work() {
 }
 
  TexGenerator::~TexGenerator() {
-     stop();
+     //stop();
  }

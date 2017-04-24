@@ -6,7 +6,7 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(512)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(32)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -174,7 +174,7 @@ void World::updateChunks() {
                              return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
                          }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
-            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res));
+            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
         }
     }
     for(Chunks::value_type& p : mChunks) {
@@ -219,9 +219,9 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(auto& p : mChunks) {
-        //if((p.first-mCenter).length() < 4) {
+        if((p.first-mCenter).length() < 4) {
             p.second.drawGrass(time,view,projection);
-        //}
+        }
     }
     mGrassMaterial.unbind();
     mMain.unbind();
@@ -237,4 +237,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
+}
+
+void World::stop() {
+    mNoise.stop();
 }

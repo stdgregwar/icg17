@@ -37,6 +37,7 @@ public:
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
     void pushTask(ChunkTask task);
     void setScreenSize(const glm::i32vec2& screenSize);
+    void stop();
 private:
     Material mTerrainMaterial;
     Material mWaterMaterial;
