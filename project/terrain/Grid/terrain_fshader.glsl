@@ -32,10 +32,10 @@ float height(vec2 p) {
 
 vec3 fdiff(vec2 p) {
     float d = 0.5f/(res*8);
-    float hL = height(p - vec2(d,0));
-    float hR = height(p + vec2(d,0));
-    float hD = height(p - vec2(0,d));
-    float hU = height(p + vec2(0,d));
+    float hL = height(p + vec2(d,0));
+    float hR = height(p - vec2(d,0));
+    float hD = height(p + vec2(0,d));
+    float hU = height(p - vec2(0,d));
 
     vec3 norm;
     // deduce terrain normal

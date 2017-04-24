@@ -6,7 +6,7 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(512)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(32)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -80,7 +80,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE1,texMirror,"mirror");
-    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal");
+    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal.png","waterNormal",GL_LINEAR_MIPMAP_LINEAR);
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,texMain,"refract_col");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,depthMain,"refract_depth");
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
@@ -174,7 +174,7 @@ void World::updateChunks() {
                              return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
                          }});
             //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
-            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res));
+            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
         }
     }
     for(Chunks::value_type& p : mChunks) {
@@ -219,7 +219,9 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(auto& p : mChunks) {
-        p.second.drawGrass(time,view,projection);
+        //if((p.first-mCenter).length() < 4) {
+            p.second.drawGrass(time,view,projection);
+        //}
     }
     mGrassMaterial.unbind();
     mMain.unbind();
@@ -235,4 +237,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
+}
+
+void World::stop() {
+    mNoise.stop();
 }

@@ -21,7 +21,7 @@ uniform mat4 M;
 uniform float res;
 uniform float time;
 
-const vec3 light_world = vec3(1,1,1);
+const vec3 light_world = vec3(1,3,3);
 
 float height(vec2 p) {
     return texture(height_map,p).r;

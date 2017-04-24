@@ -16,7 +16,7 @@ uniform mat4 M;
 uniform float res;
 uniform float time;
 
-const vec3 light_world = vec3(1,3,1);
+const vec3 light_world = vec3(1,3,3);
 
 void main() {
     gl_Position = MVP* vec4(position,shift,1.0);

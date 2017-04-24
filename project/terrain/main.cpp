@@ -184,6 +184,7 @@ int main(int argc, char *argv[]) {
         glfwPollEvents();
         lastTime=time;
     }
+    world.stop();
     /// Close OpenGL window and terminate GLFW
     glfwDestroyWindow(window);
     glfwTerminate();
