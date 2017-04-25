@@ -49,7 +49,7 @@ void main() {
     vec3 normal = normalFromTex(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
     normal += normalFromTex(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
     normal += normalFromTex(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
-    normal += vec3(0,0,20);
+    normal += vec3(0,0,10);
     normal = normalize(normal);
     //normal = vec3(0,0,1);
     vec3 v_normal = normalize((MV*vec4(normal,0)).xyz);

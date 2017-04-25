@@ -45,6 +45,14 @@ vec3 fdiff(vec2 p) {
     return normalize(norm);
 }
 
+vec4 triplanar(vec4 x, vec4 y, vec4 z, vec3 normal) {
+    float xf = abs(dot(normal,vec3(1,0,0)));
+    float yf = abs(dot(normal,vec3(0,1,0)));
+    float zf = pow(abs(dot(normal,vec3(0,0,1))),8);
+    float t = 1.f/(xf+yf+zf);
+    return x*xf*t+y*yf*t+z*zf*t;
+}
+
 void main() {
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
@@ -70,9 +78,10 @@ void main() {
     dist = clamp(1-distance(b_color,(vec3(1,0,0))),0,1);
     color += texture(snow,vertex.w_pos.xy*0.25)*dist*2;
 
-    float fac = pow(dot(normal_m,vec3(0,0,1)),8);
-    vec4 rock = texture(cliffs,vertex.w_pos.xy*0.125);
-    color = mix(rock,color,fac);
+    //float fac = pow(dot(normal_m,vec3(0,0,1)),8);
+    vec4 rockx = texture(cliffs,vertex.w_pos.yz*0.125);
+    vec4 rocky = texture(cliffs,vertex.w_pos.xz*0.125);
+    color = triplanar(rockx,rocky,color,normal_m);
 
     color *= vec4(0.2,0.3,0.3,1)+vec4(1.1)*diff;
     float fog = exp(-0.0004*gl_FragCoord.z/gl_FragCoord.w);

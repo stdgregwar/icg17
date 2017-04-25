@@ -1,12 +1,12 @@
 #version 330
 
 
-#define amount 10
+#define amount 12
 #define dist 20
 #define adist 15
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices=100) out;
+layout(triangle_strip, max_vertices=200) out;
 
 in vData {
     vec2 uv;
