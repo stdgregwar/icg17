@@ -23,6 +23,7 @@ public:
     ~Chunk();
 private:
     float mAlpha;
+    float mNextAlpha;
     bool mReady;
     GLuint mHmap;
     GLuint mNextHmap;

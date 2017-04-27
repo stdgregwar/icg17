@@ -12,17 +12,20 @@ Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
 }
 
 void Chunk::update(float delta_s) {
+    constexpr float t_max = 0.25f;
     if(mTexFuture.valid()) {
         if(mTexFuture.wait_for(std::chrono::microseconds(1)) == future_status::ready) {
             //Texture is available!
             mNextHmap = mTexFuture.get();
             mTexFuture = TexFuture();
+            mTexJob = nullptr;
         }
     }
     if(mNextHmap) { //Do transition
         mTTime += delta_s;
-        mAlpha = std::max(0.f,1-mTTime /2);
-        if(mTTime > 2) {
+        mNextAlpha =  std::min(1.f,mTTime*2/t_max);
+        mAlpha = std::min(1.f,2-mTTime*2/t_max);
+        if(mTTime > t_max) {
             mAlpha = 1;
             mHmap = mNextHmap;
             mNextHmap = 0;
@@ -31,7 +34,6 @@ void Chunk::update(float delta_s) {
             mWater = mNextWater;
             mGrass = mNextGrass;
             mReady = true;
-            mTexJob = nullptr;
             mTTime = 0;
         }
     }
@@ -75,7 +77,7 @@ void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection) {
     }
     //Transition
     if(mNextHmap) {
-        mNextTerrain->draw(time,model,view,projection,1-mAlpha,mNextHmap,mNextRes);
+        mNextTerrain->draw(time,model,view,projection,mNextAlpha,mNextHmap,mNextRes);
     }
 }
 
