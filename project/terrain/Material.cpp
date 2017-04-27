@@ -38,6 +38,51 @@ GLuint Material::uniformLocation(const string& name) const {
     return glGetUniformLocation(mProgramId,name.c_str());
 }
 
+GLuint Material::addStippleTex(GLuint no, const string& uname) {
+    static GLubyte stipple[80]  = {
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+
+        1,0,0,0,
+        0,0,0,0,
+        0,0,1,0,
+        0,0,0,0,
+
+        1,0,0,1,
+        0,1,1,0,
+        0,1,1,0,
+        1,1,0,1,
+
+        1,0,1,0,
+        0,1,0,1,
+        1,0,1,0,
+        0,1,0,1,
+
+        1,1,1,1,
+        1,1,1,1,
+        1,1,1,1,
+        1,1,1,1
+    };
+    GLuint tid;
+    glGenTextures(1,&tid);
+    glActiveTexture(no);
+    glBindTexture(GL_TEXTURE_3D, tid);
+    glTexImage3D(GL_TEXTURE_3D,0,GL_RED_INTEGER,4,4,5,0,GL_RED,GL_UNSIGNED_BYTE,stipple);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_3D, 0);
+    mTextures.push_back({
+                            uname,
+                            tid,
+                            GL_TEXTURE_3D,
+                            no,
+                            uniformLocation(uname)
+                        });
+    return tid;
+}
+
 GLuint Material::addTexture(GLuint no, const string& filename, const string& uName, GLuint filter,GLuint repeat,bool genMipmaps) {
     int width;
     int height;

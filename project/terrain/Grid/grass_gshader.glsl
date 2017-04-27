@@ -3,10 +3,10 @@
 
 #define amount 12
 #define dist 20
-#define adist 15
+#define adist 13
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices=200) out;
+layout(triangle_strip, max_vertices=201) out;
 
 in vData {
     vec2 uv;
@@ -92,7 +92,7 @@ void main()
 
   for(int i = 0; i < tamount; i++) {
       for(int j = 0; j < tamount; j++) {
-	  if(j+i <= tamount) {
+          if(j+i <= tamount-1) {
 	      float ifa = float(i)/tamount;
 	      float jfa = float(j)/tamount;
 	      vec3 bpos = vertices[0].w_pos + v1 * i + v2 * j;
@@ -103,7 +103,7 @@ void main()
 	      if(bdist < dist && bpos.z > 0) {
 		float alpha = clamp((dist-bdist)/(dist-adist),0,1);
 		vertex.alpha = alpha;
-		bladeAt(bpos+vec3(rand2(bpos.xy)*0.5,0),normal,baseSize*normalFac);
+                bladeAt(bpos/*+vec3(rand2(bpos.xy)*0.5,0)*/,normal,baseSize*normalFac);
 	      }
 	  }
       }

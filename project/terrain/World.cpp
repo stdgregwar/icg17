@@ -37,6 +37,7 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
     mGrassMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
+    mGrassMaterial.addStippleTex(GL_TEXTURE2,"stipple");
     mTerrainMaterial.addTexture(GL_TEXTURE2,"grass.jpg","grass",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE3,"pebbles.jpg","pebbles",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE4,"sand.jpg","sand",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
