@@ -23,8 +23,12 @@ public:
     bool isInFrustum(const glm::mat4 &VP);
     ~Chunk();
 private:
+    float mAlpha;
+    float mNextAlpha;
     bool mReady;
     GLuint mHmap;
+    GLuint mNextHmap;
+    float mTTime;
     ScalarFrameBuffer mNoiseBuffer;
     const Grid* mTerrain;
     const Grid* mWater;

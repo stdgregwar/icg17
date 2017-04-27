@@ -34,7 +34,7 @@ using namespace glm;
 void Init(GLFWwindow* window) {
     float ratio = window_width / (float) window_height;
     cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
-    cam.setBaseSpeed(40);
+    cam.setBaseSpeed(400);
     glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);

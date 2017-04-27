@@ -103,7 +103,7 @@ void Grid::cleanup() {
 
 void Grid::draw(float time, const glm::mat4 &model,
           const glm::mat4 &view,
-          const glm::mat4 &projection, GLuint heightMap, GLuint texRes) const {
+          const glm::mat4 &projection, GLfloat alpha, GLuint heightMap, GLuint texRes) const {
     //mMaterial.bind();
     glBindVertexArray(mVertexArrayId);
 
@@ -121,6 +121,7 @@ void Grid::draw(float time, const glm::mat4 &model,
     glUniformMatrix4fv(mMaterial.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
     glUniformMatrix4fv(mMaterial.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
     glUniformMatrix4fv(mMaterial.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
+    glUniform1f(mMaterial.uniformLocation("alpha"), alpha);
 
     // pass the current time stamp to the shader.
     glUniform1f(mMaterial.uniformLocation("time"), time);

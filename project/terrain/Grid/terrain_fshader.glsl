@@ -13,6 +13,7 @@ uniform float time;
 uniform float res;
 uniform mat4 MV;
 uniform mat4 M;
+uniform float alpha;
 
 in vec3 view_dir;
 in vec3 light_dir;
@@ -23,6 +24,19 @@ in vData {
     vec3 w_pos;
     float base_color;
 } vertex;
+
+const mat4 thresholdMatrix = mat4(
+            vec4(1.f,13.f,4.f,16.f),
+            vec4(9.f,5.f,12.f,8.f),
+            vec4(3.f,15.f,2.f,14.f),
+            vec4(11.f,7.f,10.f,6.f)
+        ) / 17.f;
+
+bool sdoor(vec2 spos, float alpha) {
+    int x = int(gl_FragCoord.x);
+    int y = int(gl_FragCoord.y);
+    return alpha - thresholdMatrix[x % 4][y % 4] < 0;
+}
 
 out vec4 color;
 
@@ -54,6 +68,7 @@ vec4 triplanar(vec4 x, vec4 y, vec4 z, vec3 normal) {
 }
 
 void main() {
+    if(sdoor(gl_FragCoord.xy,alpha)) discard;
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
     vec3 normal = normalize((MV*vec4(n,0)).xyz);

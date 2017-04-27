@@ -23,4 +23,4 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_executable(${EXERCISENAME} ${SOURCES} ${HEADERS} ${SHADERS})
-target_link_libraries(${EXERCISENAME} ${COMMON_LIBS} Threads::Threads)
+target_link_libraries(${EXERCISENAME} ${COMMON_LIBS} ${CMAKE_THREAD_LIBS_INIT})

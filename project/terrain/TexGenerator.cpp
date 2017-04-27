@@ -41,7 +41,7 @@ void TexGenerator::work() {
     mGenerator.init(mVShader,mFShader);
     while(mContinue) {
         if(!mJobs.size()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(33));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
             continue;
         }
         //cout << "Have " << mJobs.size() << " tex to gen" << endl;
