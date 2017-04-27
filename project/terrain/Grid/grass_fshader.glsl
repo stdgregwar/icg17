@@ -14,12 +14,14 @@ const mat4 thresholdMatrix = mat4(
             vec4(11.f,7.f,10.f,6.f)
         ) / 17.f;
 
-void main(void)
-{
-    //if(sdoor(gl_FragCoord.xy,vertex.alpha)) discard;
+bool sdoor(vec2 spos) {
     int x = int(gl_FragCoord.x);
     int y = int(gl_FragCoord.y);
-    float val = vertex.alpha - thresholdMatrix[x % 4][y % 4];
-    if(val < 0) discard;
+    return vertex.alpha - thresholdMatrix[x % 4][y % 4] < 0;
+}
+
+void main(void)
+{
+    if(sdoor(gl_FragCoord.xy)) discard;
     color = vec3(0,1,vertex.alpha);
 }

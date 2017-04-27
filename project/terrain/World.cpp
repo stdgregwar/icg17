@@ -5,7 +5,7 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
+World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(8),
     mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(32)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);

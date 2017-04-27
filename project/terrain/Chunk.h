@@ -22,8 +22,11 @@ public:
     const glm::vec2& pos() const {return mOffset;}
     ~Chunk();
 private:
+    float mAlpha;
     bool mReady;
     GLuint mHmap;
+    GLuint mNextHmap;
+    float mTTime;
     ScalarFrameBuffer mNoiseBuffer;
     const Grid* mTerrain;
     const Grid* mWater;

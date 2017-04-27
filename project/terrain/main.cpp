@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     Init(window);
     KeyCallback(window, GLFW_KEY_KP_1, 0, 0, 0);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     /// Render loop & keyboard input
     glfwSwapInterval(1);
     float lastTime = glfwGetTime();
