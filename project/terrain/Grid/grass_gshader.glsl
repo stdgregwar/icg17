@@ -3,7 +3,7 @@
 
 #define amount 12
 #define dist 20
-#define adist 13
+#define adist 10
 
 layout(triangles) in;
 layout(triangle_strip, max_vertices=201) out;

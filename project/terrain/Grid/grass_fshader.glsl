@@ -1,7 +1,5 @@
 #version 330
 
-uniform usampler3D stipple;
-
 in vData {
     vec2 uv;
     float alpha;
@@ -9,16 +7,19 @@ in vData {
 
 out vec3 color;
 
-float sdoor(vec2 sc, float alpha) {
-    int al = int(clamp(vertex.alpha*5,0,4));
-    int x = int(sc.x) % 4;
-    int y = int(sc.y) % 4;
-    return float(texelFetch(stipple,ivec3(x,y,al),0).r);
-}
+const mat4 thresholdMatrix = mat4(
+            vec4(1.f,13.f,4.f,16.f),
+            vec4(9.f,5.f,12.f,8.f),
+            vec4(3.f,15.f,2.f,14.f),
+            vec4(11.f,7.f,10.f,6.f)
+        ) / 17.f;
 
 void main(void)
 {
     //if(sdoor(gl_FragCoord.xy,vertex.alpha)) discard;
+    int x = int(gl_FragCoord.x);
+    int y = int(gl_FragCoord.y);
+    float val = vertex.alpha - thresholdMatrix[x % 4][y % 4];
+    if(val < 0) discard;
     color = vec3(0,1,vertex.alpha);
-    color = vec3(sdoor(gl_FragCoord.xy,0.3)*255);
 }

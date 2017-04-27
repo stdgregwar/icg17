@@ -10,7 +10,7 @@
 using namespace glm;
 using namespace std;
 
-Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mTargetRotation(orientation),mSSpeed(20), mPosition(pos), mLSpeed(0)
+Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mTargetRotation(orientation),mSSpeed(20), mPosition(pos), mTargetPosition(pos), mLSpeed(0)
 {
 
 }
