@@ -5,8 +5,8 @@
 using namespace glm;
 using namespace std;
 
-World::World(float chunkSize) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(32)
+World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(32), mCamera(camera)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -199,8 +199,9 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mSkybox.draw(mirror, projection);
     glEnable(GL_CLIP_DISTANCE0);
     mTerrainMaterial.bind();
+    glm::mat4 VP = projection * view;
     for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < mViewDistance/4) {
+        if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos())) {
             p.second.drawTerrain(time,mirror,projection);
         }
     }
@@ -212,14 +213,15 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMain.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mTerrainMaterial.bind();
-    for(auto& p : mChunks) {
-        p.second.drawTerrain(time,view,projection);
+    for(Chunks::value_type& p : mChunks) {
+        if(mCamera.inFrustum(p.second.pos()))
+            p.second.drawTerrain(time,view,projection);
     }
     mTerrainMaterial.unbind();
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
-    for(auto& p : mChunks) {
-        if((p.first-mCenter).length() < 4) {
+    for(Chunks::value_type& p : mChunks) {
+        if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos())) {
             p.second.drawGrass(time,view,projection);
         }
     }
@@ -232,8 +234,9 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
     glDisable(GL_CULL_FACE);
     mWaterMaterial.bind();
-    for(auto& p : mChunks) {
-        p.second.drawWater(time,view,projection);
+    for(Chunks::value_type& p : mChunks) {
+        if(mCamera.inFrustum(p.second.pos()))
+            p.second.drawWater(time,view,projection);
     }
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);

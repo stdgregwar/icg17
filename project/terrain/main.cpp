@@ -27,13 +27,13 @@ int old_wh;
 
 Camera cam({789,234,150},{-M_PI/4,-M_PI/4,-M_PI/4});
 
-World world(256);
+World world(256,cam);
 
 using namespace glm;
 
-mat4 projection_matrix;
-
 void Init(GLFWwindow* window) {
+    float ratio = window_width / (float) window_height;
+    cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
     cam.setBaseSpeed(40);
     glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
@@ -43,8 +43,6 @@ void Init(GLFWwindow* window) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.5f, 10000.0f);
 
     world.init({window_width,window_height},window);
 }
@@ -57,7 +55,7 @@ void Display() {
     vec3 cam_look(0.0f, 0.0f, 0.0f);
     vec3 cam_up(0.0f, 0.0f, 1.0f);
     mat4 view = cam.view();//lookAt(cam_pos, cam_look, cam_up);
-    mat4 view_projection = projection_matrix * view;
+    mat4 view_projection = cam.projection() * view;
 
     mat4 scalem = scale(mat4(),vec3(4));
 
@@ -68,14 +66,14 @@ void Display() {
 
 
 
-    world.draw(time,view,projection_matrix);
+    world.draw(time,view,cam.projection());
 }
 
 // Gets called when the windows/framebuffer is resized.
 void resize_callback(GLFWwindow* window, int width, int height) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.5f, 10000.0f);
+    cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
     glViewport(0, 0, window_width, window_height);
     world.setScreenSize({width,height});
 }

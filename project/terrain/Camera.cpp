@@ -10,7 +10,7 @@
 using namespace glm;
 using namespace std;
 
-Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mTargetRotation(orientation),mSSpeed(20), mPosition(pos), mLSpeed(0)
+Camera::Camera(const glm::vec3& pos, const glm::vec3& orientation) : mRotation(orientation),mTargetRotation(orientation),mSSpeed(20), mPosition(pos), mLSpeed(0)
 {
 
 }
@@ -84,9 +84,48 @@ void Camera::onMouse(GLFWwindow* window, double xpos, double ypos) {
     rotate(vec2{-xrel,-yrel}*0.001f);
 }
 
+const glm::mat4& Camera::projection() const {
+    return mProjection;
+}
+
+
 const glm::mat4& Camera::view() const {
     return mView;
 }
+
+void Camera::setProjection(const glm::mat4& projection) {
+    mProjection = projection;
+}
+
+bool Camera::inFrustum(const glm::vec2& pos) const {
+    return true;
+//    glm::vec4 mFrustum[6];
+//    glm::mat4 VP = mProjection*mView;
+//    for(int i = 0; i < 6; i++) {
+//        mFrustum[i].x = VP[3][0] + VP[0][0];
+//        mFrustum[i].y = VP[3][1] + VP[0][1];
+//        mFrustum[i].z = VP[3][2] + VP[0][2];
+//        mFrustum[i].w = VP[3][3] + VP[0][3];
+//        glm::normalize(mFrustum[i]);
+//    }
+
+//    for(int i =0; i < 6; i++) {
+//        const float w = mFrustum[i].w;
+//        const glm::vec3 normal = vec3(mFrustum[i]);
+//        for(int x = 0; x <= 1; x++) {
+//            for(int y = 0; y<= 1; y++) {
+//                for(int z = -1; z <= 1; z += 2) {
+//                    glm::vec4 pos4D = VP*glm::vec4(pos+glm::vec2(x,y),1*z,1.0);
+//                    glm::vec3 pos3D = glm::vec3(pos4D.x,pos4D.y,pos4D.z)/pos4D.w;
+//                    if(glm::dot(pos3D,normal) + w > 0)
+//                        return true;
+//                }
+//            }
+//        }
+//    }
+//    return false;
+}
+
 
 glm::vec2 Camera::wPos() const {
     return {mPosition.x,mPosition.y};

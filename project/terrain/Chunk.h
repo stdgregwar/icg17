@@ -20,6 +20,7 @@ public:
     void setFrameID(long id);
     long frameID() { return mFrameId;}
     const glm::vec2& pos() const {return mOffset;}
+    bool isInFrustum(const glm::mat4 &VP);
     ~Chunk();
 private:
     bool mReady;
@@ -32,6 +33,7 @@ private:
     int mRes;
     glm::vec2 mOffset;
     glm::vec2 mSize;
+    glm::mat4 mModel;
 
     TexGenerator::Job* mTexJob;
     TexFuture mTexFuture;

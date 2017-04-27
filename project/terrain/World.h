@@ -6,6 +6,7 @@
 #include "Chunk.h"
 #include "ScreenQuad/ScreenQuad.h"
 #include "Skybox/Skybox.h"
+#include "Camera.h"
 #include "FrameBuffer.h"
 #include <list>
 #include <functional>
@@ -29,7 +30,7 @@ typedef std::list<ChunkTask> Tasks;
 class World
 {
 public:
-    World(float chunkSize);
+    World(float chunkSize,const Camera& camera);
     void init(const glm::i32vec2& screenSize, GLFWwindow *window);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
@@ -39,6 +40,7 @@ public:
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
 private:
+    const Camera& mCamera;
     Material mTerrainMaterial;
     Material mWaterMaterial;
     Material mGrassMaterial;
