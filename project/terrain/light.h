@@ -6,6 +6,8 @@ class Light
 {
 public:
     Light();
+
+    bool computeLight();
 };
 
 #endif // LIGHT_H
