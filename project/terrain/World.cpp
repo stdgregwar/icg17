@@ -1,6 +1,7 @@
 #include "World.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 using namespace glm;
 using namespace std;
@@ -201,9 +202,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mSkybox.draw(mirror, projection);
     glEnable(GL_CLIP_DISTANCE0);
     mTerrainMaterial.bind();
-    glm::mat4 VP = projection * view;
     for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos())) {
+        if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
             p.second.drawTerrain(time,mirror,projection);
         }
     }
@@ -224,15 +224,20 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMain.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mTerrainMaterial.bind();
+    int i =0;
     for(Chunks::value_type& p : mChunks) {
-        if(mCamera.inFrustum(p.second.pos()))
+        if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+
             p.second.drawTerrain(time,view,projection);
+        i++;
+        }
     }
+    cout << "Ratio of chunks " << i/float(mChunks.size()) << endl;
     mTerrainMaterial.unbind();
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos())) {
+        if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
             p.second.drawGrass(time,view,projection);
         }
     }
@@ -247,7 +252,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glDisable(GL_CULL_FACE);
     mWaterMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
-        if(mCamera.inFrustum(p.second.pos()))
+        if(mCamera.inFrustum(p.second.pos(),mChunkSize))
             p.second.drawWater(time,view,projection);
     }
     mWaterMaterial.unbind();
