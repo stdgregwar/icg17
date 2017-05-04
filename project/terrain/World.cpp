@@ -6,7 +6,7 @@ using namespace glm;
 using namespace std;
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(32), mCamera(camera)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(32), mCamera(camera)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -37,7 +37,8 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
     mGrassMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
-    mGrassMaterial.addStippleTex(GL_TEXTURE2,"stipple");
+    mGrassMaterial.addTexture(GL_TEXTURE2, "grasscolor.png","grass_col");
+    mGrassMaterial.addTexture(GL_TEXTURE3, "grasspatch.png", "grasspatch",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE2,"grass.jpg","grass",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE3,"pebbles.jpg","pebbles",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE4,"sand.jpg","sand",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
@@ -208,6 +209,15 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mTerrainMaterial.unbind();
     glDisable(GL_CLIP_DISTANCE0);
+    glDisable(GL_CULL_FACE);
+    mGrassMaterial.bind();
+    for(Chunks::value_type& p : mChunks) {
+        if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos())) {
+            p.second.drawGrass(time,mirror,projection);
+        }
+    }
+    mGrassMaterial.unbind();
+    glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     mMirror.unbind();
 
@@ -227,6 +237,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mGrassMaterial.unbind();
+    glEnable(GL_CULL_FACE);
     mMain.unbind();
 
     //mMain.blit(GL_BACK);

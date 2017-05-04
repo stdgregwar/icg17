@@ -2,10 +2,13 @@
 
 in vData {
     vec2 uv;
+    vec3 color;
     float alpha;
 } vertex;
 
 out vec3 color;
+
+uniform sampler2D grasspatch;
 
 const mat4 thresholdMatrix = mat4(
             vec4(1.f,13.f,4.f,16.f),
@@ -23,5 +26,7 @@ bool sdoor(vec2 spos) {
 void main(void)
 {
     if(sdoor(gl_FragCoord.xy)) discard;
-    color = vec3(0,1,vertex.alpha);
+    vec4 tex = texture(grasspatch,vertex.uv);
+    if(tex.a < 0.5f) discard;
+    color = vertex.color*tex.rgb;
 }

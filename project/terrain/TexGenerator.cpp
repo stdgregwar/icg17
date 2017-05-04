@@ -56,7 +56,7 @@ void TexGenerator::work() {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             j.render(mGenerator);
             fb.unbind();
-            glFinish(); //Ensure texture is fully loaded
+            //glFinish(); //Ensure texture is fully loaded
             std::this_thread::sleep_for(std::chrono::milliseconds(max(1,int(100-mJobs.size()))));
         //} else {
         //    tex = 0;

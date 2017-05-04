@@ -2,11 +2,14 @@
 
 
 #define amount 12
-#define dist 20
-#define adist 10
+#define dist 300.f
+#define maxbdist 60.f
+#define trans 20.f
+#define adist 200.f
+#define gtiles 5
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices=201) out;
+layout(triangle_strip, max_vertices=102) out;
 
 in vData {
     vec2 uv;
@@ -17,11 +20,13 @@ in vData {
 
 out vData {
     vec2 uv;
+    vec3 color;
     float alpha;
 } vertex;
 
 uniform mat4 VP;
 uniform mat4 iV;
+uniform sampler2D grass_col;
 
 uniform float time;
 
@@ -34,22 +39,67 @@ vec2 rand2(vec2 p) {
     return vec2(rand(p),rand(p.yx));
 }
 
+vec2 uvFrame(vec2 base, int i) {
+    return vec2(float(i)/gtiles + base.x/gtiles,base.y);
+}
+
+///Create a billboard quad at given pos
+void patchAt(vec3 bpos, vec3 dir) {
+    bpos.x -= 0.5;
+    vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz)*2;
+    float ph = rand(bpos.xy);
+    vec3 top = dir*4+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
+    int i = 1;
+
+    vec3 pos = bpos-side;
+    gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(0,0),i);
+    EmitVertex();
+
+    pos = bpos+side;
+    gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(1,0),i);
+    EmitVertex();
+
+    pos = bpos-side+top;
+    gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(0,1),i);
+    EmitVertex();
+
+    pos = bpos+side+top;
+    gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(1,1),i);
+    EmitVertex();
+
+    EndPrimitive();
+}
+
+
 void bladeAt(vec3 bpos,vec3 dir,float size) {
     float ph = rand(bpos.xy);
     vec3 top = dir*size+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
-    vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz);
+    //vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz);
+    vec3 side = normalize(vec3(rand2(bpos.xy),0.f))*1.5f;
     side*=0.1;
 
-    vec3 pos = bpos + side;
+    vertex.uv = uvFrame(vec2(0.5,0),0);
+    vec3 pos = bpos;
     gl_Position = VP * vec4(pos,1.0);
     EmitVertex();
 
-    pos = bpos + top;
+    pos = bpos + side + top;
     gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(0.5,0.5),0);
     EmitVertex();
 
-    pos = bpos -side;
+    pos = bpos -side + top;
     gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(0.5,0.5),0);
+    EmitVertex();
+
+    pos = bpos  + 2*top;
+    gl_Position = VP * vec4(pos,1.0);
+    vertex.uv = uvFrame(vec2(0.5,1),0);
     EmitVertex();
 
     EndPrimitive();
@@ -78,7 +128,11 @@ void main()
   }
 
 
-  int tamount = int(amount-clamp(distance(cpos,vPos)*0.5,0,amount));
+  const float falloff = amount/dist;
+  const float lam = log(float(amount))/log(2.f);
+  float fdist = distance(cpos,vPos);
+  fdist = fdist > maxbdist ? fdist*4: fdist;
+  int tamount = int(pow(2,lam-clamp(fdist*falloff*0.5,0,lam)));
   float fac = 1.f/tamount;
 
   v1 *= fac;
@@ -87,23 +141,32 @@ void main()
   //v1 = vec3(0.1,0,0);
   //v2 = vec3(0,0.1,0);
 
-  const float baseSize = 1;
+  const float baseSize = 2;
 
 
   for(int i = 0; i < tamount; i++) {
       for(int j = 0; j < tamount; j++) {
-          if(j+i <= tamount-1) {
+	  if(j+i <= tamount-1) {
 	      float ifa = float(i)/tamount;
 	      float jfa = float(j)/tamount;
 	      vec3 bpos = vertices[0].w_pos + v1 * i + v2 * j;
 	      vec3 normal = normal0 * (1-jfa) * (1-ifa) + normal1 * ifa + normal2 * jfa;
 	      normal = normalize(normal);
-	      float normalFac = 1-pow(1-dot(normal,vec3(0,0,1)),4);
+	      float normalFac = pow(dot(normal,vec3(0,0,1)),8);
 	      float bdist = distance(bpos,vPos);
-	      if(bdist < dist && bpos.z > 0) {
+	      if(bdist < dist && bpos.z > 0 && bpos.z < 70 && normalFac > 0.3f) {
 		float alpha = clamp((dist-bdist)/(dist-adist),0,1);
 		vertex.alpha = alpha;
-                bladeAt(bpos/*+vec3(rand2(bpos.xy)*0.5,0)*/,normal,baseSize*normalFac);
+		vertex.color = texture(grass_col,vec2(rand(bpos.xy),0)).rgb;
+		vec3 randp = vec3(rand2(bpos.xy),0);
+		if(bdist > maxbdist) {
+		    float a2 = clamp((bdist-maxbdist)*0.25,0,1);
+		    vertex.alpha = alpha*a2;
+		    patchAt(bpos+randp,normal);
+		}
+		if(bdist < maxbdist + trans) {
+		    bladeAt(bpos+randp,normal,baseSize*normalFac);
+		}
 	      }
 	  }
       }
