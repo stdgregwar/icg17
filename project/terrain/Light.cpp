@@ -1,5 +1,7 @@
 #include "light.h"
 
+#include "icg_helper.h"
+
 Light::Light()
 {
 

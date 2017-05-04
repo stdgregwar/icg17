@@ -17,7 +17,7 @@ public:
     const glm::mat4& view() const;
     const glm::mat4& projection() const;
     void setProjection(const glm::mat4& projection);
-    bool inFrustum(const glm::vec2& pos) const;
+    bool inFrustum(const glm::vec2& pos, const float &chunkSize) const;
     glm::vec2 wPos() const;
 private:
     enum Plane
