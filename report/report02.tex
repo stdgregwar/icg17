@@ -34,7 +34,7 @@
 \maketitle
 \vspace{-1cm}
 \section{State of the project}
-Since an image is better than a thousand words, here is one:
+Let's begin with a screenshot:
 \begin{center}
 \includegraphics[width=\textwidth]{screen04}
 \caption{Current state of the project}
@@ -49,7 +49,7 @@ What we implemented during this second part was:
 \end{itemize}
 
 \begin{center}
-\includegraphics[width=\textwidth]{screen02}
+\includegraphics[width=\textwidth]{screen05}
 \caption{Top view}
 \end{center} 
 
@@ -58,7 +58,7 @@ parts.
 
 \subsection{Triplanar texturing}
 
-We updated the terrain fragment shaders to feature a decent phong lighting and
+We updated the terrain fragment shaders to feature a decent Phong lighting and
 triplanar texturing. This also include fragment-wise evaluation of the heightmap
 to add bump-mapping to the terrain. This allow to achieve fairly detailed
 landscape without pushing the vertex count to high. We then use a power of the
@@ -91,11 +91,11 @@ view angle. Another thing that we added is a water fog. Meaning that when we see
 the water from above, the luminosity of the refractions are decreasing with
 depth, and underwater becomes almost black from a certain threshold. Of course,
 deformation of the reflexion and refraction images are approximations since we
-have planar texture and not envirronement maps that would be less efficient. So
-we use the difference between flat reflected vector and distorded reflected
+have planar texture and not environment maps that would be less efficient. So
+we use the difference between flat reflected vector and distorted reflected
 vector as an offset in the texture lookup. Same goes for the refraction.
 
-A small bonus feature is the chromatic abberation based on the water depth.
+A small bonus feature is the chromatic aberration based on the water depth.
 Meaning red green and blue components don't get distorted exactly the same way
 and give this impression of colored blur.
 
@@ -104,7 +104,7 @@ the waves.
 
 \subsection{Skybox}
 
-The skybox was implemented in a quite canonic way. By loading 6 faces of a cube
+The skybox was implemented in a quite canonical way. By loading 6 faces of a cube
 map in a CubeMap Texture and then using the normalized vertex coordinates in a
 zero centered cube to lookup the texture. We also disable depth writing to
 prevent the skybox, which is drawn first, to occlude the terrain. To keep the
@@ -129,8 +129,8 @@ the worker thread to busy-wait on an empty job queue, so we had to find the best
 heuristics to make the thread sleep.
 
 \begin{center}
-\includegraphics[width=\textwidth]{screen01}
-\caption{Another view of the current state}
+\includegraphics[width=\textwidth]{screen06}
+\caption{Advanced water}
 \end{center} \\
 
 \section{Work distribution}
@@ -138,8 +138,8 @@ heuristics to make the thread sleep.
 
 \begin{tabular}{l|ccc}
  & Marc & Grégoire & Raphaël \\ \hline
-Texturing & \checkmarck  & \checkmark & \checkmark \\
-Basic water &\checkmark  &  & \ckeckmark \\
+Texturing & \checkmark  & \checkmark & \checkmark \\
+Basic water &\checkmark  &  & \checkmark \\
 Skybox & \checkmark  &  & \checkmark  \\
 \end{tabular}
 
