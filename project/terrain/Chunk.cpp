@@ -38,23 +38,26 @@ void Chunk::update(float delta_s) {
     }
 }
 
-int Chunk::updateRes(int res, TexGenerator &texGen, const Grid& terrain, const Grid &water, const Grid &grass) {
+int Chunk::updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid &water, const Grid &grass) {
 
 
-    if(mRes == res) return 0;
-    mNextRes = res;
+    if(mRes == res*8+2) return 0;
+    mNextRes = res*8+2;
     mNextTerrain = &terrain;
     mNextWater = &water;
     mNextGrass = &grass;
 
     //if(mTexFuture.valid()) mTexFuture.get(); //Throw future result
     //if(mTexJob) mTexJob->valid = false; //invalidate previous job
-    TexGenerator::Job* job;
-    mTexFuture = texGen.getTexture({res*8+2,res*8+2},
-                                   [res,this](ScreenQuad& q){
-                                        q.draw(mModel,res);},
+    ChunkTexGenerator::Job* job;
+    size_t tres = mNextRes;
+    /*mTexFuture = texGen.getTexture({tres,tres},
+                                   [tres,this](ScreenQuad& q){
+                                        q.draw(mModel,tres);},
                                    job
-                                   );
+                                   );*/
+    glm::ivec3 key(mOffset/mSize,tres);
+    mTexFuture = texGen.getChunkTex(key,mSize.x,job);
     //if(mTexJob) mTexJob->valid = false;
     mTexJob = job;
     return 1;

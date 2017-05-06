@@ -45,7 +45,7 @@ float height(vec2 p) {
 }
 
 vec3 fdiff(vec2 p) {
-    float d = 0.5f/(res*8);
+    float d = 0.5f/(res);
     float hL = height(p + vec2(d,0));
     float hR = height(p - vec2(d,0));
     float hD = height(p + vec2(0,d));

@@ -1,13 +1,16 @@
 #include "TexGenerator.h"
 #include "ScalarFrameBuffer.h"
 
-TexGenerator::TexGenerator()
+#include <glm/gtc/matrix_transform.hpp>
+
+ChunkTexGenerator::ChunkTexGenerator(size_t cacheByteSize, float csize) : mChunkSize(csize),
+    mCache(cacheByteSize,[this](const glm::ivec3& k){return prod(k);})
 {
 
 }
 
 
-void TexGenerator::init(GLFWwindow* parentWindow,const string& vshader, const string& fshader) {
+void ChunkTexGenerator::init(GLFWwindow* parentWindow,const string& vshader, const string& fshader) {
     mVShader = vshader;
     mFShader = fshader;
     glfwWindowHint(GLFW_VISIBLE, false);
@@ -15,17 +18,17 @@ void TexGenerator::init(GLFWwindow* parentWindow,const string& vshader, const st
     start();
 }
 
-void TexGenerator::start() {
+void ChunkTexGenerator::start() {
     mContinue = true;
-    mThread = std::thread(std::bind(&TexGenerator::work,this));
+    mThread = std::thread(std::bind(&ChunkTexGenerator::work,this));
 }
 
-void TexGenerator::stop() {
+void ChunkTexGenerator::stop() {
     mContinue = false;
     mThread.join();
 }
 
-TexFuture TexGenerator::getTexture(
+/*TexFuture ChunkTexGenerator::getTexture(
                      const glm::ivec2 size,
                      const RenderFunc& render,
                      Job*& handle) {
@@ -33,10 +36,35 @@ TexFuture TexGenerator::getTexture(
     mJobs.emplace(size,render);
     handle = &mJobs.back();
     return mJobs.back().promise.get_future();
+}*/
+
+TexFuture ChunkTexGenerator::getChunkTex(const glm::ivec3& posAndSize, float csize, Job*& handle) {
+    using namespace glm;
+    Lock l(mJobsMutex);
+    mJobs.emplace(posAndSize);
+    handle = &mJobs.back();
+    return mJobs.back().promise.get_future();
 }
 
+SharedTexture ChunkTexGenerator::prod(const glm::ivec3& k) {
+    using namespace glm;
+    GLuint tex;
+    //if(j.valid) {
+    ScalarFrameBuffer fb;
+    tex = fb.init(k.z,k.z);
+    fb.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //j.render(mGenerator);
+    vec2 pos(k.x*mChunkSize,k.y*mChunkSize);
+    mat4 model(scale(translate(mat4(),vec3(pos,0)),vec3(mChunkSize)));
+    mGenerator.draw(model,k.z);
+    fb.unbind();
+    //glFinish();
+    return SharedTexture(tex);
+}
 
-void TexGenerator::work() {
+void ChunkTexGenerator::work() {
+    using namespace glm;
     glfwMakeContextCurrent(mWindow);
     mGenerator.init(mVShader,mFShader);
     while(mContinue) {
@@ -48,16 +76,9 @@ void TexGenerator::work() {
         mJobsMutex.lock();
         Job& j = mJobs.front();
         mJobsMutex.unlock();
-        GLuint tex;
         //if(j.valid) {
-            ScalarFrameBuffer fb;
-            tex = fb.init(j.size.x,j.size.y);
-            fb.bind();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            j.render(mGenerator);
-            fb.unbind();
-            //glFinish(); //Ensure texture is fully loaded
-            std::this_thread::sleep_for(std::chrono::milliseconds(max(1,int(100-mJobs.size()))));
+        SharedTexture tex = mCache.get(j.posAndSize);
+
         //} else {
         //    tex = 0;
         //}
@@ -70,9 +91,10 @@ void TexGenerator::work() {
             Lock l(mJobsMutex);
             mJobs.pop();
         }
+        //std::this_thread::sleep_for(std::chrono::milliseconds(max(1,int(100-mJobs.size()))));
     }
 }
 
- TexGenerator::~TexGenerator() {
+ ChunkTexGenerator::~ChunkTexGenerator() {
      //stop();
  }

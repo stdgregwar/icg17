@@ -28,7 +28,7 @@ float height(vec2 p) {
 }
 
 vec3 fdiff(vec2 p) {
-    float d = 0.5f/(res*8);
+    float d = 0.5f/(res);
     float hL = height(p - vec2(d,0));
     float hR = height(p + vec2(d,0));
     float hD = height(p - vec2(0,d));
@@ -44,7 +44,7 @@ vec3 fdiff(vec2 p) {
 
 void main() {
     vertex.uv = (position);
-    float tres = res+2;
+    float tres = res;
     vertex.uv*=1-(2/tres); //Align with texture margin
     vertex.uv+=vec2(1/tres);
 

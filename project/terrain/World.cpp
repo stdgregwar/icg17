@@ -6,8 +6,10 @@
 using namespace glm;
 using namespace std;
 
+#define Mb *1024*1024
+
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(32), mCamera(camera)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(32), mCamera(camera), mNoise(1024 Mb, chunkSize)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -150,7 +152,7 @@ void World::updateChunks() {
     for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
         for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
             i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
+            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
             int res = maxRes >> dist;
             Chunks::iterator it = mChunks.find(cpos);
             if(it == mChunks.end()) { //Chunk does not exist

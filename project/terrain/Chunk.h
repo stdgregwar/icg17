@@ -13,7 +13,7 @@ class Chunk
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
     void update(float delta_s);
-    int updateRes(int res, TexGenerator &texGen, const Grid& terrain, const Grid& water, const Grid& grass);
+    int updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid& water, const Grid& grass);
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection);
     void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection);
@@ -26,8 +26,8 @@ private:
     float mAlpha;
     float mNextAlpha;
     bool mReady;
-    GLuint mHmap;
-    GLuint mNextHmap;
+    SharedTexture mHmap;
+    SharedTexture mNextHmap;
     float mTTime;
     ScalarFrameBuffer mNoiseBuffer;
     const Grid* mTerrain;
@@ -39,7 +39,7 @@ private:
     glm::vec2 mSize;
     glm::mat4 mModel;
 
-    TexGenerator::Job* mTexJob;
+    ChunkTexGenerator::Job* mTexJob;
     TexFuture mTexFuture;
     int mNextRes;
     const Grid* mNextTerrain;

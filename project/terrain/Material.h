@@ -3,7 +3,7 @@
 
 #include "icg_helper.h"
 
-struct Texture{
+struct Texture {
     string name;
     GLuint id;
     GLuint target;

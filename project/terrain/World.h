@@ -50,7 +50,7 @@ private:
     Grids mGrass;
     Tasks mToDo;
     Chunks mChunks;
-    TexGenerator mNoise;
+    ChunkTexGenerator mNoise;
     ScreenQuad mScreen;
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;
