@@ -17,16 +17,16 @@ const mat4 thresholdMatrix = mat4(
             vec4(11.f,7.f,10.f,6.f)
         ) / 17.f;
 
-bool sdoor(vec2 spos) {
+bool sdoor(vec2 spos, float alpha) {
     int x = int(gl_FragCoord.x);
     int y = int(gl_FragCoord.y);
-    return vertex.alpha - thresholdMatrix[x % 4][y % 4] < 0;
+    return alpha - thresholdMatrix[x % 4][y % 4] < 0;
 }
 
 void main(void)
 {
-    if(sdoor(gl_FragCoord.xy)) discard;
     vec4 tex = texture(grasspatch,vertex.uv);
-    if(tex.a < 0.5f) discard;
+    if(sdoor(gl_FragCoord.xy, vertex.alpha)) discard;
+    if(tex.a < 0.8f) discard;
     color = vertex.color*tex.rgb;
 }
