@@ -45,11 +45,11 @@ vec2 uvFrame(vec2 base, int i) {
 
 ///Create a billboard quad at given pos
 void patchAt(vec3 bpos, vec3 dir) {
-    bpos.x -= 0.5;
-    vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz)*2;
+    bpos.z -= 0.5;
+    vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz)*3;
     float ph = rand(bpos.xy);
-    vec3 top = dir*4+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
-    int i = 1;
+    vec3 top = dir*6+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
+    int i = int((0.5+rand(bpos.xy)*0.5)*gtiles);
 
     vec3 pos = bpos-side;
     gl_Position = VP * vec4(pos,1.0);
@@ -77,7 +77,8 @@ void patchAt(vec3 bpos, vec3 dir) {
 
 void bladeAt(vec3 bpos,vec3 dir,float size) {
     float ph = rand(bpos.xy);
-    vec3 top = dir*size+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
+    vec3 wind = vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
+    vec3 top = dir*size;
     //vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz);
     vec3 side = normalize(vec3(rand2(bpos.xy),0.f))*1.5f;
     side*=0.1;
@@ -87,17 +88,17 @@ void bladeAt(vec3 bpos,vec3 dir,float size) {
     gl_Position = VP * vec4(pos,1.0);
     EmitVertex();
 
-    pos = bpos + side + top;
+    pos = bpos + side + top + wind*0.5f;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,0.5),0);
     EmitVertex();
 
-    pos = bpos -side + top;
+    pos = bpos -side + top + wind*0.5f;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,0.5),0);
     EmitVertex();
 
-    pos = bpos  + 2*top;
+    pos = bpos  + 2*top + wind*2;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,1),0);
     EmitVertex();
@@ -122,7 +123,7 @@ void main()
 
   vec4 ccpos = VP*vec4(cpos,1);
   vec3 nccpos = ccpos.xyz /ccpos.w;
-  const float l = sqrt(2)+0.2;
+  const float l = sqrt(2)*1.2;
   if(distance(vec3(0,0,0),nccpos) > l) {
       return;
   }

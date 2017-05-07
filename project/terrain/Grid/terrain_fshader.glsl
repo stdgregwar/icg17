@@ -55,14 +55,14 @@ vec3 fdiff(vec2 p) {
     // deduce terrain normal
     norm.x = hL - hR;
     norm.y = hD - hU;
-    norm.z = 1800*d;
+    norm.z = 1200*d;
     return normalize(norm);
 }
 
 vec4 triplanar(vec4 x, vec4 y, vec4 z, vec3 normal) {
     float xf = abs(dot(normal,vec3(1,0,0)));
     float yf = abs(dot(normal,vec3(0,1,0)));
-    float zf = pow(abs(dot(normal,vec3(0,0,1))),8);
+    float zf = pow(abs(dot(normal,vec3(0,0,1))),3);
     float t = 1.f/(xf+yf+zf);
     return x*xf*t+y*yf*t+z*zf*t;
 }
@@ -79,10 +79,11 @@ void main() {
     vec3 ref = reflect(light,normal);
     float spec = pow(clamp(dot(ref,view),0,1),2);
     float no = texture(noise,vertex.w_pos.xy*0.06).r*0.3;
+    no-= texture(noise,vertex.w_pos.xy*0.001).r*0.6;
     vec3 b_color = texture(color_map,vertex.base_color+no).rgb;
 
     float dist = pow(clamp(1-distance(b_color,(vec3(0,1,0))),0,1),0.7);
-    color = texture(grass,vertex.w_pos.xy*0.25)*dist*1.1;
+    color = texture(grass,vertex.w_pos.xy*0.25)*dist*1.5;
 
     dist = clamp(1-distance(b_color,(vec3(0,0,1))),0,1);
     color += texture(pebbles,vertex.w_pos.xy*0.25)*dist;
@@ -94,12 +95,13 @@ void main() {
     color += texture(snow,vertex.w_pos.xy*0.25)*dist*2;
 
     //float fac = pow(dot(normal_m,vec3(0,0,1)),8);
-    vec4 rockx = texture(cliffs,vertex.w_pos.yz*0.125);
-    vec4 rocky = texture(cliffs,vertex.w_pos.xz*0.125);
+    vec4 rockx = texture(cliffs,vertex.w_pos.yz*0.025);
+    vec4 rocky = texture(cliffs,vertex.w_pos.xz*0.025);
     color = triplanar(rockx,rocky,color,normal_m);
 
     color *= vec4(0.2,0.3,0.3,1)+vec4(1.1)*diff;
-    float fog = exp(-0.0004*gl_FragCoord.z/gl_FragCoord.w);
-    color = mix(vec4(1),color,fog);
+    float fog = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);
+    //color = mix(vec4(1),color,fog);
+    if(sdoor(gl_FragCoord.xy,fog)) discard;
     color.a = gl_FragCoord.w;
 }

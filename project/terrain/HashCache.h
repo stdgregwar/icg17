@@ -26,8 +26,8 @@ template <class K, class V>
 class HashCache
 {
 public:
-    HashCache(size_t size, function<V(const K&)> prod) : mMap(size/2), mProd(prod), mMaxSize(size), mSize(0) {
-    mMap.reserve(size);
+    HashCache(size_t bytesize, function<V(const K&)> prod) : mProd(prod), mMaxSize(bytesize), mSize(0) {
+        mMap.reserve(1024);
     }
 
     const V& get(const K& key) {

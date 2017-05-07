@@ -24,6 +24,20 @@ float height(vec2 p) {
     return texture(height_map,bias).r;
 }
 
+const mat4 thresholdMatrix = mat4(
+            vec4(1.f,13.f,4.f,16.f),
+            vec4(9.f,5.f,12.f,8.f),
+            vec4(3.f,15.f,2.f,14.f),
+            vec4(11.f,7.f,10.f,6.f)
+        ) / 17.f;
+
+bool sdoor(vec2 spos, float alpha) {
+    int x = int(gl_FragCoord.x);
+    int y = int(gl_FragCoord.y);
+    return alpha - thresholdMatrix[x % 4][y % 4] < 0;
+}
+
+
 vec3 normalFromTex(sampler2D tex, vec2 coords) {
     return (texture(tex,coords).rgb*2)-1;
 }
@@ -77,7 +91,8 @@ void main() {
     vec3 rdiff = rwn-rwon; //Making diff of reflection with and without normal mapping to estimate displace in reflect lookup
     vec3 refl = texture(mirror,gl_FragCoord.xy/size+rdiff.xy*0.02*fac).rgb;
 
-    float fog2 = exp(-0.0004*gl_FragCoord.z/gl_FragCoord.w);
+    float fog2 = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);
+    if(sdoor(gl_FragCoord.xy,fog2)) discard;
 
     //vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
     vec3 waterFog = mix(vec3(1),vec3(0.1,0.2,0.2),fog2); //Compute underwater fog color

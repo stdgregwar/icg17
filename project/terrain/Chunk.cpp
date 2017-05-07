@@ -11,7 +11,7 @@ Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
 }
 
 void Chunk::update(float delta_s) {
-    constexpr float t_max = 0.25f;
+    constexpr float t_max = 0.5f;
     if(mTexFuture.valid()) {
         if(mTexFuture.wait_for(std::chrono::microseconds(1)) == future_status::ready) {
             //Texture is available!
@@ -40,9 +40,9 @@ void Chunk::update(float delta_s) {
 
 int Chunk::updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid &water, const Grid &grass) {
 
-
-    if(mRes == res*8+2) return 0;
-    mNextRes = res*8+2;
+    size_t tres = res*4+2;
+    if(mRes == tres) return 0;
+    mNextRes = tres;
     mNextTerrain = &terrain;
     mNextWater = &water;
     mNextGrass = &grass;
@@ -50,7 +50,7 @@ int Chunk::updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, co
     //if(mTexFuture.valid()) mTexFuture.get(); //Throw future result
     //if(mTexJob) mTexJob->valid = false; //invalidate previous job
     ChunkTexGenerator::Job* job;
-    size_t tres = mNextRes;
+
     /*mTexFuture = texGen.getTexture({tres,tres},
                                    [tres,this](ScreenQuad& q){
                                         q.draw(mModel,tres);},
