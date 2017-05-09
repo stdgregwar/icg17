@@ -22,6 +22,7 @@ out vData {
     vec2 uv;
     vec3 color;
     float alpha;
+    vec3 normal;
 } vertex;
 
 uniform mat4 VP;

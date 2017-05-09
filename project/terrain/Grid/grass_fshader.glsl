@@ -4,10 +4,11 @@ in vData {
     vec2 uv;
     vec3 color;
     float alpha;
+    vec3 normal;
 } vertex;
 
-out vec3 color;
-
+layout(location = 0) out vec3 color;
+layout(location = 1) out vec3 o_normal;
 uniform sampler2D grasspatch;
 
 const mat4 thresholdMatrix = mat4(
@@ -29,4 +30,5 @@ void main(void)
     if(sdoor(gl_FragCoord.xy, vertex.alpha)) discard;
     if(tex.a < 0.8f) discard;
     color = vertex.color*tex.rgb;
+    o_normal = vertex.normal;
 }

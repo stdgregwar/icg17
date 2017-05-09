@@ -38,7 +38,8 @@ bool sdoor(vec2 spos, float alpha) {
     return alpha - thresholdMatrix[x % 4][y % 4] < 0;
 }
 
-out vec4 color;
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec3 o_normal;
 
 float height(vec2 p) {
     return texture(height_map,p).r;
@@ -72,6 +73,7 @@ void main() {
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
     vec3 normal = normalize((MV*vec4(n,0)).xyz);
+    o_normal = normal;
     vec3 light = normalize(light_dir);
     vec3 view = normalize(view_dir);
 

@@ -40,7 +40,7 @@ void Chunk::update(float delta_s) {
 
 int Chunk::updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid &water, const Grid &grass) {
 
-    size_t tres = res*4+2;
+    size_t tres = res*6+2;
     if(mRes == tres) return 0;
     mNextRes = tres;
     mNextTerrain = &terrain;
