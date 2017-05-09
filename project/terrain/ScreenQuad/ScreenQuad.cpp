@@ -60,3 +60,16 @@ void ScreenQuad::draw(const glm::mat4& model, float res) const {
     glBindVertexArray(0);
     mMaterial.unbind();
 }
+
+void ScreenQuad::draw(const mat4 &view, const mat4& projection) const {
+    mMaterial.bind();
+    glBindVertexArray(mVertexArrayId);
+
+    glUniformMatrix4fv(mMaterial.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
+    glUniformMatrix4fv(mMaterial.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
+    // draw
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glBindVertexArray(0);
+    mMaterial.unbind();
+}

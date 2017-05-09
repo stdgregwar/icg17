@@ -3,15 +3,17 @@
 #include "icg_helper.h"
 #include "../Material.h"
 
-class ScreenQuad {
+using namespace glm;
 
+class ScreenQuad {
 public:
     ScreenQuad(const string& vshader, const string& fshader,float size);
     ScreenQuad();
     void init(const string& vshader, const string& fshader,float size = 256);
     Material& material() {return mMaterial;}
     void cleanup();
-    void draw(const glm::mat4 &model = glm::mat4(), float res = 256) const;
+    void draw(const mat4 &model = mat4(), float res = 256) const;
+    void draw(const mat4 &view, const mat4& projection) const;
 private:
     Material mMaterial;
     GLuint mVertexArrayId;        // vertex array object

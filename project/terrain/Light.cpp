@@ -1,24 +1,22 @@
 #include "Light.h"
 
-#include "icg_helper.h"
-
 Light::Light()
 {
 
 }
 
 
-bool Light::computeLight() {
+bool Light::init(size_t texSize) {
     // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-     GLuint FramebufferName = 0;
-     glGenFramebuffers(1, &FramebufferName);
-     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+     mFrameBuffer = 0;
+     glGenFramebuffers(1, &mFrameBuffer);
+     glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffer);
 
      // Depth texture. Slower than a depth buffer, but you can sample it later in your shader
      GLuint depthTexture;
      glGenTextures(1, &depthTexture);
      glBindTexture(GL_TEXTURE_2D, depthTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0,GL_DEPTH_COMPONENT16, 1024, 1024, 0,GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+     glTexImage2D(GL_TEXTURE_2D, 0,GL_DEPTH_COMPONENT16, texSize, texSize, 0,GL_DEPTH_COMPONENT, GL_FLOAT, 0);
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

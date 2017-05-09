@@ -9,7 +9,6 @@ public:
 private:
     GLuint mFramebufferObjectId=0;
     GLuint mColorTextureId = 0;
-    GLuint mNormalTextureId = 0;
     GLuint mDepthTextureId=0;
 public:
     // warning: overrides viewport!!
@@ -17,7 +16,6 @@ public:
     void blit(GLuint fb);
     void unbind();
     std::pair<int,int> init(int imageWidth, int imageHeight, bool useInterpolation = true);
-    GLuint normal() const {return mNormalTextureId;}
     GLuint diffuse() const {return mColorTextureId;}
     GLuint depth() const {return mDepthTextureId;}
 

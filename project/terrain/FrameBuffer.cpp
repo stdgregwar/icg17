@@ -4,8 +4,8 @@
 void FrameBuffer::bind() {
     glViewport(0, 0, width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferObjectId);
-    const GLenum buffers[] = { GL_COLOR_ATTACHMENT0 ,GL_COLOR_ATTACHMENT1};
-    glDrawBuffers(2 /*length of buffers[]*/, buffers);
+    const GLenum buffers[] = { GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1 /*length of buffers[]*/, buffers);
 }
 
 void FrameBuffer::blit(GLuint fb) {
@@ -56,28 +56,6 @@ std::pair<int, int> FrameBuffer::init(int imageWidth, int imageHeight, bool useI
         // how to load from buffer
     }
 
-    {
-        glGenTextures(1, &mNormalTextureId);
-        glBindTexture(GL_TEXTURE_2D, mNormalTextureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-        if(useInterpolation){
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        } else {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        }
-
-        // create texture for the color attachment
-        // see Table.2 on
-        // khronos.org/opengles/sdk/docs/man3/docbook4/xhtml/glTexImage2D.xml
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0,
-                     GL_RGB, GL_FLOAT, NULL);
-        // how to load from buffer
-    }
-
     // create render buffer (for depth channel)
     {
         glGenTextures(1, &mDepthTextureId);
@@ -109,10 +87,6 @@ std::pair<int, int> FrameBuffer::init(int imageWidth, int imageHeight, bool useI
                                GL_TEXTURE_2D, mColorTextureId,
                                0 /*level*/);
         glFramebufferTexture2D(GL_FRAMEBUFFER,
-                               GL_COLOR_ATTACHMENT1 /*location = 1*/,
-                               GL_TEXTURE_2D, mNormalTextureId,
-                               0 /*level*/);
-        glFramebufferTexture2D(GL_FRAMEBUFFER,
                                GL_DEPTH_ATTACHMENT /*location = depth*/,
                                GL_TEXTURE_2D, mDepthTextureId,
                                0 /*level*/);
@@ -130,7 +104,6 @@ std::pair<int, int> FrameBuffer::init(int imageWidth, int imageHeight, bool useI
 void FrameBuffer::cleanup() {
     glDeleteTextures(1, &mColorTextureId);
     glDeleteTextures(1, &mDepthTextureId);
-    glDeleteTextures(1, &mNormalTextureId);
     //glDeleteRenderbuffers(1, &mDepthRenderBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, 0 /*UNBIND*/);
     glDeleteFramebuffers(1, &mFramebufferObjectId);

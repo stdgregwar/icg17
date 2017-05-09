@@ -9,7 +9,7 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera), mNoise(2048 Mb, chunkSize)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera), mNoise(1024 Mb, chunkSize)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -91,7 +91,6 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
     mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,texMain,"buffer_color");
     mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,depthMain,"buffer_depth");
-    mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE2,mMain.normal(),"buffer_normal");
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
@@ -207,7 +206,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mTerrainMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-            p.second.drawTerrain(time,mirror,projection);
+            p.second.drawTerrain(time,mirror,projection,mTerrainMaterial);
         }
     }
     mTerrainMaterial.unbind();
@@ -216,7 +215,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-            p.second.drawGrass(time,mirror,projection);
+            p.second.drawGrass(time,mirror,projection,mGrassMaterial);
         }
     }
     mGrassMaterial.unbind();
@@ -229,9 +228,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mTerrainMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-
-            p.second.drawTerrain(time,view,projection);
-
+            p.second.drawTerrain(time,view,projection,mTerrainMaterial);
         }
     }
     mTerrainMaterial.unbind();
@@ -239,7 +236,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-            p.second.drawGrass(time,view,projection);
+            p.second.drawTerrain(time,view,projection,mGrassMaterial);
         }
     }
     mGrassMaterial.unbind();
@@ -247,14 +244,14 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMain.unbind();
 
     //mMain.blit(GL_BACK);
-    mScreen.draw();
+    mScreen.draw(view,projection);
 
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
     glDisable(GL_CULL_FACE);
     mWaterMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if(mCamera.inFrustum(p.second.pos(),mChunkSize))
-            p.second.drawWater(time,view,projection);
+            p.second.drawWater(time,view,projection,mWaterMaterial);
     }
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);

@@ -103,7 +103,7 @@ void Grid::cleanup() {
 
 void Grid::draw(float time, const glm::mat4 &model,
           const glm::mat4 &view,
-          const glm::mat4 &projection, GLfloat alpha, GLuint heightMap, GLuint texRes) const {
+          const glm::mat4 &projection, Material &mat, GLfloat alpha, GLuint heightMap, GLuint texRes) const {
     //mMaterial.bind();
     glBindVertexArray(mVertexArrayId);
 
@@ -114,18 +114,18 @@ void Grid::draw(float time, const glm::mat4 &model,
 
     // setup MVP
     glm::mat4 MVP = projection*view*model;
-    glUniformMatrix4fv(mMVPId, ONE, DONT_TRANSPOSE, glm::value_ptr(MVP));
-    glUniformMatrix4fv(mMaterial.uniformLocation("MV"), ONE, DONT_TRANSPOSE,glm::value_ptr(view*model));
-    glUniformMatrix4fv(mMaterial.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
-    glUniformMatrix4fv(mMaterial.uniformLocation("iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
-    glUniformMatrix4fv(mMaterial.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
-    glUniformMatrix4fv(mMaterial.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
-    glUniformMatrix4fv(mMaterial.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
-    glUniform1f(mMaterial.uniformLocation("alpha"), alpha);
+    glUniformMatrix4fv(mat.uniformLocation("MVP"), ONE, DONT_TRANSPOSE, glm::value_ptr(MVP));
+    glUniformMatrix4fv(mat.uniformLocation("MV"), ONE, DONT_TRANSPOSE,glm::value_ptr(view*model));
+    glUniformMatrix4fv(mat.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
+    glUniformMatrix4fv(mat.uniformLocation("iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
+    glUniformMatrix4fv(mat.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
+    glUniformMatrix4fv(mat.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
+    glUniformMatrix4fv(mat.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
+    glUniform1f(mat.uniformLocation("alpha"), alpha);
 
     // pass the current time stamp to the shader.
-    glUniform1f(mMaterial.uniformLocation("time"), time);
-    glUniform1f(mMaterial.uniformLocation("res"), texRes == -1 ? mRes : texRes);
+    glUniform1f(mat.uniformLocation("time"), time);
+    glUniform1f(mat.uniformLocation("res"), texRes == -1 ? mRes : texRes);
 
     // drawing the grid
     //lPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

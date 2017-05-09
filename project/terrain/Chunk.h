@@ -14,9 +14,9 @@ public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
     void update(float delta_s);
     int updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid& water, const Grid& grass);
-    void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection);
-    void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection);
-    void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection);
+    void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection, Material& mat);
+    void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
+    void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
     void setFrameID(long id);
     long frameID() { return mFrameId;}
     const glm::vec2& pos() const {return mOffset;}

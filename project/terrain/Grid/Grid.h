@@ -13,9 +13,9 @@ public:
     Grid(Material& m);
     void init(int res, bool seams=true);
     void cleanup();
-    void draw(float time, const glm::mat4 &model = IDENTITY_MATRIX,
-              const glm::mat4 &view = IDENTITY_MATRIX,
-              const glm::mat4 &projection = IDENTITY_MATRIX, GLfloat alpha=1, GLuint heightMap = 0, GLuint texRes = -1) const;
+    void draw(float time, const glm::mat4 &model,
+              const glm::mat4 &view,
+              const glm::mat4 &projection,Material& mat, GLfloat alpha=1, GLuint heightMap = 0, GLuint texRes = -1) const;
 private:
     Material& mMaterial;
     GLuint mVertexArrayId;                // vertex array object

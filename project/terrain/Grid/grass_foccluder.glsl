@@ -30,5 +30,6 @@ void main(void)
     vec4 tex = texture(grasspatch,vertex.uv);
     if(sdoor(gl_FragCoord.xy, vertex.alpha)) discard;
     if(tex.a < 0.8f) discard;
-    color = vertex.color*tex.rgb;
+    color = vec3(0.2);
 }
+

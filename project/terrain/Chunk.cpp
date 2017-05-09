@@ -67,26 +67,26 @@ void Chunk::setFrameID(long id) {
     mFrameId = id;
 }
 
-void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection) {
+void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection, Material &mat) {
     //if(!mReady) return;
 
     if(mHmap) {
-        mTerrain->draw(time,mModel,view,projection,mAlpha,mHmap,mRes);
+        mTerrain->draw(time,mModel,view,projection,mat,mAlpha,mHmap,mRes);
     }
     //Transition
     if(mNextHmap) {
-        mNextTerrain->draw(time,mModel,view,projection,mNextAlpha,mNextHmap,mNextRes);
+        mNextTerrain->draw(time,mModel,view,projection,mat,mNextAlpha,mNextHmap,mNextRes);
     }
 }
 
-void Chunk::drawGrass(float time, const mat4 &view, const mat4 &projection) {
+void Chunk::drawGrass(float time, const mat4 &view, const mat4 &projection,Material& mat) {
     if(!mReady) return;
-    mGrass->draw(time,mModel,view,projection,1,mHmap,mRes);
+    mGrass->draw(time,mModel,view,projection,mat,1,mHmap,mRes);
 }
 
-void Chunk::drawWater(float time, const mat4 &view, const mat4 &projection) {
+void Chunk::drawWater(float time, const mat4 &view, const mat4 &projection,Material& mat) {
     if(!mReady) return;
-    mWater->draw(time,mModel,view,projection,1,mHmap,mRes);
+    mWater->draw(time,mModel,view,projection,mat,1,mHmap,mRes);
 }
 
 bool Chunk::isInFrustum(const glm::mat4 &VP) {
