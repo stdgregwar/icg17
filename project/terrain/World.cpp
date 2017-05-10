@@ -9,13 +9,17 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera), mNoise(1024 Mb, chunkSize)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera),
+    mNoise(1024 Mb, chunkSize),
+    mLight({512,512,512},{1,1,-1},{1,1,1})
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
+    mLight.init(1024);
+    mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
 
@@ -197,6 +201,17 @@ void World::pushTask(ChunkTask task) {
 void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mSkybox.draw(view, projection);
 
+    mTerrainShadows.bind();
+    mLight.bind(mTerrainShadows,mCamera);
+
+    for(Chunks::value_type& p : mChunks) {
+        if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+            p.second.drawTerrain(time,view,projection,mTerrainShadows);
+        }
+    }
+
+    mTerrainShadows.unbind();
+
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
     mMirror.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -255,6 +270,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
+
+    //mLight.draw();
 }
 
 void World::stop() {

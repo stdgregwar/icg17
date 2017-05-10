@@ -1,9 +1,9 @@
 #version 330
 
+#pragma include"grass_foccluder.glsl"
 
-out vec4 color;
-
+out vec4 c;
 
 void main() {
-    color = vec4(0,0,0,1);
+    c = vec4(0);
 }

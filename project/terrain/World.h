@@ -8,6 +8,7 @@
 #include "Skybox/Skybox.h"
 #include "Camera.h"
 #include "FrameBuffer.h"
+#include "Light.h"
 #include <list>
 #include <functional>
 
@@ -41,7 +42,9 @@ public:
     void stop();
 private:
     const Camera& mCamera;
+    Light mLight;
     Material mTerrainMaterial;
+    Material mTerrainShadows;
     Material mWaterMaterial;
     Material mGrassMaterial;
     Skybox mSkybox;

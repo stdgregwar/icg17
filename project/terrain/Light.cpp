@@ -2,7 +2,8 @@
 #include <glm/gtc/type_ptr.hpp>
 using namespace glm;
 
-Light::Light()
+Light::Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color) :
+    mSize(shadowSize), mDirection(direction), mColor(color)
 {
 
 }
@@ -10,6 +11,7 @@ Light::Light()
 
 bool Light::init(size_t texSize) {
     mTexSize = texSize;
+    mScreenQuad.init("vbuffercopy.glsl","fbuffercopy.glsl");
     // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
      mFrameBuffer = 0;
      glGenFramebuffers(1, &mFrameBuffer);
@@ -24,6 +26,8 @@ bool Light::init(size_t texSize) {
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+     mScreenQuad.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mDepthTexture,"buffer_color");
+
      glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mDepthTexture, 0);
 
      glDrawBuffer(GL_NONE); // No color buffer is drawn to.
@@ -33,6 +37,10 @@ bool Light::init(size_t texSize) {
      if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
      return false;
      else return true;
+}
+
+void Light::draw() const {
+    mScreenQuad.draw();
 }
 
 void Light::bind(Material& m, const Camera& cam) {
@@ -50,5 +58,5 @@ void Light::unbind() {
 
 void Light::uniforms(Material& m) {
     glUniformMatrix4fv(m.uniformLocation("l_MVP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLMVP));
-    glUniform3f(m.uniformLocation("l_color"),&mColor);
+    glUniform3f(m.uniformLocation("l_color"),mColor.x,mColor.y,mColor.z);
 }
