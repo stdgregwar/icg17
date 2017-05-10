@@ -9,7 +9,7 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera), mNoise(1024 Mb, chunkSize)
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera), mNoise(1024 Mb, chunkSize)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -211,7 +211,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mTerrainMaterial.unbind();
     glDisable(GL_CLIP_DISTANCE0);
-    glDisable(GL_CULL_FACE);
+    /*glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
@@ -219,7 +219,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mGrassMaterial.unbind();
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);*/
     glFrontFace(GL_CCW);
     mMirror.unbind();
 
@@ -232,7 +232,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mTerrainMaterial.unbind();
-    glDisable(GL_CULL_FACE);
+    /*glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
@@ -240,7 +240,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mGrassMaterial.unbind();
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);*/
     mMain.unbind();
 
     //mMain.blit(GL_BACK);

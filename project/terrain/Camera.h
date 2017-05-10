@@ -19,6 +19,7 @@ public:
     void setProjection(const glm::mat4& projection);
     bool inFrustum(const glm::vec2& pos, const float &chunkSize) const;
     glm::vec2 wPos() const;
+    const glm::vec3 pos() const {return mPosition;}
 private:
     enum Plane
                    {

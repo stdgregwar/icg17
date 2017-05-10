@@ -1,10 +1,12 @@
 #include "Material.h"
 
-Material::Material() : mProgramId(0) {
+Material::Material() : mProgramId(0) , mULocCache(1024,[this](const std::string uname){
+    return glGetUniformLocation(mProgramId,uname.c_str());
+}) {
 
 }
 
-Material::Material(const std::string& vshader, const std::string& fshader) {
+Material::Material(const std::string& vshader, const std::string& fshader) : Material() {
     init(vshader,fshader);
 }
 
@@ -35,7 +37,8 @@ GLuint Material::attrLocation(const string& name) const {
 }
 
 GLuint Material::uniformLocation(const string& name) const {
-    return glGetUniformLocation(mProgramId,name.c_str());
+    //return glGetUniformLocation(mProgramId,name.c_str());
+    return mULocCache.get(name);
 }
 
 GLuint Material::addTexture(GLuint no, const string& filename, const string& uName, GLuint filter,GLuint repeat,bool genMipmaps) {

@@ -2,6 +2,7 @@
 #define MATERIAL_H
 
 #include "icg_helper.h"
+#include "HashCache.h"
 
 struct Texture {
     string name;
@@ -31,7 +32,7 @@ public:
 private:
     GLuint mProgramId;
     vector<Texture> mTextures;
-
+    mutable rmg::HashCache<string, GLuint> mULocCache;
 };
 
 #endif // MATERIAL_H
