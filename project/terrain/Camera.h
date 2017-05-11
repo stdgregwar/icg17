@@ -15,11 +15,27 @@ public:
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
     void onMouse(GLFWwindow* window, double xpos, double ypos);
     const glm::mat4& view() const;
+    const glm::mat4& projection() const;
+    void setProjection(const glm::mat4& projection);
+    bool inFrustum(const glm::vec2& pos, const float &chunkSize) const;
     glm::vec2 wPos() const;
+    const glm::vec3 pos() const {return mPosition;}
 private:
+    enum Plane
+                   {
+                           PLANE_BACK,
+                           PLANE_FRONT,
+                           PLANE_RIGHT,
+                           PLANE_LEFT,
+                           PLANE_TOP,
+                           PLANE_BOTTOM
+                   };
     float mSSpeed;
     glm::vec3 mLSpeed;
     glm::vec3 mPosition;
+    glm::vec3 mTargetPosition;
+    glm::vec3 mTargetRotation;
     glm::vec3 mRotation;
     glm::mat4 mView;
+    glm::mat4 mProjection;
 };

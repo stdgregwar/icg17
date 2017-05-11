@@ -275,4 +275,6 @@ inline GLuint LoadShaders(const char * vertex_file_path,
                vertex_file_path, fragment_file_path, geometry_file_path);
     return status;
 }
+
+
 }

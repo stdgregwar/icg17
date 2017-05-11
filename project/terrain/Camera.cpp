@@ -10,7 +10,7 @@
 using namespace glm;
 using namespace std;
 
-Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mSSpeed(200), mPosition(pos), mLSpeed(0)
+Camera::Camera(const vec3 &pos, const vec3 &orientation) : mRotation(orientation),mTargetRotation(orientation),mSSpeed(20), mPosition(pos), mTargetPosition(pos), mLSpeed(0)
 {
 
 }
@@ -20,6 +20,8 @@ void Camera::setBaseSpeed(float speed) {
 }
 
 void Camera::update(float delta_s) {
+    mRotation = mRotation + (mTargetRotation - mRotation) * std::min(10.f * delta_s,1.f);
+
     vec3& rot = mRotation;
     vec3 look = {cos(rot.y)*cos(rot.x),
                  cos(rot.y)*sin(rot.x),
@@ -29,16 +31,17 @@ void Camera::update(float delta_s) {
     vec3 side = normalize(cross(look,up));
     vec3 wspeed = look*mLSpeed.x + side*mLSpeed.y;
 
-    mPosition += wspeed*mSSpeed*delta_s;
+    mTargetPosition += wspeed*mSSpeed*delta_s;
+    mPosition = mPosition + (mTargetPosition - mPosition) * std::min(10.f * delta_s,1.f);
     mView = lookAt(mPosition,mPosition+look,up);
 }
 
 void Camera::rotate(glm::vec2 delta) {
-    mRotation.x += delta.x;
+    mTargetRotation.x += delta.x;
     static float max = M_PI/2-0.1;
-    mRotation.y += delta.y;
-    if(abs(mRotation.y) > max) {
-        mRotation.y = sign(mRotation.y)*max;
+    mTargetRotation.y += delta.y;
+    if(abs(mTargetRotation.y) > max) {
+        mTargetRotation.y = sign(mTargetRotation.y)*max;
     }
 }
 
@@ -81,9 +84,79 @@ void Camera::onMouse(GLFWwindow* window, double xpos, double ypos) {
     rotate(vec2{-xrel,-yrel}*0.001f);
 }
 
+const glm::mat4& Camera::projection() const {
+    return mProjection;
+}
+
+
 const glm::mat4& Camera::view() const {
     return mView;
 }
+
+void Camera::setProjection(const glm::mat4& projection) {
+    mProjection = projection;
+}
+
+bool Camera::inFrustum(const glm::vec2& pos, const float &chunkSize) const {
+    glm::vec4 mFrustum[6];
+    glm::mat4 VP = mProjection*mView;
+    for(int i = 0; i < 3; i++) {
+        mFrustum[i].x = VP[0][3] + VP[0][i];
+        mFrustum[i].y = VP[1][3] + VP[1][i];
+        mFrustum[i].z = VP[2][3] + VP[2][i];
+        mFrustum[i].w = VP[3][3] + VP[3][i];
+
+        mFrustum[i+1].x = VP[0][3] - VP[0][i];
+        mFrustum[i+1].y = VP[1][3] - VP[1][i];
+        mFrustum[i+1].z = VP[2][3] - VP[2][i];
+        mFrustum[i+1].w = VP[3][3] - VP[3][i];
+        mFrustum[i] = glm::normalize(mFrustum[i]);
+        mFrustum[i+1] = glm::normalize(mFrustum[i+1]);
+    }
+
+    glm::vec3 mins = glm::vec3(pos,0);
+    glm::vec3 maxs = mins + glm::vec3(chunkSize);
+    glm::vec3 vmin, vmax;
+
+    for(int i =0; i < 6; i++) {
+        const float w = mFrustum[i].w;
+        const glm::vec3 normal = vec3(mFrustum[i]);
+
+        // X axis
+        if(mFrustum[i].x > 0) {
+            vmin.x = mins.x;
+            vmax.x = maxs.x;
+        } else {
+            vmin.x = maxs.x;
+            vmax.x = mins.x;
+        }
+        // Y axis
+        if(mFrustum[i].y > 0) {
+            vmin.y = mins.y;
+            vmax.y = maxs.y;
+        } else {
+            vmin.y = maxs.y;
+            vmax.y = mins.y;
+        }
+        // Z axis
+        if(mFrustum[i].z > 0) {
+            vmin.z = mins.z;
+            vmax.z = maxs.z;
+        } else {
+            vmin.z = maxs.z;
+            vmax.z = mins.z;
+        }
+
+        if(glm::dot(normal,vmin)   + w > 0){
+            return true;
+        }
+        if(glm::dot(normal,vmax) + w < 0){
+            return false;
+        }
+    }
+    return false;
+}
+
 
 glm::vec2 Camera::wPos() const {
     return {mPosition.x,mPosition.y};

@@ -1,28 +1,20 @@
-#include "NoiseGen.h"
+#include "ScreenQuad.h"
 
-NoiseGen::NoiseGen() {
+ScreenQuad::ScreenQuad() {
 
 }
 
-NoiseGen::NoiseGen(float size) {
-    init(size);
+ScreenQuad::ScreenQuad(const string &vshader, const string &fshader, float size) {
+    init(vshader,fshader,size);
 }
 
-void NoiseGen::init(float size) {
+void ScreenQuad::init(const string &vshader, const string &fshader, float size) {
 
     // set screenquad size
     this->mSize = size;
 
-    // compile the shaders
-    mProgramId = icg_helper::LoadShaders("NoiseGen_vshader.glsl",
-                                          "NoiseGen_fshader.glsl");
-    if(!mProgramId) {
-        exit(EXIT_FAILURE);
-    }
+    mMaterial.init(vshader,fshader);
 
-    glUseProgram(mProgramId);
-
-    // vertex one vertex Array
     glGenVertexArrays(1, &mVertexArrayId);
     glBindVertexArray(mVertexArrayId);
 
@@ -39,7 +31,7 @@ void NoiseGen::init(float size) {
                      vertex_point, GL_STATIC_DRAW);
 
         // attribute
-        GLuint vertex_point_id = glGetAttribLocation(mProgramId, "vpoint");
+        GLuint vertex_point_id = mMaterial.attrLocation("vpoint");
         glEnableVertexAttribArray(vertex_point_id);
         glVertexAttribPointer(vertex_point_id, 2, GL_FLOAT, DONT_NORMALIZE,
                               ZERO_STRIDE, ZERO_BUFFER_OFFSET);
@@ -47,27 +39,37 @@ void NoiseGen::init(float size) {
 
     // to avoid the current object being polluted
     glBindVertexArray(0);
-    glUseProgram(0);
 }
 
-void NoiseGen::cleanup() {
+void ScreenQuad::cleanup() {
     glBindVertexArray(0);
-    glUseProgram(0);
     glDeleteBuffers(1, &mVertexBufferObject);
-    glDeleteProgram(mProgramId);
     glDeleteVertexArrays(1, &mVertexArrayId);
 }
 
-void NoiseGen::draw(const glm::mat4& model, float res) const {
-    glUseProgram(mProgramId);
+void ScreenQuad::draw(const glm::mat4& model, float res) const {
+    mMaterial.bind();
     glBindVertexArray(mVertexArrayId);
 
-    glUniform1f(glGetUniformLocation(mProgramId,"res"),res);
+    glUniform1f(mMaterial.uniformLocation("res"),res);
 
-    glUniformMatrix4fv(glGetUniformLocation(mProgramId,"M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
+    glUniformMatrix4fv(mMaterial.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
     // draw
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     glBindVertexArray(0);
-    glUseProgram(0);
+    mMaterial.unbind();
+}
+
+void ScreenQuad::draw(const mat4 &view, const mat4& projection) const {
+    mMaterial.bind();
+    glBindVertexArray(mVertexArrayId);
+
+    glUniformMatrix4fv(mMaterial.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
+    glUniformMatrix4fv(mMaterial.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
+    // draw
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glBindVertexArray(0);
+    mMaterial.unbind();
 }

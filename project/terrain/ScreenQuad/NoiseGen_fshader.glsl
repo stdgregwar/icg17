@@ -39,7 +39,7 @@ float snoise(vec2 v){
 }
 
 float noise(vec2 p) {
-    return snoise(p);
+    return snoise(p+vec2(532,123));
 }
 
 float fbm(vec2 x, int octaves) {
@@ -68,7 +68,7 @@ float multifractal(vec2 point, float H, float lacunarity, int
 }
 
 void main() {
-        float s = 10;
+        float s = 4;
 	vec2 n_uv = w_pos.xy;
 	//vec2 n_uv = (gl_FragCoord.xy+vec2(1,1))*0.5;
 	vec2 p = n_uv*0.01*s;
@@ -76,10 +76,12 @@ void main() {
 	//value = fbm(p,1)*20+10;
 	value = (multifractal(p*0.4,0.1,0.5,6,0.7)-10)*0.8;//*fbm(p*1,5)*0.5;
 	value = max(0.1,value);
-	value += (value*0.3+0.5)*fbm(p*1,8)*2;
+	value += (value*0.3+0.9)*fbm(p*1,8)*2;
 	value += (multifractal(p*0.04,0.1,0.5,5,0.7)-10)*10;
-	value += fbm(p*0.01,3)*120+80;
+	value += (value*0.3+0.9)*fbm(p*0.5,8)*0.25;
+	value += fbm(p*0.01,3)*240+120;
 	value /= s;
+	//value*=0.1;
 	//value = p.x*20;
 	//value = max(0,value);
 

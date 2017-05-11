@@ -4,12 +4,16 @@
 #include <unordered_map>
 #include <glm/gtx/hash.hpp>
 #include "Chunk.h"
-#include "NoiseGen/NoiseGen.h"
+#include "ScreenQuad/ScreenQuad.h"
+#include "Skybox/Skybox.h"
+#include "Camera.h"
+#include "FrameBuffer.h"
+#include "Light.h"
 #include <list>
 #include <functional>
 
 typedef std::unordered_map<glm::i32vec2,Chunk> Chunks;
-typedef std::unordered_map<int,Terrain> Terrains;
+typedef std::unordered_map<int,Grid> Grids;
 
 struct ChunkTask {
     enum Type{
@@ -27,19 +31,34 @@ typedef std::list<ChunkTask> Tasks;
 class World
 {
 public:
-    World(float chunkSize);
-    void init();
+    World(float chunkSize,const Camera& camera);
+    void init(const glm::i32vec2& screenSize, GLFWwindow *window);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
     void pushTask(ChunkTask task);
+    void setScreenSize(const glm::i32vec2& screenSize);
+    void stop();
 private:
-    Terrains mTerrains;
+    const Camera& mCamera;
+    Light mLight;
+    Material mTerrainMaterial;
+    Material mTerrainShadows;
+    Material mWaterMaterial;
+    Material mGrassMaterial;
+    Skybox mSkybox;
+    Grids mTerrains;
+    Grids mWaters;
+    Grids mGrass;
     Tasks mToDo;
     Chunks mChunks;
-    NoiseGen mNoise;
+    ChunkTexGenerator mNoise;
+    ScreenQuad mScreen;
     glm::i32vec2 mCenter;
+    glm::i32vec2 mScreenSize;
+    FrameBuffer mMirror;
+    FrameBuffer mMain;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;

@@ -8,10 +8,9 @@
 #include "icg_helper.h"
 
 #include "ScalarFrameBuffer.h"
-#include "NoiseGen/NoiseGen.h"
 #include "Camera.h"
 
-#include "Terrain/Terrain.h"
+#include "Grid/Grid.h"
 #include "World.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -26,26 +25,30 @@ int window_height = 720;
 int old_ww;
 int old_wh;
 
-Camera cam({789,234,20},{-M_PI/4,-M_PI/4,-M_PI/4});
+#ifndef M_PI
+#define M_PI 3.1415
+#endif
 
-World world(128);
+Camera cam({789,234,150},{-M_PI/4,-M_PI/4,-M_PI/4});
+
+World world(256,cam);
 
 using namespace glm;
 
-mat4 projection_matrix;
-
 void Init(GLFWwindow* window) {
-    glClearColor(0.70, 0.99, 1.0 /*white*/, 1.0 /*solid*/);
+    float ratio = window_width / (float) window_height;
+    cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
+    cam.setBaseSpeed(160);
+    glClearColor(1.f, 1.f, 1.f /*white*/, 1.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 1000000.0f);
 
-    world.init();
+    world.init({window_width,window_height},window);
 }
 
 void Display() {
@@ -56,7 +59,7 @@ void Display() {
     vec3 cam_look(0.0f, 0.0f, 0.0f);
     vec3 cam_up(0.0f, 0.0f, 1.0f);
     mat4 view = cam.view();//lookAt(cam_pos, cam_look, cam_up);
-    mat4 view_projection = projection_matrix * view;
+    mat4 view_projection = cam.projection() * view;
 
     mat4 scalem = scale(mat4(),vec3(4));
 
@@ -67,15 +70,16 @@ void Display() {
 
 
 
-    world.draw(time,view,projection_matrix);
+    world.draw(time,view,cam.projection());
 }
 
 // Gets called when the windows/framebuffer is resized.
 void resize_callback(GLFWwindow* window, int width, int height) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     float ratio = window_width / (float) window_height;
-    projection_matrix = perspective(45.0f, ratio, 0.1f, 1000000.0f);
+    cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
     glViewport(0, 0, window_width, window_height);
+    world.setScreenSize({width,height});
 }
 
 void ErrorCallback(int error, const char* description) {
@@ -172,6 +176,7 @@ int main(int argc, char *argv[]) {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     /// Render loop & keyboard input
+    glfwSwapInterval(1);
     float lastTime = glfwGetTime();
     while(!glfwWindowShouldClose(window)){
         float time = glfwGetTime();
@@ -181,6 +186,7 @@ int main(int argc, char *argv[]) {
         glfwPollEvents();
         lastTime=time;
     }
+    world.stop();
     /// Close OpenGL window and terminate GLFW
     glfwDestroyWindow(window);
     glfwTerminate();
