@@ -20,7 +20,6 @@ public:
     void setFrameID(long id);
     long frameID() { return mFrameId;}
     const glm::vec2& pos() const {return mOffset;}
-    bool isInFrustum(const glm::mat4 &VP);
     ~Chunk();
 private:
     float mAlpha;

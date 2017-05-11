@@ -15,6 +15,10 @@ uniform mat4 MV;
 uniform mat4 M;
 uniform float alpha;
 
+uniform mat4 l_VP;
+uniform vec3 l_color;
+uniform sampler2D shadowmap;
+
 in vec3 view_dir;
 in vec3 light_dir;
 

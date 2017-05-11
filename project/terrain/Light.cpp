@@ -57,6 +57,7 @@ void Light::unbind() {
 }
 
 void Light::uniforms(Material& m) {
+    m.addTexture(GL_TEXTURE_2D,GL_TEXTURE16,mDepthTexture,"shadowmap");
     glUniformMatrix4fv(m.uniformLocation("l_VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLVP));
     glUniform3f(m.uniformLocation("l_color"),mColor.x,mColor.y,mColor.z);
 }
