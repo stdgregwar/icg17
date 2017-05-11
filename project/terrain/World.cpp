@@ -83,6 +83,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     GLuint depthMiror;
     GLuint texMain;
     GLuint depthMain;
+
     std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     std::tie(texMain,depthMain) = mMain.init(mScreenSize.x,mScreenSize.y);
     // Water material initialization
@@ -149,43 +150,95 @@ void World::update(float dt,const glm::vec2& worldPos) {
     //cout << "taskspf " << mTaskPerFrame << endl;
 }
 
+void World::pushForPos(i32vec2 cpos) {
+    i32vec2 center = mCenter;
+
+    int maxRes = mMaxRes;
+
+    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
+    int res = maxRes >> dist;
+    Chunks::iterator it = mChunks.find(cpos);
+    if(it == mChunks.end()) { //Chunk does not exist
+        vec2 worldOffset = vec2(cpos)*mChunkSize;
+        vec2 size = {mChunkSize,mChunkSize};
+        /*pushTask({
+                     ChunkTask::CREATE,
+                     cpos,
+                     nullptr
+                 });*/
+
+        pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
+                                                        std::forward_as_tuple(cpos),
+                                                        std::forward_as_tuple(worldOffset,size));
+        it = p.first;
+    }
+
+    Chunk* c = &it->second;
+    c->setFrameID(mFrameID);
+    pushTask({
+                 ChunkTask::UPDATE,
+                 cpos,
+                 [this,res](Chunk* c){
+                     return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
+                 }});
+}
+
 void World::updateChunks() {
     i32vec2 center = mCenter;
     mFrameID++;
-    int maxRes = mMaxRes;
-    for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
-        for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
-            i32vec2 cpos = {x,y};
-            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
-            int res = maxRes >> dist;
-            Chunks::iterator it = mChunks.find(cpos);
-            if(it == mChunks.end()) { //Chunk does not exist
-                vec2 worldOffset = vec2(cpos)*mChunkSize;
-                vec2 size = {mChunkSize,mChunkSize};
-                /*pushTask({
-                             ChunkTask::CREATE,
-                             cpos,
-                             nullptr
-                         });*/
 
-                pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
-                                                                std::forward_as_tuple(cpos),
-                                                                std::forward_as_tuple(worldOffset,size));
-                it = p.first;
-            }
-
-            Chunk* c = &it->second;
-            c->setFrameID(mFrameID);
-            pushTask({
-                         ChunkTask::UPDATE,
-                         cpos,
-                         [this,res](Chunk* c){
-                             return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
-                         }});
-            //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
-            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
+    pushForPos(center);
+    int x, y, dx, dy;
+    x = 0;
+    y= 1;
+    dx = 1;
+    dy = 0;
+    for(int radius = 0; radius <= (mViewDistance*2+2)*(mViewDistance*2+2); radius++){
+        if( (x == y) || ((x > 0) && (x== -y)) || ((x < 0) && (x == 1-y) )){
+            int tmp = dy;
+            dy = -dx;
+            dx = tmp;
         }
+
+        i32vec2 cpos = {center.x+x,center.y+y};
+        pushForPos(cpos);
+        x += dx;
+        y += dy;
     }
+
+//    for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
+//        for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
+//            i32vec2 cpos = {x,y};
+//            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
+//            int res = maxRes >> dist;
+//            Chunks::iterator it = mChunks.find(cpos);
+//            if(it == mChunks.end()) { //Chunk does not exist
+//                vec2 worldOffset = vec2(cpos)*mChunkSize;
+//                vec2 size = {mChunkSize,mChunkSize};
+//                /*pushTask({
+//                             ChunkTask::CREATE,
+//                             cpos,
+//                             nullptr
+//                         });*/
+
+//                pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
+//                                                                std::forward_as_tuple(cpos),
+//                                                                std::forward_as_tuple(worldOffset,size));
+//                it = p.first;
+//            }
+
+//            Chunk* c = &it->second;
+//            c->setFrameID(mFrameID);
+//            pushTask({
+//                         ChunkTask::UPDATE,
+//                         cpos,
+//                         [this,res](Chunk* c){
+//                             return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
+//                         }});
+//            //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
+//            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
+//        }
+//    }
     for(Chunks::value_type& p : mChunks) {
         if(p.second.frameID() != mFrameID) {
             pushTask({ChunkTask::DELETE,p.second.pos()/mChunkSize,nullptr});
@@ -211,6 +264,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
 
     mTerrainShadows.unbind();
+
+//    mLight.uniforms(mTerrainMaterial);
 
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
     mMirror.bind();
@@ -271,7 +326,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
 
-    mLight.draw();
+//    mLight.draw();
 }
 
 void World::stop() {

@@ -36,6 +36,7 @@ public:
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
+    void pushForPos(i32vec2 cpos);
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
     void pushTask(ChunkTask task);
     void setScreenSize(const glm::i32vec2& screenSize);
