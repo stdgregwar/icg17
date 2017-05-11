@@ -18,6 +18,8 @@ public:
     void unbind();
     void uniforms(Material& m);
     GLuint depth() const {return mDepthTexture;}
+    const glm::mat4& proj() const {return mLP;}
+    const glm::mat4& view() const {return mLV;}
     void draw() const;
 private:
     ScreenQuad mScreenQuad;
@@ -27,7 +29,9 @@ private:
     glm::vec3 mDirection;
     glm::vec3 mColor;
     glm::vec3 mSize;
-    glm::mat4 mLMVP;
+    glm::mat4 mLVP;
+    glm::mat4 mLV;
+    glm::mat4 mLP;
 };
 
 #endif // LIGHT_H

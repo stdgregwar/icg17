@@ -205,8 +205,8 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mLight.bind(mTerrainShadows,mCamera);
 
     for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-            p.second.drawTerrain(time,view,projection,mTerrainShadows);
+        if((p.first-mCenter).length() < mViewDistance/4) {
+            p.second.drawTerrain(time,mLight.view(),mLight.proj(),mTerrainShadows);
         }
     }
 
@@ -271,7 +271,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
 
-    //mLight.draw();
+    mLight.draw();
 }
 
 void World::stop() {

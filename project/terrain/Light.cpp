@@ -5,7 +5,7 @@ using namespace glm;
 Light::Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color) :
     mSize(shadowSize), mDirection(direction), mColor(color)
 {
-
+    mLP = ortho(-mSize.x/2,mSize.x/2,-mSize.y/2,mSize.y/2,-mSize.z/2,mSize.z/2);
 }
 
 
@@ -44,9 +44,9 @@ void Light::draw() const {
 }
 
 void Light::bind(Material& m, const Camera& cam) {
-    mLMVP = ortho(-mSize.x/2,mSize.x/2,-mSize.y/2,mSize.y/2,-mSize.z/2,mSize.z/2);
-    mLMVP = mLMVP*lookAt(cam.pos(),cam.pos()+mDirection,vec3(0,0,1));
-    glUniformMatrix4fv(m.uniformLocation("l_MVP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLMVP));
+    mLV = lookAt(cam.pos(),cam.pos()+mDirection,vec3(0,0,1));
+    mLVP = mLP*mLV;
+    //glUniformMatrix4fv(m.uniformLocation("l_MVP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLMVP));
     glViewport(0, 0, mTexSize, mTexSize);
     glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -57,6 +57,6 @@ void Light::unbind() {
 }
 
 void Light::uniforms(Material& m) {
-    glUniformMatrix4fv(m.uniformLocation("l_MVP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLMVP));
+    glUniformMatrix4fv(m.uniformLocation("l_VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLVP));
     glUniform3f(m.uniformLocation("l_color"),mColor.x,mColor.y,mColor.z);
 }
