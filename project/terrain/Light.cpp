@@ -21,10 +21,11 @@ bool Light::init(size_t texSize) {
      glGenTextures(1, &mDepthTexture);
      glBindTexture(GL_TEXTURE_2D, mDepthTexture);
      glTexImage2D(GL_TEXTURE_2D, 0,GL_DEPTH_COMPONENT16, texSize, texSize, 0,GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_COMPARE_MODE,GL_COMPARE_REF_TO_TEXTURE);
 
      mScreenQuad.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mDepthTexture,"buffer_color");
 
@@ -32,6 +33,8 @@ bool Light::init(size_t texSize) {
 
      glDrawBuffer(GL_NONE); // No color buffer is drawn to.
      glReadBuffer(GL_NONE);
+
+     glBindFramebuffer(GL_FRAMEBUFFER,0);
 
      // Always check that our framebuffer is ok
      if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

@@ -2,8 +2,9 @@
 
 #pragma include"grass_foccluder.glsl"
 
-out vec4 c;
 
-void main() {
-    c = vec4(0);
+void main(){
+    // Not really needed, OpenGL does it anyway
+    //fragmentdepth = gl_FragCoord.z;
+    gl_FragDepth = gl_FragCoord.z;
 }

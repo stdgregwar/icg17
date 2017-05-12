@@ -17,11 +17,11 @@ uniform float alpha;
 
 uniform mat4 l_VP;
 uniform vec3 l_color;
-uniform sampler2D shadowmap;
+uniform sampler2DShadow shadowmap;
 
 in vec3 view_dir;
 in vec3 light_dir;
-in vec3 shadow_coord;
+in vec4 shadow_coord;
 
 in vData {
     vec2 uv;
@@ -44,6 +44,14 @@ bool sdoor(vec2 spos, float alpha) {
 }
 
 out vec4 color;
+
+vec3 normHom(vec4 v) {
+    return v.xyz/v.w;
+}
+
+bool clipSpace(vec3 v) {
+    return abs(v.x) < 1 && abs(v.y) < 1 && abs(v.z) < 1;
+}
 
 float height(vec2 p) {
     return texture(height_map,p).r;
@@ -73,10 +81,6 @@ vec4 triplanar(vec4 x, vec4 y, vec4 z, vec3 normal) {
 }
 
 void main() {
-    float visibility=1.0;
-    if(texture(shadowmap,shadow_coord.xy).z < shadow_coord.z) {
-        visibility = 1.0;
-    }
     if(sdoor(gl_FragCoord.xy,alpha)) discard;
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
@@ -114,8 +118,21 @@ void main() {
     if(sdoor(gl_FragCoord.xy,fog)) discard;
     color.a = gl_FragCoord.w;
 
-    if(texture(shadowmap,shadow_coord.xy*0.5+vec2(0.5)).z < shadow_coord.z) {
-        color = vec4(shadow_coord,1.0);
+    float bias = max(0.05 * (1.0 - dot(normal, light)), 0.005);
+    // &&
+    if(clipSpace(shadow_coord.xyz)) {
+	//color = vec4(shadow_coord.xy,0,1);
+
+	/*if(shadow_coord.x < 0) {
+	    color = texture(shadowmap,shadow_coord.xy*0.5+vec2(0.5));
+	} else {
+	    color = vec4((shadow_coord.z+1)*0.5,0,0,1);
+	}*/
+
+	float d = texture(shadowmap,vec3(shadow_coord.xy*0.5+vec2(0.5),(shadow_coord.z+1)*0.5-bias));
+	//d = texture(shadowmap,shadow_coord.xyz);
+	color*= clamp(d+0.3,0,1);
+
     }
  }
 

@@ -12,7 +12,7 @@ out vData {
 
 out vec3 view_dir;
 out vec3 light_dir;
-out vec3 shadow_coord;
+out vec4 shadow_coord;
 
 uniform sampler2D height_map;
 
@@ -66,5 +66,5 @@ void main() {
     gl_ClipDistance[0] = dot(vec4(vertex.w_pos,1),vec4(0,0,1,0.1));
     gl_Position = MVP * vec4(pos_3d,1.0);
 
-    shadow_coord = (l_VP * vec4(pos_3d,1.0)).xyz;
+    shadow_coord = l_VP * M * vec4(pos_3d,1.0);
 }

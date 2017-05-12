@@ -11,14 +11,14 @@ using namespace std;
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({512,512,512},{0.5,2,-1},{1,1,1})
+    mLight({2048,2048,4096},{3,3,-1},{1,1,1})
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(1024);
+    mLight.init(4096);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -206,39 +206,6 @@ void World::updateChunks() {
         y += dy;
     }
 
-//    for(int x = center.x-mViewDistance; x <= center.x+mViewDistance; x++) {
-//        for(int y = center.y-mViewDistance; y <= center.y+mViewDistance; y++) {
-//            i32vec2 cpos = {x,y};
-//            int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
-//            int res = maxRes >> dist;
-//            Chunks::iterator it = mChunks.find(cpos);
-//            if(it == mChunks.end()) { //Chunk does not exist
-//                vec2 worldOffset = vec2(cpos)*mChunkSize;
-//                vec2 size = {mChunkSize,mChunkSize};
-//                /*pushTask({
-//                             ChunkTask::CREATE,
-//                             cpos,
-//                             nullptr
-//                         });*/
-
-//                pair<Chunks::iterator,bool> p = mChunks.emplace(std::piecewise_construct,
-//                                                                std::forward_as_tuple(cpos),
-//                                                                std::forward_as_tuple(worldOffset,size));
-//                it = p.first;
-//            }
-
-//            Chunk* c = &it->second;
-//            c->setFrameID(mFrameID);
-//            pushTask({
-//                         ChunkTask::UPDATE,
-//                         cpos,
-//                         [this,res](Chunk* c){
-//                             return c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
-//                         }});
-//            //it->second.update(res,mFrameID,mNoise,mTerrains.at(res));
-//            //c->updateRes(res,mNoise,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
-//        }
-//    }
     for(Chunks::value_type& p : mChunks) {
         if(p.second.frameID() != mFrameID) {
             pushTask({ChunkTask::DELETE,p.second.pos()/mChunkSize,nullptr});
