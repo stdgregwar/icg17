@@ -11,7 +11,7 @@ using namespace std;
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({512,512,512},{1,1,-1},{1,1,1})
+    mLight({512,512,512},{0.5,2,-1},{1,1,1})
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -262,10 +262,10 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
             p.second.drawTerrain(time,mLight.view(),mLight.proj(),mTerrainShadows);
         }
     }
-
+    mLight.uniforms(mTerrainMaterial);
+    mLight.unbind();
     mTerrainShadows.unbind();
 
-//    mLight.uniforms(mTerrainMaterial);
 
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
     mMirror.bind();
@@ -326,7 +326,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
 
-//    mLight.draw();
+    mLight.draw();
 }
 
 void World::stop() {

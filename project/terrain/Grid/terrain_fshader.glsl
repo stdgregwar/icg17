@@ -21,6 +21,7 @@ uniform sampler2D shadowmap;
 
 in vec3 view_dir;
 in vec3 light_dir;
+in vec3 shadow_coord;
 
 in vData {
     vec2 uv;
@@ -72,6 +73,10 @@ vec4 triplanar(vec4 x, vec4 y, vec4 z, vec3 normal) {
 }
 
 void main() {
+    float visibility=1.0;
+    if(texture(shadowmap,shadow_coord.xy).z < shadow_coord.z) {
+        visibility = 1.0;
+    }
     if(sdoor(gl_FragCoord.xy,alpha)) discard;
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
@@ -108,4 +113,9 @@ void main() {
     //color = mix(vec4(1),color,fog);
     if(sdoor(gl_FragCoord.xy,fog)) discard;
     color.a = gl_FragCoord.w;
-}
+
+    if(texture(shadowmap,shadow_coord.xy*0.5+vec2(0.5)).z < shadow_coord.z) {
+        color = vec4(shadow_coord,1.0);
+    }
+ }
+
