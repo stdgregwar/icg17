@@ -159,6 +159,7 @@ void main()
 	      vec3 bpos = vertices[0].w_pos + v1 * i + v2 * j;
 	      vec3 normal = normal0 * (1-jfa) * (1-ifa) + normal1 * ifa + normal2 * jfa;
 	      normal = normalize(normal);
+	      normal.xy *= -1.1;
 	      vertex.normal = (V*vec4(normal,0)).xyz;
 	      float normalFac = pow(dot(normal,vec3(0,0,1)),8);
 	      float bdist = distance(bpos,vPos);

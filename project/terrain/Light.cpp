@@ -53,8 +53,8 @@ void Light::draw() const {
 void Light::bind(Material& m, const Camera& cam) {
     vec3 pos = cam.pos();
     pos.z = 0;
-    pos.x -= mDirection.x*mSize.x/16;
-    pos.y -= mDirection.y*mSize.y/16;
+    //pos.x -= mDirection.x*mSize.x/128;
+    //pos.y -= mDirection.y*mSize.y/128;
     mLV = lookAt(pos,pos+mDirection,vec3(0,0,1));
     mLVP = mLP*mLV;
     //glUniformMatrix4fv(m.uniformLocation("l_MVP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLMVP));

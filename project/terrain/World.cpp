@@ -12,14 +12,14 @@ using namespace std;
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({4096,1024,4096},{3,3,-1},{2,1.8,1})
+    mLight({8192,1024,8192},{3,3,-1},{2,1.8,1})
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(2048);
+    mLight.init(4096);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -230,7 +230,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mLight.bind(mTerrainShadows,mCamera);
 
     for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < mViewDistance/4) {
+        if((p.first-mCenter).length() < 3) {
             p.second.drawTerrain(time,mLight.view(),mLight.proj(),mTerrainShadows);
         }
     }
