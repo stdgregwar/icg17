@@ -101,7 +101,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 void World::update(float dt,const glm::vec2& worldPos) {
     static float time = 0;
     time += dt;
-    mLight.setDirection(vec3(3*cos(time),3*sin(time),-1));
+    //mLight.setDirection(vec3(3*cos(time),3*sin(time),-1));
 
     i32vec2 center = worldPos/mChunkSize;
     int remaining = mToDo.size();
