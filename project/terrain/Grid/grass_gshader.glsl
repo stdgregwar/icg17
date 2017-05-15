@@ -1,7 +1,7 @@
 #version 330
 
 
-#define amount 12
+#define amount 8
 #define dist 300.f
 #define maxbdist 60.f
 #define trans 20.f
@@ -9,7 +9,7 @@
 #define gtiles 5
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices=102) out;
+layout(triangle_strip, max_vertices=60) out;
 
 in vData {
     vec2 uv;
@@ -23,22 +23,18 @@ out vData {
     vec3 color;
     float alpha;
     vec3 normal;
+    vec4 shadow_pos;
 } vertex;
 
 uniform mat4 VP;
+uniform mat4 V;
 uniform mat4 iV;
+uniform mat4 l_VP;
 uniform sampler2D grass_col;
 
 uniform float time;
 
-float rand(vec2 co)
-{
-   return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-vec2 rand2(vec2 p) {
-    return vec2(rand(p),rand(p.yx));
-}
+#include rand.glsl
 
 vec2 uvFrame(vec2 base, int i) {
     return vec2(float(i)/gtiles + base.x/gtiles,base.y);
@@ -55,21 +51,25 @@ void patchAt(vec3 bpos, vec3 dir) {
     vec3 pos = bpos-side;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0,0),i);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos+side;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(1,0),i);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos-side+top;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0,1),i);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos+side+top;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(1,1),i);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     EndPrimitive();
@@ -87,21 +87,25 @@ void bladeAt(vec3 bpos,vec3 dir,float size) {
     vertex.uv = uvFrame(vec2(0.5,0),0);
     vec3 pos = bpos;
     gl_Position = VP * vec4(pos,1.0);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos + side + top + wind*0.5f;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,0.5),0);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos -side + top + wind*0.5f;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,0.5),0);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos  + 2*top + wind*2;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,1),0);
+    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     EndPrimitive();
@@ -117,6 +121,7 @@ void main()
   vec3 normal0 = vertices[0].normal_m;
   vec3 normal1 = vertices[1].normal_m;
   vec3 normal2 = vertices[2].normal_m;
+
 
 
 
@@ -154,6 +159,7 @@ void main()
 	      vec3 bpos = vertices[0].w_pos + v1 * i + v2 * j;
 	      vec3 normal = normal0 * (1-jfa) * (1-ifa) + normal1 * ifa + normal2 * jfa;
 	      normal = normalize(normal);
+	      vertex.normal = (V*vec4(normal,0)).xyz;
 	      float normalFac = pow(dot(normal,vec3(0,0,1)),8);
 	      float bdist = distance(bpos,vPos);
 	      if(bdist < dist && bpos.z > 0 && bpos.z < 70 && normalFac > 0.3f) {

@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "ShaderBuilder.h"
 
 Material::Material() : mProgramId(0) , mULocCache(1024,[this](const std::string uname){
     return glGetUniformLocation(mProgramId,uname.c_str());
@@ -11,7 +12,7 @@ Material::Material(const std::string& vshader, const std::string& fshader) : Mat
 }
 
 void Material::init(const string& vshader, const string& fshader) {
-    mProgramId = icg_helper::LoadShaders(vshader.c_str(),
+    mProgramId = ShaderBuilder::makeShader(vshader.c_str(),
                                               fshader.c_str());
 
     mTextures.clear();
@@ -22,7 +23,7 @@ void Material::init(const string& vshader, const string& fshader) {
 }
 
 void Material::init(const string& vshader, const string& fshader, const string& gshader) {
-    mProgramId = icg_helper::LoadShaders(vshader.c_str(),
+    mProgramId = ShaderBuilder::makeShader(vshader.c_str(),
                                               fshader.c_str(),gshader.c_str());
 
     mTextures.clear();

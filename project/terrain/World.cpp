@@ -2,6 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include "ShaderBuilder.h"
 
 using namespace glm;
 using namespace std;
@@ -9,7 +10,7 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
     mLight({4096,1024,4096},{3,3,-1},{2,1.8,1})
 {
@@ -237,6 +238,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mLight.unbind();
     mTerrainShadows.unbind();
 
+    mLight.uniforms(mGrassMaterial);
 
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
     mMirror.bind();
@@ -252,7 +254,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     }
     mTerrainMaterial.unbind();
     glDisable(GL_CLIP_DISTANCE0);
-    /*glDisable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < mViewDistance/4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
@@ -260,7 +262,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mGrassMaterial.unbind();
-    glEnable(GL_CULL_FACE);*/
+    glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     mMirror.unbind();
 
@@ -273,7 +275,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mTerrainMaterial.unbind();
-    /*glDisable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
@@ -281,7 +283,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
         }
     }
     mGrassMaterial.unbind();
-    glEnable(GL_CULL_FACE);*/
+    glEnable(GL_CULL_FACE);
     mMain.unbind();
 
     //mMain.blit(GL_BACK);

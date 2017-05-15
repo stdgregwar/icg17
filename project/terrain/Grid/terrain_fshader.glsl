@@ -16,7 +16,6 @@ uniform mat4 M;
 uniform mat4 V;
 uniform float alpha;
 
-uniform mat4 l_VP;
 uniform vec3 l_color;
 uniform sampler2DShadow shadowmap;
 
@@ -31,64 +30,19 @@ in vData {
     float base_color;
 } vertex;
 
-const mat4 thresholdMatrix = mat4(
-            vec4(1.f,13.f,4.f,16.f),
-            vec4(9.f,5.f,12.f,8.f),
-            vec4(3.f,15.f,2.f,14.f),
-            vec4(11.f,7.f,10.f,6.f)
-        ) / 17.f;
+#include sdoor.glsl
 
-float rand(vec2 co)
-{
-   return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-vec2 rand2(vec2 p) {
-    return vec2(rand(p),rand(p.yx));
-}
-
-bool sdoor(vec2 spos, float alpha) {
-    int x = int(gl_FragCoord.x);
-    int y = int(gl_FragCoord.y);
-    return alpha - thresholdMatrix[x % 4][y % 4] < 0;
-}
+#include rand.glsl
 
 out vec4 color;
-
-vec3 normHom(vec4 v) {
-    return v.xyz/v.w;
-}
-
-bool clipSpace(vec3 v) {
-    return abs(v.x) < 1 && abs(v.y) < 1 && abs(v.z) < 1;
-}
 
 float height(vec2 p) {
     return texture(height_map,p).r;
 }
 
-vec3 fdiff(vec2 p) {
-    float d = 0.5f/(res);
-    float hL = height(p + vec2(d,0));
-    float hR = height(p - vec2(d,0));
-    float hD = height(p + vec2(0,d));
-    float hU = height(p - vec2(0,d));
+#include utils.glsl
 
-    vec3 norm;
-    // deduce terrain normal
-    norm.x = hL - hR;
-    norm.y = hD - hU;
-    norm.z = 900*d;
-    return normalize(norm);
-}
-
-vec4 triplanar(vec4 x, vec4 y, vec4 z, vec3 normal) {
-    float xf = abs(dot(normal,vec3(1,0,0)));
-    float yf = abs(dot(normal,vec3(0,1,0)));
-    float zf = pow(abs(dot(normal,vec3(0,0,1))),3);
-    float t = 1.f/(xf+yf+zf);
-    return x*xf*t+y*yf*t+z*zf*t;
-}
+#include shadows.glsl
 
 void main() {
     if(sdoor(gl_FragCoord.xy,alpha)) discard;
@@ -124,23 +78,7 @@ void main() {
     vec4 rocky = texture(cliffs,vertex.w_pos.xz*0.025);
     color = triplanar(rockx,rocky,color,normal_m);
 
-
-
-    float bias = max(0.005 * (1.0 - dot(normal, light)), 0.0005);
-    // &&
-    if(clipSpace(shadow_coord.xyz)) {
-
-        vec3 fcoords = vec3(shadow_coord.xy*0.5+vec2(0.5)+0.0006*rand2(gl_FragCoord.xy),(shadow_coord.z+1)*0.5-bias);
-        float d = texture(shadowmap,fcoords);
-	//d = texture(shadowmap,shadow_coord.xyz);
-        float nfac = dot(normal,light);
-        float dfac = 1-clamp(-2+length(shadow_coord.xy)*4,0,1);
-        //d += 0.5;
-        d *= (1-nfac*0.5);
-        //d *= 1-dfac;
-        diff = mix(diff, diff*clamp(d,0,1), dfac);
-        //color.xyz = vec3(0,1,0);
-    }
+    diff = diffFromShadows(shadowmap,shadow_coord,diff, normal, light);
 
     color *= vec4(0.2,0.3,0.3,1)+vec4(l_color,1)*diff;
     float fog = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);

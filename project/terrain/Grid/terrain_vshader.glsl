@@ -28,20 +28,7 @@ float height(vec2 p) {
     return texture(height_map,p).r;
 }
 
-vec3 fdiff(vec2 p) {
-    float d = 0.5f/(res);
-    float hL = height(p - vec2(d,0));
-    float hR = height(p + vec2(d,0));
-    float hD = height(p - vec2(0,d));
-    float hU = height(p + vec2(0,d));
-
-    vec3 norm;
-    // deduce terrain normal
-    norm.x = hL - hR;
-    norm.y = hD - hU;
-    norm.z = 900*d;
-    return normalize(norm);
-}
+#include utils.glsl
 
 void main() {
     vertex.uv = (position);
