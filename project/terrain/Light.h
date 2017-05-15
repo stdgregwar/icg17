@@ -18,6 +18,7 @@ public:
     void unbind();
     void uniforms(Material& m);
     GLuint depth() const {return mDepthTexture;}
+    void setDirection(const glm::vec3& dir);
     const glm::mat4& proj() const {return mLP;}
     const glm::mat4& view() const {return mLV;}
     void draw() const;

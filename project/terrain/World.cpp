@@ -11,14 +11,14 @@ using namespace std;
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({2048,2048,4096},{3,3,-1},{1,1,1})
+    mLight({4096,1024,4096},{3,3,-1},{2,1.8,1})
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(4096);
+    mLight.init(2048);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -99,6 +99,10 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
+    static float time = 0;
+    time += dt;
+    mLight.setDirection(vec3(3*cos(time),3*sin(time),-1));
+
     i32vec2 center = worldPos/mChunkSize;
     int remaining = mToDo.size();
     //mTaskPerFrame = std::max(8,remaining / 30);
@@ -155,7 +159,7 @@ void World::pushForPos(i32vec2 cpos) {
 
     int maxRes = mMaxRes;
 
-    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),5);
+    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
     int res = maxRes >> dist;
     Chunks::iterator it = mChunks.find(cpos);
     if(it == mChunks.end()) { //Chunk does not exist
@@ -293,7 +297,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mWaterMaterial.unbind();
     glEnable(GL_CULL_FACE);
 
-    mLight.draw();
+    //mLight.draw();
 }
 
 void World::stop() {

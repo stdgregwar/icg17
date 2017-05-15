@@ -5,9 +5,12 @@ using namespace glm;
 Light::Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color) :
     mSize(shadowSize), mDirection(direction), mColor(color)
 {
-    mLP = ortho(-mSize.x/2,mSize.x/2,-mSize.y/2,mSize.y/2,-mSize.z/2,mSize.z/2);
+    mLP = ortho(-mSize.x/2,mSize.x/2,-mSize.y/2,mSize.y/2,-mSize.z/4,3*mSize.z/4);
 }
 
+void Light::setDirection(const glm::vec3& dir) {
+    mDirection = dir;
+}
 
 bool Light::init(size_t texSize) {
     mTexSize = texSize;
@@ -48,7 +51,11 @@ void Light::draw() const {
 }
 
 void Light::bind(Material& m, const Camera& cam) {
-    mLV = lookAt(cam.pos(),cam.pos()+mDirection,vec3(0,0,1));
+    vec3 pos = cam.pos();
+    pos.z = 0;
+   // pos.x -= mDirection.x*200.f;
+    //pos.y -= mDirection.x*200.f;
+    mLV = lookAt(pos,pos+mDirection,vec3(0,0,1));
     mLVP = mLP*mLV;
     //glUniformMatrix4fv(m.uniformLocation("l_MVP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLMVP));
     glViewport(0, 0, mTexSize, mTexSize);
@@ -63,5 +70,8 @@ void Light::unbind() {
 void Light::uniforms(Material& m) {
     m.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,mDepthTexture,"shadowmap");
     glUniformMatrix4fv(m.uniformLocation("l_VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLVP));
+    glUniformMatrix4fv(m.uniformLocation("l_V"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLV));
+    glUniformMatrix4fv(m.uniformLocation("l_iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(mLV)));
+    glUniformMatrix4fv(m.uniformLocation("l_P"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLV));
     glUniform3f(m.uniformLocation("l_color"),mColor.x,mColor.y,mColor.z);
 }

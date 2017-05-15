@@ -13,6 +13,7 @@ uniform float time;
 uniform float res;
 uniform mat4 MV;
 uniform mat4 M;
+uniform mat4 V;
 uniform float alpha;
 
 uniform mat4 l_VP;
@@ -36,6 +37,15 @@ const mat4 thresholdMatrix = mat4(
             vec4(3.f,15.f,2.f,14.f),
             vec4(11.f,7.f,10.f,6.f)
         ) / 17.f;
+
+float rand(vec2 co)
+{
+   return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+vec2 rand2(vec2 p) {
+    return vec2(rand(p),rand(p.yx));
+}
 
 bool sdoor(vec2 spos, float alpha) {
     int x = int(gl_FragCoord.x);
@@ -68,7 +78,7 @@ vec3 fdiff(vec2 p) {
     // deduce terrain normal
     norm.x = hL - hR;
     norm.y = hD - hU;
-    norm.z = 1200*d;
+    norm.z = 900*d;
     return normalize(norm);
 }
 
@@ -85,6 +95,8 @@ void main() {
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
     vec3 normal = normalize((MV*vec4(n,0)).xyz);
+    vec3 gnormal = normalize((MV*vec4(vertex.normal_m,0)).xyz);
+    //normal = gnormal;
     vec3 light = normalize(light_dir);
     vec3 view = normalize(view_dir);
 
@@ -112,27 +124,28 @@ void main() {
     vec4 rocky = texture(cliffs,vertex.w_pos.xz*0.025);
     color = triplanar(rockx,rocky,color,normal_m);
 
-    color *= vec4(0.2,0.3,0.3,1)+vec4(1.1)*diff;
+
+
+    float bias = max(0.005 * (1.0 - dot(normal, light)), 0.0005);
+    // &&
+    if(clipSpace(shadow_coord.xyz)) {
+
+        vec3 fcoords = vec3(shadow_coord.xy*0.5+vec2(0.5)+0.0006*rand2(gl_FragCoord.xy),(shadow_coord.z+1)*0.5-bias);
+        float d = texture(shadowmap,fcoords);
+	//d = texture(shadowmap,shadow_coord.xyz);
+        float nfac = dot(normal,light);
+        float dfac = 1-clamp(-2+length(shadow_coord.xy)*4,0,1);
+        //d += 0.5;
+        d *= (1-nfac*0.5);
+        //d *= 1-dfac;
+        diff = mix(diff, diff*clamp(d,0,1), dfac);
+        //color.xyz = vec3(0,1,0);
+    }
+
+    color *= vec4(0.2,0.3,0.3,1)+vec4(l_color,1)*diff;
     float fog = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);
     //color = mix(vec4(1),color,fog);
     if(sdoor(gl_FragCoord.xy,fog)) discard;
     color.a = gl_FragCoord.w;
-
-    float bias = max(0.05 * (1.0 - dot(normal, light)), 0.005);
-    // &&
-    if(clipSpace(shadow_coord.xyz)) {
-	//color = vec4(shadow_coord.xy,0,1);
-
-	/*if(shadow_coord.x < 0) {
-	    color = texture(shadowmap,shadow_coord.xy*0.5+vec2(0.5));
-	} else {
-	    color = vec4((shadow_coord.z+1)*0.5,0,0,1);
-	}*/
-
-	float d = texture(shadowmap,vec3(shadow_coord.xy*0.5+vec2(0.5),(shadow_coord.z+1)*0.5-bias));
-	//d = texture(shadowmap,shadow_coord.xyz);
-	color*= clamp(d+0.3,0,1);
-
-    }
  }
 
