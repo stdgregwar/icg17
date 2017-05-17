@@ -41,7 +41,7 @@ void Init(GLFWwindow* window) {
     cam.setBaseSpeed(250);
     glClearColor(1.f, 1.f, 1.f /*white*/, 0.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_MULTISAMPLE);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_CULL_FACE);
@@ -54,23 +54,8 @@ void Init(GLFWwindow* window) {
 void Display() {
     glViewport(0,0,window_width,window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    vec3 cam_pos(5.0f, 5.0f, 5.0f);
-    vec3 cam_look(0.0f, 0.0f, 0.0f);
-    vec3 cam_up(0.0f, 0.0f, 1.0f);
-    mat4 view = cam.view();//lookAt(cam_pos, cam_look, cam_up);
-    mat4 view_projection = cam.projection() * view;
-
-    mat4 scalem = scale(mat4(),vec3(4));
-
     float time = 0.3*glfwGetTime();
-    glm::vec2 offset = {time,time};
-    offset *= 5.f;
-    offset += glm::vec2{-1000.f,231.f};
-
-
-
-    world.draw(time,view,cam.projection());
+    world.draw(time,cam.view(),cam.projection());
 }
 
 // Gets called when the windows/framebuffer is resized.

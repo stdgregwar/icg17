@@ -14,7 +14,7 @@ class Light
 public:
     Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color);
     bool init(size_t texSize = 1024);
-    void bind(Material& m, const Camera& cam);
+    void bind(const Camera& cam);
     void unbind();
     void uniforms(Material& m);
     GLuint depth() const {return mDepthTexture;}

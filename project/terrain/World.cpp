@@ -10,9 +10,9 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({8192,1024,8192},{3,3,-1},{2,2,1}),
+    mLight({8192,1024,8192},{3,3,-1},{2,1,0.5}),
     mRenderGrass(true),
     mRenderTerrain(true),
     mRenderReflexion(true),
@@ -59,6 +59,10 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     mTerrainMaterial.addTexture(GL_TEXTURE5,"cliffs.jpg","cliffs",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
+
+    mTerrainMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,mLight.depth(),"shadowmap");
+    mGrassMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,mLight.depth(),"shadowmap");
+
     mNoise.init(window,"NoiseGen_vshader.glsl","NoiseGen_fshader.glsl");
 
     GLuint skyBoxTex = mSkybox.init();
@@ -112,6 +116,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 
     mRays.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mFront.diffuse(),"buffer_color");
     mRays.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,mFront.depth(),"buffer_depth");
+    mRays.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE2,mLight.depth(),"shadowmap");
 
     mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mFront.diffuse(),"diffuse");
     mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,mHalf.diffuse(),"overlay");
@@ -178,7 +183,7 @@ void World::pushForPos(i32vec2 cpos) {
 
     int maxRes = mMaxRes;
 
-    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
+    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),6);
     int res = maxRes >> dist;
     Chunks::iterator it = mChunks.find(cpos);
     if(it == mChunks.end()) { //Chunk does not exist
@@ -242,23 +247,25 @@ void World::pushTask(ChunkTask task) {
 }
 
 void World::drawShadows(float time,const glm::mat4& view, const glm::mat4& projection){
-    mTerrainShadows.bind();
-    mLight.bind(mTerrainShadows,mCamera);
 
+    mLight.bind(mCamera);
+    mTerrainShadows.bind();
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < 3) {
             p.second.drawTerrain(time,mLight.view(),mLight.proj(),mTerrainShadows);
         }
     }
-    mLight.uniforms(mTerrainMaterial);
-    mLight.uniforms(mGrassMaterial);
-    mLight.unbind();
     mTerrainShadows.unbind();
+    mLight.unbind();
+
+
+
 }
 
 void World::drawGrass(float time, const glm::mat4& view, const glm::mat4& projection) {
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
+    mLight.uniforms(mGrassMaterial);
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
             p.second.drawTerrain(time,view,projection,mGrassMaterial);
@@ -270,6 +277,7 @@ void World::drawGrass(float time, const glm::mat4& view, const glm::mat4& projec
 
 void World::drawTerrain(float time, const glm::mat4& view, const glm::mat4& projection) {
     mTerrainMaterial.bind();
+    mLight.uniforms(mTerrainMaterial);
     for(Chunks::value_type& p : mChunks) {
         if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
             p.second.drawTerrain(time,view,projection,mTerrainMaterial);
@@ -320,14 +328,16 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
 void World::draw(float time, const mat4 &view, const mat4 &projection) {
 
 
-    if(mRenderShadow) drawShadows(time,view,projection);
 
+
+    if(mRenderSkybox) mSkybox.draw(view, projection);
+    if(mRenderShadow) drawShadows(time,view,projection);
 
     if(mRenderReflexion) drawReflexions(time,view,projection);
 
     mMain.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if(mRenderSkybox) mSkybox.draw(view, projection);
+
     if(mRenderTerrain) drawTerrain(time,view,projection);
     if(mRenderGrass) drawGrass(time, view,projection);
     mMain.unbind();
@@ -335,26 +345,28 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
 
     mFront.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //mMain.blit(mHalf);
-    mScreen.draw(view,projection);
+    mMain.blit(mFront);
+    //mScreen.draw(view,projection);
     if(mRenderWater) drawWater(time,view,projection);
     mFront.unbind();
 
 
     mHalf.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mLight.uniforms(mRays.material());
+
+    mRays.material().bind();
     glUniformMatrix4fv(mRays.material().uniformLocation("iP"),ONE,DONT_TRANSPOSE,glm::value_ptr(inverse(projection)));
     glUniformMatrix4fv(mRays.material().uniformLocation("iV"),ONE,DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
     glUniform1f(mRays.material().uniformLocation("width"),mHalf.width);
     glUniform1f(mRays.material().uniformLocation("height"),mHalf.height);
+    mLight.uniforms(mRays.material());
     mRays.draw(view,projection);
     mHalf.unbind();
 
     //mFront.blit(GL_BACK);
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
     mCompositor.draw(view,projection);
-    //mLight.draw();
+    mLight.draw();
 }
 
 void World::stop() {
