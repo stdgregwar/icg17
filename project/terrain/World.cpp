@@ -100,6 +100,11 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mFront.init(mScreenSize.x,mScreenSize.y);
     mHalf.init(mScreenSize.x/4,mScreenSize.y/4);
 
+    mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
+    mRays.init("vbuffercopy.glsl","godrays.glsl");
+    mCompositor.init("vbuffercopy.glsl","compose.glsl");
+
+
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
@@ -107,9 +112,8 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal2.png","waterNormal",GL_LINEAR_MIPMAP_LINEAR);
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,texMain,"refract_col");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,depthMain,"refract_depth");
-    mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
-    mRays.init("vbuffercopy.glsl","godrays.glsl");
-    mCompositor.init("vbuffercopy.glsl","compose.glsl");
+    mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE5,mLight.depth(),"shadowmap");
+
 
     mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,texMain,"buffer_color");
     mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,depthMain,"buffer_depth");
