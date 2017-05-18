@@ -8,7 +8,9 @@
 #include "icg_helper.h"
 
 #include "ScalarFrameBuffer.h"
-#include "Camera.h"
+#include "CameraFreefly.h"
+#include "CameraBezier.h"
+
 
 #include "Grid/Grid.h"
 #include "World.h"
@@ -29,7 +31,9 @@ int old_wh;
 #define M_PI 3.1415
 #endif
 
-Camera cam({789,234,150},{-M_PI/4,-M_PI/4,-M_PI/4});
+CameraBezier cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},{{0.f,0.f,300.f},{5000.f,5000.f,200.f},{10000.f,10000.f,500.f},{-5000.f,-5000.f,700.f},{0.f,0.f,300.f}},{{0.0f,0.0f,0.0f}});
+//CameraFreefly cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4});
+
 
 World world(256,cam);
 
@@ -67,8 +71,6 @@ void Display() {
     glm::vec2 offset = {time,time};
     offset *= 5.f;
     offset += glm::vec2{-1000.f,231.f};
-
-
 
     world.draw(time,view,cam.projection());
 }
