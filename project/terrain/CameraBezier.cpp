@@ -10,8 +10,8 @@
 using namespace glm;
 using namespace std;
 
-CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vector<vec3> &pathControlPoints, const vector<vec3>& rotationControlPoints) : Camera(pos,orientation), mSSpeed(20), mLSpeed(0),
-    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(pathControlPoints), mBezierRotate(rotationControlPoints)
+CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vector<VecAndDiff> &pathControlPoints) : Camera(pos,orientation), mSSpeed(20), mLSpeed(0),
+    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(pathControlPoints)
 {
 
 }
@@ -23,6 +23,8 @@ void CameraBezier::setBaseSpeed(float speed) {
 void CameraBezier::update(float delta_s) {
     static float time = 0;
     time += delta_s;
+    VecAndDiff point = mBezierPath.curveAtTime(time*0.01);
+//    mTargetRotation = point.d;
     mRotation = mRotation + (mTargetRotation - mRotation) * std::min(10.f * delta_s,1.f);
 
     vec3& rot = mRotation;
@@ -35,7 +37,7 @@ void CameraBezier::update(float delta_s) {
     vec3 wspeed = look*mLSpeed.x + side*mLSpeed.y;
 
     mTargetPosition += wspeed*mSSpeed*delta_s;
-    mTargetPosition = mBezierPath.curveAtTime(time*0.01);
+    mTargetPosition = point.v;
     mPosition = mPosition + (mTargetPosition - mPosition) * std::min(10.f * delta_s,1.f);
     mView = lookAt(mPosition,mPosition+look,up);
 }

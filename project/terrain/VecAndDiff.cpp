@@ -9,6 +9,10 @@ VecAndDiff VecAndDiff::operator+(const VecAndDiff& other) const {
     return VecAndDiff(other.v + v, other.d + d);
 }
 
+VecAndDiff VecAndDiff::operator-(const VecAndDiff& other) const {
+    return VecAndDiff(other.v - v, other.d - d);
+}
+
 VecAndDiff VecAndDiff::operator*(float s) const {
     return VecAndDiff(v*s,d*s);
 }
