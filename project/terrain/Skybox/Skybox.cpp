@@ -76,7 +76,7 @@ GLuint Skybox::init() {
 void Skybox::draw(const glm::mat4 &view, const glm::mat4 &projection) {
     glm::mat4 newView = view;
     newView[3] = glm::vec4(0,0,0,1);
-    //glDepthMask(GL_FALSE);
+    glDepthMask(GL_FALSE);
     glBindVertexArray(skyboxVAO);
     mMaterial.bind();
     glUniformMatrix4fv(mMaterial.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection * newView));
@@ -84,6 +84,6 @@ void Skybox::draw(const glm::mat4 &view, const glm::mat4 &projection) {
     mMaterial.unbind();
     glBindVertexArray(0);
     glClear(GL_DEPTH_BUFFER_BIT);
-    //glDepthMask(GL_TRUE);
+    glDepthMask(GL_TRUE);
 }
 

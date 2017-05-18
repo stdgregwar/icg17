@@ -25,7 +25,7 @@ World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mVie
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(4096);
+    mLight.init(1024);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -334,7 +334,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
 
 
 
-    if(mRenderSkybox) mSkybox.draw(view, projection);
+
     if(mRenderShadow) drawShadows(time,view,projection);
 
     if(mRenderReflexion) drawReflexions(time,view,projection);
@@ -352,6 +352,7 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     mMain.blit(mFront);
     //mScreen.draw(view,projection);
     if(mRenderWater) drawWater(time,view,projection);
+    if(mRenderSkybox) mSkybox.draw(view, projection);
     mFront.unbind();
 
 

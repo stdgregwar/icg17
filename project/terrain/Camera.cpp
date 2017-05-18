@@ -114,8 +114,8 @@ bool Camera::inFrustum(const glm::vec2& pos, const float &chunkSize) const {
         mFrustum[i+1] = glm::normalize(mFrustum[i+1]);
     }
 
-    glm::vec3 mins = glm::vec3(pos,0);
-    glm::vec3 maxs = mins + glm::vec3(chunkSize);
+    glm::vec3 mins = glm::vec3(pos,-4096);
+    glm::vec3 maxs = mins + glm::vec3(chunkSize,chunkSize,8192);
     glm::vec3 vmin, vmax;
 
     for(int i =0; i < 6; i++) {

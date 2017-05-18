@@ -26,7 +26,7 @@ const float density = 1;
 void main(void) {
     float depth = texture(buffer_depth,uv).r;
     float d = 0;
-    const int max = 100;
+    const int max = 50;
     float bias = 0.003*depth;
     vec3 base = worldFrom(uv,depth,iP,iV);
     vec3 last = base;
