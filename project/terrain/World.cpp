@@ -10,9 +10,9 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({8192,1024,8192},{3,3,-1},{2,1,0.5}),
+    mLight({2*8192,1024,2*8192},{3,3,-1},{2,1,0.5}),
     mRenderGrass(true),
     mRenderTerrain(true),
     mRenderReflexion(true),
@@ -25,7 +25,7 @@ World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mVie
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(1024);
+    mLight.init(4096);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -187,7 +187,7 @@ void World::pushForPos(i32vec2 cpos) {
 
     int maxRes = mMaxRes;
 
-    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),4);
+    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),6);
     int res = maxRes >> dist;
     Chunks::iterator it = mChunks.find(cpos);
     if(it == mChunks.end()) { //Chunk does not exist
