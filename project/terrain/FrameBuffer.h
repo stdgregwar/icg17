@@ -14,6 +14,8 @@ public:
     // warning: overrides viewport!!
     void bind();
     void blit(GLuint fb);
+    void blit(const FrameBuffer& other);
+    GLuint id() const {return mFramebufferObjectId;}
     void unbind();
     std::pair<int,int> init(int imageWidth, int imageHeight, bool useInterpolation = true);
     GLuint diffuse() const {return mColorTextureId;}

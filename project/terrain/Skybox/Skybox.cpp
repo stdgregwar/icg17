@@ -83,6 +83,7 @@ void Skybox::draw(const glm::mat4 &view, const glm::mat4 &projection) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
     mMaterial.unbind();
     glBindVertexArray(0);
+    glClear(GL_DEPTH_BUFFER_BIT);
     glDepthMask(GL_TRUE);
 }
 

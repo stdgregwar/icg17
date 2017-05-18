@@ -50,7 +50,7 @@ void Light::draw() const {
     mScreenQuad.draw();
 }
 
-void Light::bind(Material& m, const Camera& cam) {
+void Light::bind(const Camera& cam) {
     vec3 pos = cam.pos();
     pos.z = 0;
     //pos.x -= mDirection.x*mSize.x/128;
@@ -68,7 +68,7 @@ void Light::unbind() {
 }
 
 void Light::uniforms(Material& m) {
-    m.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,mDepthTexture,"shadowmap");
+    //m.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,depth(),"shadowmap");
     glUniformMatrix4fv(m.uniformLocation("l_VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLVP));
     glUniformMatrix4fv(m.uniformLocation("l_V"), ONE, DONT_TRANSPOSE,glm::value_ptr(mLV));
     glUniformMatrix4fv(m.uniformLocation("l_iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(mLV)));

@@ -106,6 +106,7 @@ GLuint Material::addTexture(GLuint target, GLuint no,GLuint texId,const string& 
                             no,
                             uniformLocation(uName)
                         });
+    glUseProgram(0);
     return texId;
 }
 

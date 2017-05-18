@@ -31,8 +31,8 @@ int old_wh;
 #define M_PI 3.1415
 #endif
 
-CameraBezier cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},{{0.f,0.f,300.f},{5000.f,5000.f,200.f},{10000.f,10000.f,500.f},{-5000.f,-5000.f,700.f},{0.f,0.f,300.f}},{{0.0f,0.0f,0.0f}});
-//CameraFreefly cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4});
+//CameraBezier cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},{{0.f,0.f,300.f},{5000.f,5000.f,200.f},{10000.f,10000.f,500.f},{-5000.f,-5000.f,700.f},{0.f,0.f,300.f}},{{0.0f,0.0f,0.0f}});
+CameraFreefly cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 
 World world(256,cam);
@@ -43,9 +43,9 @@ void Init(GLFWwindow* window) {
     float ratio = window_width / (float) window_height;
     cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
     cam.setBaseSpeed(250);
-    glClearColor(1.f, 1.f, 1.f /*white*/, 1.0 /*solid*/);
+    glClearColor(1.f, 1.f, 1.f /*white*/, 0.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_MULTISAMPLE);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glEnable(GL_CULL_FACE);
@@ -58,21 +58,9 @@ void Init(GLFWwindow* window) {
 void Display() {
     glViewport(0,0,window_width,window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    vec3 cam_pos(5.0f, 5.0f, 5.0f);
-    vec3 cam_look(0.0f, 0.0f, 0.0f);
-    vec3 cam_up(0.0f, 0.0f, 1.0f);
-    mat4 view = cam.view();//lookAt(cam_pos, cam_look, cam_up);
-    mat4 view_projection = cam.projection() * view;
-
-    mat4 scalem = scale(mat4(),vec3(4));
-
     float time = 0.3*glfwGetTime();
-    glm::vec2 offset = {time,time};
-    offset *= 5.f;
-    offset += glm::vec2{-1000.f,231.f};
 
-    world.draw(time,view,cam.projection());
+    world.draw(time,cam.view(),cam.projection());
 }
 
 // Gets called when the windows/framebuffer is resized.
@@ -116,6 +104,23 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             // Use start-up values for "windowed" mode.
             glfwSetWindowSize(window,old_ww, old_wh);
             //glfwSetWindowPos(originalPosX, originalPosY);
+        }
+    }
+    if(action == GLFW_RELEASE) {
+        switch(key) {
+        case GLFW_KEY_F5:
+            world.tGrass(); break;
+        case GLFW_KEY_F6:
+            world.tWater(); break;
+        case GLFW_KEY_F7:
+            world.tReflexions(); break;
+        case GLFW_KEY_F8:
+            world.tSkybox(); break;
+        case GLFW_KEY_F9:
+            world.tTerrain(); break;
+        case GLFW_KEY_F10:
+            world.tShadows(); break;
+        default: break;
         }
     }
 

@@ -12,14 +12,20 @@ using namespace std;
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
-    mLight({8192,1024,8192},{3,3,-1},{2,1.8,1})
+    mLight({8192,1024,8192},{3,3,-1},{2,1,0.5}),
+    mRenderGrass(true),
+    mRenderTerrain(true),
+    mRenderReflexion(true),
+    mRenderShadow(true),
+    mRenderSkybox(true),
+    mRenderWater(true)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(4096);
+    mLight.init(1024);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -53,6 +59,10 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     mTerrainMaterial.addTexture(GL_TEXTURE5,"cliffs.jpg","cliffs",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
+
+    mTerrainMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,mLight.depth(),"shadowmap");
+    mGrassMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE9,mLight.depth(),"shadowmap");
+
     mNoise.init(window,"NoiseGen_vshader.glsl","NoiseGen_fshader.glsl");
 
     GLuint skyBoxTex = mSkybox.init();
@@ -87,6 +97,14 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 
     std::tie(texMirror,depthMiror) = mMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     std::tie(texMain,depthMain) = mMain.init(mScreenSize.x,mScreenSize.y);
+    mFront.init(mScreenSize.x,mScreenSize.y);
+    mHalf.init(mScreenSize.x/4,mScreenSize.y/4);
+
+    mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
+    mRays.init("vbuffercopy.glsl","godrays.glsl");
+    mCompositor.init("vbuffercopy.glsl","compose.glsl");
+
+
     // Water material initialization
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
@@ -94,14 +112,23 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal2.png","waterNormal",GL_LINEAR_MIPMAP_LINEAR);
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,texMain,"refract_col");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,depthMain,"refract_depth");
-    mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
+    mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE5,mLight.depth(),"shadowmap");
+
+
     mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,texMain,"buffer_color");
     mScreen.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,depthMain,"buffer_depth");
+
+    mRays.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mFront.diffuse(),"buffer_color");
+    mRays.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,mFront.depth(),"buffer_depth");
+    mRays.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE2,mLight.depth(),"shadowmap");
+
+    mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mFront.diffuse(),"diffuse");
+    mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,mHalf.diffuse(),"overlay");
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
     static float time = 0;
-    time += dt;
+    time += 0.2*dt;
     //mLight.setDirection(vec3(3*cos(time),3*sin(time),-1));
 
     i32vec2 center = worldPos/mChunkSize;
@@ -223,23 +250,58 @@ void World::pushTask(ChunkTask task) {
     mToDo.push_back(task);
 }
 
-void World::draw(float time, const mat4 &view, const mat4 &projection) {
-    mSkybox.draw(view, projection);
+void World::drawShadows(float time,const glm::mat4& view, const glm::mat4& projection){
 
+    mLight.bind(mCamera);
     mTerrainShadows.bind();
-    mLight.bind(mTerrainShadows,mCamera);
-
     for(Chunks::value_type& p : mChunks) {
         if((p.first-mCenter).length() < 3) {
             p.second.drawTerrain(time,mLight.view(),mLight.proj(),mTerrainShadows);
         }
     }
-    mLight.uniforms(mTerrainMaterial);
-    mLight.unbind();
     mTerrainShadows.unbind();
+    mLight.unbind();
 
+
+
+}
+
+void World::drawGrass(float time, const glm::mat4& view, const glm::mat4& projection) {
+    glDisable(GL_CULL_FACE);
+    mGrassMaterial.bind();
     mLight.uniforms(mGrassMaterial);
+    for(Chunks::value_type& p : mChunks) {
+        if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+            p.second.drawTerrain(time,view,projection,mGrassMaterial);
+        }
+    }
+    mGrassMaterial.unbind();
+    glEnable(GL_CULL_FACE);
+}
 
+void World::drawTerrain(float time, const glm::mat4& view, const glm::mat4& projection) {
+    mTerrainMaterial.bind();
+    mLight.uniforms(mTerrainMaterial);
+    for(Chunks::value_type& p : mChunks) {
+        if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+            p.second.drawTerrain(time,view,projection,mTerrainMaterial);
+        }
+    }
+    mTerrainMaterial.unbind();
+}
+
+void World::drawWater(float time, const glm::mat4& view, const glm::mat4& projection) {
+    glDisable(GL_CULL_FACE);
+    mWaterMaterial.bind();
+    for(Chunks::value_type& p : mChunks) {
+        if(mCamera.inFrustum(p.second.pos(),mChunkSize))
+            p.second.drawWater(time,view,projection,mWaterMaterial);
+    }
+    mWaterMaterial.unbind();
+    glEnable(GL_CULL_FACE);
+}
+
+void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& projection) {
     mat4 mirror = scale(view,vec3(1.0,1.0,-1.0));
     mMirror.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -265,41 +327,51 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     mMirror.unbind();
+}
+
+void World::draw(float time, const mat4 &view, const mat4 &projection) {
+
+
+
+
+
+    if(mRenderShadow) drawShadows(time,view,projection);
+
+    if(mRenderReflexion) drawReflexions(time,view,projection);
 
     mMain.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mTerrainMaterial.bind();
-    for(Chunks::value_type& p : mChunks) {
-        if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-            p.second.drawTerrain(time,view,projection,mTerrainMaterial);
-        }
-    }
-    mTerrainMaterial.unbind();
-    glDisable(GL_CULL_FACE);
-    mGrassMaterial.bind();
-    for(Chunks::value_type& p : mChunks) {
-        if((p.first-mCenter).length() < 4 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
-            p.second.drawTerrain(time,view,projection,mGrassMaterial);
-        }
-    }
-    mGrassMaterial.unbind();
-    glEnable(GL_CULL_FACE);
+
+    if(mRenderTerrain) drawTerrain(time,view,projection);
+    if(mRenderGrass) drawGrass(time, view,projection);
     mMain.unbind();
 
-    //mMain.blit(GL_BACK);
-    mScreen.draw(view,projection);
 
+    mFront.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mMain.blit(mFront);
+    //mScreen.draw(view,projection);
+    if(mRenderWater) drawWater(time,view,projection);
+    if(mRenderSkybox) mSkybox.draw(view, projection);
+    mFront.unbind();
+
+
+    mHalf.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    mRays.material().bind();
+    glUniformMatrix4fv(mRays.material().uniformLocation("iP"),ONE,DONT_TRANSPOSE,glm::value_ptr(inverse(projection)));
+    glUniformMatrix4fv(mRays.material().uniformLocation("iV"),ONE,DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
+    glUniform1f(mRays.material().uniformLocation("width"),mHalf.width);
+    glUniform1f(mRays.material().uniformLocation("height"),mHalf.height);
+    mLight.uniforms(mRays.material());
+    mRays.draw(view,projection);
+    mHalf.unbind();
+
+    //mFront.blit(GL_BACK);
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
-    glDisable(GL_CULL_FACE);
-    mWaterMaterial.bind();
-    for(Chunks::value_type& p : mChunks) {
-        if(mCamera.inFrustum(p.second.pos(),mChunkSize))
-            p.second.drawWater(time,view,projection,mWaterMaterial);
-    }
-    mWaterMaterial.unbind();
-    glEnable(GL_CULL_FACE);
-
-    //mLight.draw();
+    mCompositor.draw(view,projection);
+    mLight.draw();
 }
 
 void World::stop() {

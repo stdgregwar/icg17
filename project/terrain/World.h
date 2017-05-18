@@ -38,6 +38,20 @@ public:
     void updateChunks();
     void pushForPos(i32vec2 cpos);
     void draw(float time,const glm::mat4& view, const glm::mat4& projection);
+
+    void drawShadows(float time,const glm::mat4& view, const glm::mat4& projection);
+    void drawGrass(float time, const glm::mat4& view, const glm::mat4& projection);
+    void drawTerrain(float time, const glm::mat4& view, const glm::mat4& projection);
+    void drawWater(float time, const glm::mat4& view, const glm::mat4& projection);
+    void drawReflexions(float time, const glm::mat4& view, const glm::mat4& projection);
+
+    void tWater() {mRenderWater = !mRenderWater;}
+    void tReflexions() {mRenderReflexion = !mRenderReflexion;}
+    void tTerrain() {mRenderTerrain = !mRenderTerrain;}
+    void tShadows() {mRenderShadow = !mRenderShadow;}
+    void tSkybox() {mRenderSkybox = !mRenderSkybox;}
+    void tGrass() {mRenderGrass = !mRenderGrass;}
+
     void pushTask(ChunkTask task);
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
@@ -56,15 +70,25 @@ private:
     Chunks mChunks;
     ChunkTexGenerator mNoise;
     ScreenQuad mScreen;
+    ScreenQuad mRays;
+    ScreenQuad mCompositor;
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;
     FrameBuffer mMirror;
     FrameBuffer mMain;
+    FrameBuffer mFront;
+    FrameBuffer mHalf;
     float mChunkSize;
     int mViewDistance;
     long mFrameID;
     int mMaxRes;
     int mTaskPerFrame;
+    bool mRenderGrass;
+    bool mRenderTerrain;
+    bool mRenderReflexion;
+    bool mRenderShadow;
+    bool mRenderSkybox;
+    bool mRenderWater;
 };
 
 #endif // WORLD_H

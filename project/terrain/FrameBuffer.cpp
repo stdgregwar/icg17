@@ -24,6 +24,21 @@ void FrameBuffer::blit(GLuint fb) {
                         GL_NEAREST);
 }
 
+void FrameBuffer::blit(const FrameBuffer& other) {
+    glBindFramebuffer (GL_DRAW_FRAMEBUFFER, other.id());
+    glDrawBuffer      (other.id());              /* Use backbuffer as color dst.         */
+
+    /* Read from your FBO */
+    glBindFramebuffer (GL_READ_FRAMEBUFFER, mFramebufferObjectId);
+    glReadBuffer      (GL_COLOR_ATTACHMENT0); /* Use Color Attachment 0 as color src. */
+
+    /* Copy the color and depth buffer from your FBO to the default framebuffer       */
+    glBlitFramebuffer (0,0, width,height,
+                       0,0, other.width,other.height,
+                       GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
+                       GL_NEAREST);
+}
+
 void FrameBuffer::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
