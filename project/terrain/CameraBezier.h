@@ -5,11 +5,12 @@
 #include <GLFW/glfw3.h>
 #include "Camera.h"
 #include "Bezier.h"
+#include "VecAndDiff.h"
 
 class CameraBezier: public Camera
 {
 public:
-    CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const vector<glm::vec3> &pathControlPoints, const vector<glm::vec3>& rotationControlPoints);
+    CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const vector<VecAndDiff> &pathControlPoints);
     void setBaseSpeed(float speed);
     void update(float delta_s);
     void rotate(glm::vec2 delta);
@@ -27,8 +28,7 @@ private:
                            PLANE_BOTTOM
                    };
     float mSSpeed;
-    Bezier<glm::vec3> mBezierPath;
-    Bezier<glm::vec3> mBezierRotate;
+    Bezier<VecAndDiff> mBezierPath;
     glm::vec3 mLSpeed;
     glm::vec3 mTargetPosition;
     glm::vec3 mTargetRotation;
