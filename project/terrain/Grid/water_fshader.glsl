@@ -15,6 +15,9 @@ uniform sampler2D waterNormal;
 uniform sampler2D refract_col;
 uniform sampler2D refract_depth;
 uniform sampler2D height_map;
+uniform mat4 iV;
+uniform mat4 iP;
+uniform vec3 l_color;
 
 float height(vec2 p) {
     vec2 bias = p;
@@ -38,9 +41,10 @@ bool sdoor(vec2 spos, float alpha) {
 }
 
 
-vec3 normalFromTex(sampler2D tex, vec2 coords) {
-    return (texture(tex,coords).rgb*2)-1;
-}
+#include normal.glsl
+#include clipspace.glsl
+#include rand.glsl
+#include shadows.glsl
 
 /// Compute chromatic aberration given deltas in some directions
 vec3 chromatic(sampler2D tex,vec2 base, vec2 main,vec2 r, vec2 g,vec2 b, float f) {
@@ -60,19 +64,17 @@ void main() {
     vec3 view = normalize(view_dir);
     float disp = sin(time*5+sin(w_pos.x+w_pos.y));
     float ttime = time * 0.1;
-    vec3 normal = normalFromTex(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
-    normal += normalFromTex(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
-    normal += normalFromTex(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
+    vec3 normal = unpackNormal(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
+    normal += unpackNormal(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
+    normal += unpackNormal(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
     normal += vec3(0,0,10);
     normal = normalize(normal);
     //normal = vec3(0,0,1);
     vec3 v_normal = normalize((MV*vec4(normal,0)).xyz);
-    float w_depth = texture(refract_depth,screenUV).r/texture(refract_col,screenUV).a;
+    float w_depth = texture(refract_depth,screenUV).r;
+    vec3 base_wpos = worldFrom(screenUV,w_depth,iP,iV);
 
-    float fogexp = -0.008;
-    float wfog = exp(fogexp*w_depth);
-    float fog = exp(fogexp*gl_FragCoord.z/gl_FragCoord.w);
-    float diff = 1-(fog-wfog)/fog;
+    float dist = distance(base_wpos, w_pos);
 
 
     float frebias = 0;
@@ -80,9 +82,8 @@ void main() {
     float fre = 1-dot(view_dir,v_normal)*0.5;
     fre = 1-clamp(frebias+(1-frebias)*pow(fre,frenelpow),0,1);
 
-    float bord = abs(-(height(uv)));
-    bord = clamp(1-pow(diff,6),0,1);
-    float fac = clamp(bord*2,0,1);
+    float bord = clamp(dist*0.05,0,1);
+    float fac = clamp(bord*15,0,1);
 
     vec3 flat_normal_view = normalize((MV*vec4(0,0,1,0)).xyz);
 
@@ -95,7 +96,7 @@ void main() {
     if(sdoor(gl_FragCoord.xy,fog2)) discard;
 
     //vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);
-    vec3 waterFog = mix(vec3(1),vec3(0.1,0.2,0.2),fog2); //Compute underwater fog color
+    vec3 waterFog = vec3(0.1,0.2,0.2); //Compute underwater fog color
     float ior = 1;
     vec3 rewon = refract(view_dir,flat_normal_view,ior);
     vec3 rewn = refract(view_dir,v_normal,ior);
@@ -103,14 +104,16 @@ void main() {
     vec3 refr = mix(chromatic(refract_col,screenUV,rediff.xy,vec2(0,1),vec2(-1,0),vec2(1,0),fac*0.02).rgb,waterFog,bord);
     //color = mix(refr,refl,fre*0.25);
 
-
     color = mix(refl,refr,fre); //Mix refl/refr using frenel factor
 
+    float shad = diffFromShadows(vec4(w_pos,1), 1, normal, light);
+
     const float alpha = 20;
-    float spec = pow(clamp(dot(rwn,light),0,1),alpha);
-    color = mix(color,vec3(1),spec); //Adding specular refl
+    float spec = pow(clamp(dot(rwn,light),0,1),alpha)*shad;
+    color = mix(color,l_color,spec); //Adding specular refl
     color = mix(refr,color,bord); //Remix refraction at spots where water is shallow to avoid hard edges
 
+    //color = vec3(bord);
 
     //float fog2 = exp(-0.00008*gl_FragCoord.z/gl_FragCoord.w);
     //color = mix(vec3(0.7, 0.99, 1),color,fog2);

@@ -10,10 +10,6 @@ out vData {
     float base_color;
 } vertex;
 
-out vec3 view_dir;
-out vec3 light_dir;
-out vec4 shadow_coord;
-
 uniform sampler2D height_map;
 
 uniform mat4 MVP;
@@ -21,8 +17,6 @@ uniform mat4 MV;
 uniform mat4 M;
 uniform float res;
 uniform float time;
-uniform mat4 l_iV;
-uniform mat4 l_VP;
 
 float height(vec2 p) {
     return texture(height_map,p).r;
@@ -37,7 +31,7 @@ void main() {
     vertex.uv+=vec2(1/tres);
 
     float value = height(vertex.uv);
-    vertex.base_color = value*0.04;
+    vertex.base_color = value*0.01+0.4;
 
     vec3 pos_3d = vec3(position.x,position.y,value*0.1+shift);
     vertex.w_pos = (M*vec4(pos_3d,1)).xyz;
@@ -45,13 +39,6 @@ void main() {
     vec3 n = fdiff(vertex.uv);
     vertex.normal_m = normalize((M*vec4(n,0)).xyz);
 
-    view_dir = normalize((MV*vec4(pos_3d,1.0)).xyz);
-
-    vec3 light_world = (l_iV*vec4(0,0,-1,0)).xyz;
-    light_dir = (MV*vec4(light_world,0)).xyz;
-
     gl_ClipDistance[0] = dot(vec4(vertex.w_pos,1),vec4(0,0,1,0.1));
     gl_Position = MVP * vec4(pos_3d,1.0);
-
-    shadow_coord = l_VP * M * vec4(pos_3d,1.0);
 }

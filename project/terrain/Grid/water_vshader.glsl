@@ -12,16 +12,17 @@ out vec3 light_dir;
 
 uniform mat4 MVP;
 uniform mat4 MV;
+uniform mat4 V;
 uniform mat4 M;
 uniform float res;
 uniform float time;
-
-const vec3 light_world = vec3(1,3,3);
+uniform mat4 l_iV[3];
 
 void main() {
     gl_Position = MVP* vec4(position,shift,1.0);
     uv = position;
     pos_3d = vec4(position,shift,1);
     w_pos = (M * pos_3d).xyz;
-    light_dir = (MV*vec4(light_world,0)).xyz;
+    vec4 light_world = l_iV[0]*vec4(0,0,-1,0);
+    light_dir = normalize((V*light_world).xyz);
 }

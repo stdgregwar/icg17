@@ -67,6 +67,8 @@ void ScreenQuad::draw(const mat4 &view, const mat4& projection) const {
 
     glUniformMatrix4fv(mMaterial.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
     glUniformMatrix4fv(mMaterial.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
+    glUniformMatrix4fv(mMaterial.uniformLocation("iP"),ONE,DONT_TRANSPOSE,glm::value_ptr(inverse(projection)));
+    glUniformMatrix4fv(mMaterial.uniformLocation("iV"),ONE,DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
     // draw
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

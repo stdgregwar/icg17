@@ -8,6 +8,7 @@
 #include "Skybox/Skybox.h"
 #include "Camera.h"
 #include "FrameBuffer.h"
+#include "GBuffer.h"
 #include "Light.h"
 #include <list>
 #include <functional>
@@ -72,8 +73,12 @@ private:
     ScreenQuad mScreen;
     ScreenQuad mRays;
     ScreenQuad mCompositor;
+    ScreenQuad mLightPass;
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;
+    GBuffer mGBuffer;
+    GBuffer mGMirror;
+    ScreenQuad mMirrorLightPass;
     FrameBuffer mMirror;
     FrameBuffer mMain;
     FrameBuffer mFront;

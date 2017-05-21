@@ -66,8 +66,8 @@ std::pair<int, int> FrameBuffer::init(int imageWidth, int imageHeight, bool useI
         // create texture for the color attachment
         // see Table.2 on
         // khronos.org/opengles/sdk/docs/man3/docbook4/xhtml/glTexImage2D.xml
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0,
-                     GL_RGBA, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+                     GL_RGB, GL_FLOAT, NULL);
         // how to load from buffer
     }
 

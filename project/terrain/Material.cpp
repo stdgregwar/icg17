@@ -1,5 +1,6 @@
 #include "Material.h"
 #include "ShaderBuilder.h"
+#include <iostream>
 
 Material::Material() : mProgramId(0) , mULocCache(1024,[this](const std::string uname){
     return glGetUniformLocation(mProgramId,uname.c_str());
@@ -14,10 +15,10 @@ Material::Material(const std::string& vshader, const std::string& fshader) : Mat
 void Material::init(const string& vshader, const string& fshader) {
     mProgramId = ShaderBuilder::makeShader(vshader.c_str(),
                                               fshader.c_str());
-
     mTextures.clear();
 
     if(!mProgramId) {
+
         throw std::runtime_error("could not get shaders \"" + vshader + "\" and/or \"" + fshader + "\" to compile");
     }
 }
@@ -75,6 +76,7 @@ GLuint Material::addTexture(GLuint target, GLuint no, const void* data, GLuint f
         break;
     }
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
+    glTexParameterf(target,GL_TEXTURE_MAX_ANISOTROPY_EXT,16);
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
     glTexParameterf( target, GL_TEXTURE_WRAP_S, repeat);
     glTexParameterf( target, GL_TEXTURE_WRAP_T, repeat);

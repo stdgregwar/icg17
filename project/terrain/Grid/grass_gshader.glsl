@@ -9,7 +9,7 @@
 #define gtiles 5
 
 layout(triangles) in;
-layout(triangle_strip, max_vertices=60) out;
+layout(triangle_strip, max_vertices=78) out;
 
 in vData {
     vec2 uv;
@@ -23,7 +23,6 @@ out vData {
     vec3 color;
     float alpha;
     vec3 normal;
-    vec4 shadow_pos;
 } vertex;
 
 uniform mat4 VP;
@@ -43,33 +42,29 @@ vec2 uvFrame(vec2 base, int i) {
 ///Create a billboard quad at given pos
 void patchAt(vec3 bpos, vec3 dir) {
     bpos.z -= 0.5;
-    vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz)*3;
+    vec3 side = normalize((iV*vec4(0.1,0,0,0)).xyz)*4;
     float ph = rand(bpos.xy);
-    vec3 top = dir*6+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
+    vec3 top = dir*3+vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
     int i = int((0.5+rand(bpos.xy)*0.5)*gtiles);
 
     vec3 pos = bpos-side;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0,0),i);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos+side;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(1,0),i);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos-side+top;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0,1),i);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos+side+top;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(1,1),i);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     EndPrimitive();
@@ -87,25 +82,21 @@ void bladeAt(vec3 bpos,vec3 dir,float size) {
     vertex.uv = uvFrame(vec2(0.5,0),0);
     vec3 pos = bpos;
     gl_Position = VP * vec4(pos,1.0);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos + side + top + wind*0.5f;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,0.5),0);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos -side + top + wind*0.5f;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,0.5),0);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     pos = bpos  + 2*top + wind*2;
     gl_Position = VP * vec4(pos,1.0);
     vertex.uv = uvFrame(vec2(0.5,1),0);
-    vertex.shadow_pos = l_VP * vec4(pos,1.0);
     EmitVertex();
 
     EndPrimitive();
@@ -159,11 +150,10 @@ void main()
 	      vec3 bpos = vertices[0].w_pos + v1 * i + v2 * j;
 	      vec3 normal = normal0 * (1-jfa) * (1-ifa) + normal1 * ifa + normal2 * jfa;
 	      normal = normalize(normal);
-	      normal.xy *= -1.1;
-	      vertex.normal = (V*vec4(normal,0)).xyz;
+	      vertex.normal = -(V*vec4(normal,0)).xyz;
 	      float normalFac = pow(dot(normal,vec3(0,0,1)),8);
 	      float bdist = distance(bpos,vPos);
-	      if(bdist < dist && bpos.z > 0 && bpos.z < 70 && normalFac > 0.3f) {
+	      if(bdist < dist && bpos.z > 0 && bpos.z < 180 && normalFac > 0.1f) {
 		float alpha = clamp((dist-bdist)/(dist-adist),0,1);
 		vertex.alpha = alpha;
 		vertex.color = texture(grass_col,vec2(rand(bpos.xy),0)).rgb;
@@ -171,7 +161,7 @@ void main()
 		if(bdist > maxbdist) {
 		    float a2 = clamp((bdist-maxbdist)*0.25,0,1);
 		    vertex.alpha = alpha*a2;
-		    patchAt(bpos+randp,normal);
+		    patchAt(bpos+randp,normal*baseSize*normalFac);
 		}
 		if(bdist < maxbdist + trans) {
 		    bladeAt(bpos+randp,normal,baseSize*normalFac);

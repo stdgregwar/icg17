@@ -119,6 +119,7 @@ void Grid::draw(float time, const glm::mat4 &model,
     glUniformMatrix4fv(mat.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
     glUniformMatrix4fv(mat.uniformLocation("iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
     glUniformMatrix4fv(mat.uniformLocation("P"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection));
+     glUniformMatrix4fv(mat.uniformLocation("iP"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(projection)));
     glUniformMatrix4fv(mat.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
     glUniformMatrix4fv(mat.uniformLocation("M"), ONE, DONT_TRANSPOSE,glm::value_ptr(model));
     glUniform1f(mat.uniformLocation("alpha"), alpha);

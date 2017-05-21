@@ -2,26 +2,21 @@
 
 uniform sampler1D color_map;
 uniform sampler2D height_map;
-uniform sampler2D grass;
-uniform sampler2D cliffs;
-uniform sampler2D pebbles;
+uniform sampler2D moss_alb;
+uniform sampler2D moss_nor;
+uniform sampler2D rock_alb;
+uniform sampler2D rock_nor;
+uniform sampler2D pebbles_alb;
+uniform sampler2D pebbles_nor;
 uniform sampler2D sand;
 uniform sampler2D snow;
 uniform sampler2D noise;
-uniform samplerCube skybox;
 uniform float time;
 uniform float res;
 uniform mat4 MV;
 uniform mat4 M;
 uniform mat4 V;
 uniform float alpha;
-
-uniform vec3 l_color;
-uniform sampler2DShadow shadowmap;
-
-in vec3 view_dir;
-in vec3 light_dir;
-in vec4 shadow_coord;
 
 in vData {
     vec2 uv;
@@ -32,9 +27,10 @@ in vData {
 
 #include sdoor.glsl
 
-#include rand.glsl
+//#include rand.glsl
 
-out vec4 color;
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec4 normal;
 
 float height(vec2 p) {
     return texture(height_map,p).r;
@@ -42,48 +38,64 @@ float height(vec2 p) {
 
 #include utils.glsl
 
-#include shadows.glsl
-
 void main() {
     if(sdoor(gl_FragCoord.xy,alpha)) discard;
     vec3 n = fdiff(vertex.uv);
     vec3 normal_m = normalize((M*vec4(n,0)).xyz);
-    vec3 normal = normalize((MV*vec4(n,0)).xyz);
-    vec3 gnormal = normalize((MV*vec4(vertex.normal_m,0)).xyz);
-    //normal = gnormal;
-    vec3 light = normalize(light_dir);
-    vec3 view = normalize(view_dir);
 
-    float diff = clamp(dot(normal,light),0,1);
-    vec3 ref = reflect(light,normal);
-    float spec = pow(clamp(dot(ref,view),0,1),2);
+
+
+    vec3 gnormal = normalize((MV*vec4(vertex.normal_m,0)).xyz);
+    //normal.xyz = gnormal;
+
+    vec3 norm = vec3(0,0,1);
+    float spec = 0;
+    float power = 0;
     float no = texture(noise,vertex.w_pos.xy*0.06).r*0.3;
     no-= texture(noise,vertex.w_pos.xy*0.001).r*0.6;
     vec3 b_color = texture(color_map,vertex.base_color+no).rgb;
 
     float dist = pow(clamp(1-distance(b_color,(vec3(0,1,0))),0,1),0.7);
-    color = texture(grass,vertex.w_pos.xy*0.25)*dist*1.5;
+    color = texture(moss_alb,vertex.w_pos.xy*0.25);
+    norm+= unpackNormal(moss_nor,vertex.w_pos.xy*0.25)*dist;
+    spec+=dist*0.1;
+    power+=dist;
 
     dist = clamp(1-distance(b_color,(vec3(0,0,1))),0,1);
-    color += texture(pebbles,vertex.w_pos.xy*0.25)*dist;
+    color += texture(pebbles_alb,vertex.w_pos.xy*0.25)*dist;
+    norm+= unpackNormal(pebbles_nor,vertex.w_pos.xy*0.25)*dist;
+    spec+=dist*0.5;
+    power+=dist*0.3;
 
     dist = clamp(1-distance(b_color,(vec3(0,1,1))),0,1);
     color += texture(sand,vertex.w_pos.xy*0.25)*dist;
 
     dist = clamp(1-distance(b_color,(vec3(1,0,0))),0,1);
     color += texture(snow,vertex.w_pos.xy*0.25)*dist*2;
+    norm+=vec3(0,0,2)*dist;
+    spec+=dist;
+    power+=dist;
 
     //float fac = pow(dot(normal_m,vec3(0,0,1)),8);
-    vec4 rockx = texture(cliffs,vertex.w_pos.yz*0.025);
-    vec4 rocky = texture(cliffs,vertex.w_pos.xz*0.025);
-    color = triplanar(rockx,rocky,color,normal_m);
+    vec3 rockx_nor = unpackNormal(rock_nor,vertex.w_pos.yz*0.025);
+    vec3 rocky_nor = unpackNormal(rock_nor,vertex.w_pos.xz*0.025);
+    vec3 rockx = texture(rock_alb,vertex.w_pos.yz*0.025).rgb;
+    vec3 rocky = texture(rock_alb,vertex.w_pos.xz*0.025).rgb;
+    color.rgb = triplanar(rockx,rocky,color.rgb,normal_m).rgb;
+    norm = triplanar(rockx_nor,rocky_nor,norm,normal_m);
+    norm = normalize(norm);
+    n = normalize(n+norm*0.2);
+    //tnormal = xytspace*norm;
+    color.a = clamp(spec,0,1); //This is specular amount
+    normal.a = clamp(power,0,1); //This is specular power
 
-    diff = diffFromShadows(shadowmap,shadow_coord,diff, normal, light);
+    //n.xy *= -1;
+    n *= -1;
+    vec3 tnormal = normalize((MV*vec4(n,0)).xyz);
+    normal.xyz = packNormal(tnormal);
 
-    color *= vec4(0.2,0.3,0.3,1)+vec4(l_color,1)*diff;
     float fog = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);
-    //color = mix(vec4(1),color,fog);
     if(sdoor(gl_FragCoord.xy,fog)) discard;
-    color.a = gl_FragCoord.w;
+
  }
 

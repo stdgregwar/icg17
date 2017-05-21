@@ -14,6 +14,7 @@ public:
     virtual void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) = 0;
     virtual void onMouse(GLFWwindow* window, double xpos, double ypos) = 0;
     const glm::mat4& view() const;
+    glm::vec3 forward() const;
     const glm::mat4& projection() const;
     void setProjection(const glm::mat4& projection);
     bool inFrustum(const glm::vec2& pos, const float &chunkSize) const;

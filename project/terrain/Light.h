@@ -8,31 +8,41 @@
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <array>
+
 
 class Light
 {
 public:
-    Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color);
+    struct Cas {
+        glm::mat4 LVP;
+        glm::mat4 LV;
+        glm::mat4 LP;
+        GLuint depth;
+        float radius;
+        string uname;
+    };
+
+    Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color, const glm::vec3 ambient);
+    void addTexture(Material& m);
     bool init(size_t texSize = 1024);
-    void bind(const Camera& cam);
+    void bind(const Camera& cam, int i);
     void unbind();
     void uniforms(Material& m);
-    GLuint depth() const {return mDepthTexture;}
+    GLuint depth(int i) const {return mCascades[i].depth;}
     void setDirection(const glm::vec3& dir);
-    const glm::mat4& proj() const {return mLP;}
-    const glm::mat4& view() const {return mLV;}
+    const glm::mat4& proj(int i) const {return mCascades[i].LP;}
+    const glm::mat4& view(int i) const {return mCascades[i].LV;}
     void draw() const;
 private:
+    GLuint mFramebuffer;
+
+    std::array<Cas,3> mCascades;
     ScreenQuad mScreenQuad;
-    GLuint mFrameBuffer;
-    GLuint mDepthTexture;
     size_t mTexSize;
     glm::vec3 mDirection;
     glm::vec3 mColor;
-    glm::vec3 mSize;
-    glm::mat4 mLVP;
-    glm::mat4 mLV;
-    glm::mat4 mLP;
+    glm::vec3 mAmbient;
 };
 
 #endif // LIGHT_H

@@ -26,6 +26,15 @@ string makeSource(const string& file) {
     return oss.str();
 }
 
+void printSource(const string& src) {
+    istringstream str(src);
+    string line;
+    int i = 0;
+    while(!getline(str,line).eof()) {
+        cout << i++ << ". " << line << endl;
+    }
+}
+
 GLuint makeShader(const string& vshader, const string& fshader, const string& gshader) {
     string vshadersrc = makeSource(vshader);
     string fshadersrc = makeSource(fshader);
@@ -33,7 +42,14 @@ GLuint makeShader(const string& vshader, const string& fshader, const string& gs
     if(gshader!="") {
         gshadersrc = makeSource(gshader);
     }
-    return icg_helper::CompileShaders(vshadersrc.c_str(),fshadersrc.c_str(), gshader != "" ? gshadersrc.c_str() : nullptr);
+    GLuint pid = icg_helper::CompileShaders(vshadersrc.c_str(),fshadersrc.c_str(), gshader != "" ? gshadersrc.c_str() : nullptr);
+    if(!pid) {
+        cout << "\n\nVSHAD" << endl;
+        ShaderBuilder::printSource(vshadersrc);
+        cout << "\n\nFSHAD" << endl;
+        ShaderBuilder::printSource(fshadersrc);
+    }
+    return pid;
 }
 
 }

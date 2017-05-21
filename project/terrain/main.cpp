@@ -22,8 +22,8 @@
 #endif
 
 int grid_size = 1024;
-int window_width = 1280;
-int window_height = 720;
+int window_width = 1920;
+int window_height = 1080;
 int old_ww;
 int old_wh;
 
@@ -162,7 +162,8 @@ int main(int argc, char *argv[]) {
     /// Attempt to open the window: fails if required version unavailable
     /// @note some Intel GPUs do not support OpenGL 3.2
     /// @note update the driver of your graphic card
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Procedural Terrain", NULL, NULL);
+    //GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Procedural Terrain",  glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Procedural Terrain",  NULL, NULL);
     if( !window ){
         glfwTerminate();
         exit(EXIT_FAILURE);
