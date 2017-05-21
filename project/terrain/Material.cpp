@@ -76,7 +76,7 @@ GLuint Material::addTexture(GLuint target, GLuint no, const void* data, GLuint f
         break;
     }
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
-    glTexParameterf(target,GL_TEXTURE_MAX_ANISOTROPY_EXT,16);
+    //glTexParameterf(target,GL_TEXTURE_MAX_ANISOTROPY_EXT,16);
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
     glTexParameterf( target, GL_TEXTURE_WRAP_S, repeat);
     glTexParameterf( target, GL_TEXTURE_WRAP_T, repeat);

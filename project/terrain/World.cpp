@@ -25,7 +25,7 @@ World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mVie
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(2048);
+    mLight.init(1024);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");

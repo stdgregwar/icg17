@@ -12,7 +12,7 @@ vec3 fdiff(vec2 p) {
     // deduce terrain normal
     norm.x = hL - hR;
     norm.y = hD - hU;
-    norm.z = 2000*d;
+    norm.z = 1500*d;
     return normalize(norm);
 }
 
