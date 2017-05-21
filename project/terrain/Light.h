@@ -31,6 +31,7 @@ public:
     void uniforms(Material& m);
     GLuint depth(int i) const {return mCascades[i].depth;}
     void setDirection(const glm::vec3& dir);
+    bool inFrustum(const glm::vec2& pos, const float &chunkSize, size_t i) const ;
     const glm::mat4& proj(int i) const {return mCascades[i].LP;}
     const glm::mat4& view(int i) const {return mCascades[i].LV;}
     void draw() const;

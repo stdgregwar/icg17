@@ -7,7 +7,7 @@
 using namespace glm;
 
 Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
-    : mOffset(offset), mSize(size), mRes(-1), mReady(false), mTexJob(nullptr),mHmap(0), mNextHmap(0) ,mTTime(0), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,mSize.x*(32/mSize.x)))) {
+    : mOffset(offset), mSize(size), mRes(-1), mReady(false), mTexJob(nullptr) ,mTTime(0), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,mSize.x*(32/mSize.x)))) {
 }
 
 void Chunk::update(float delta_s) {
@@ -20,21 +20,21 @@ void Chunk::update(float delta_s) {
             mTexJob = nullptr;
         }
     }
-    if(mNextHmap) { //Do transition
-        mTTime += delta_s;
+    if(mNextHmap.get()) { //Do transition
+        /*mTTime += delta_s;
         mNextAlpha =  std::min(1.f,mTTime*2/t_max);
         mAlpha = std::min(1.f,2-mTTime*2/t_max);
-        if(mTTime > t_max) {
+        if(mTTime > t_max) {*/
             mAlpha = 1;
             mHmap = mNextHmap;
-            mNextHmap = 0;
+            mNextHmap.reset();
             mRes = mNextRes;
             mTerrain = mNextTerrain;
             mWater = mNextWater;
             mGrass = mNextGrass;
             mReady = true;
             mTTime = 0;
-        }
+        //}
     }
 }
 
@@ -67,16 +67,15 @@ void Chunk::setFrameID(long id) {
     mFrameId = id;
 }
 
-void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection, Material &mat) {
+void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection, Material &mat, bool shad) {
     //if(!mReady) return;
-
-    if(mHmap) {
+    if(mHmap.get()) {
         mTerrain->draw(time,mModel,view,projection,mat,mAlpha,mHmap,mRes);
     }
     //Transition
-    if(mNextHmap) {
+    /*if(mNextHmap.get()) {
         mNextTerrain->draw(time,mModel,view,projection,mat,mNextAlpha,mNextHmap,mNextRes);
-    }
+    }*/
 }
 
 void Chunk::drawGrass(float time, const mat4 &view, const mat4 &projection,Material& mat) {

@@ -72,6 +72,7 @@ void patchAt(vec3 bpos, vec3 dir) {
 
 
 void bladeAt(vec3 bpos,vec3 dir,float size) {
+    bpos-=vec3(0,0,0.5);
     float ph = rand(bpos.xy);
     vec3 wind = vec3(rand2(bpos.xy),0)*sin((time+ph)*20*ph)*0.2;
     vec3 top = dir*size;

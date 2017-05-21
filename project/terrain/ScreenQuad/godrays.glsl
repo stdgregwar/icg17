@@ -36,7 +36,7 @@ void main(void) {
 	last = wpos.xyz;
     }
     float dist = distance(base,eye);
-    float df = 1-clamp(exp(-dist*0.005),0,1);
+    float df = 1-clamp(exp(-dist*0.001),0,1);
     //d = clamp(d,0,maxdiff);
     color = df*(d/max)*0.25*l_color;
     //color = debug(vec4(base,1));

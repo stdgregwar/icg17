@@ -25,6 +25,7 @@ private:
 class SharedTexture : public shared_ptr<GCTexture> {
 public:
     SharedTexture(GLuint tex) : shared_ptr(new GCTexture(tex)) {}
+    SharedTexture() : shared_ptr() {}
     operator GLuint() {return this->get()->id();}
 };
 

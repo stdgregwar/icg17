@@ -10,7 +10,7 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(128), mTaskPerFrame(8), mCamera(camera),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
     mLight({3000,4096,3000},{3,3,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     mRenderGrass(false),
@@ -79,7 +79,7 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
         mGrass.emplace(std::piecewise_construct,
                        std::forward_as_tuple(res),
                        std::forward_as_tuple(mGrassMaterial));
-        mGrass.at(res).init(res,false);
+        mGrass.at(res).init(res*2,false);
         mWaters.emplace(std::piecewise_construct,
                         std::forward_as_tuple(res),
                         std::forward_as_tuple(mWaterMaterial));
@@ -203,7 +203,7 @@ void World::pushForPos(i32vec2 cpos) {
 
     int maxRes = mMaxRes;
 
-    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-2),(int)std::log2(mMaxRes)-1);
+    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-3),(int)std::log2(mMaxRes)-1);
     int res = maxRes >> dist;
     Chunks::iterator it = mChunks.find(cpos);
     if(it == mChunks.end()) { //Chunk does not exist
@@ -272,13 +272,11 @@ void World::drawShadows(float time,const glm::mat4& view, const glm::mat4& proje
     mTerrainShadows.bind();
     for(int i = 0; i < 3; i++) {
         mLight.bind(mCamera,i);
-
         for(Chunks::value_type& p : mChunks) {
-            if(distance(vec2(p.first),vec2(mCenter)) < mViewDistance) {
-                p.second.drawTerrain(time,mLight.view(i),mLight.proj(i),mTerrainShadows);
-            }
+            //if(mLight.inFrustum(p.second.pos(),mChunkSize,i)) {
+                p.second.drawTerrain(time,mLight.view(i),mLight.proj(i),mTerrainShadows,true);
+            //}
         }
-
     }
     mLight.unbind();
     mTerrainShadows.unbind();

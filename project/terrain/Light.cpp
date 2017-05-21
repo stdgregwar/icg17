@@ -76,6 +76,66 @@ void Light::bind(const Camera& cam, int i) {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
+bool Light::inFrustum(const glm::vec2& pos, const float &chunkSize, size_t i) const {
+    glm::vec4 mFrustum[6];
+    glm::mat4 VP = mCascades[i].LVP;
+    for(int i = 0; i < 3; i++) {
+        mFrustum[i].x = VP[0][3] + VP[0][i];
+        mFrustum[i].y = VP[1][3] + VP[1][i];
+        mFrustum[i].z = VP[2][3] + VP[2][i];
+        mFrustum[i].w = VP[3][3] + VP[3][i];
+
+        mFrustum[i+1].x = VP[0][3] - VP[0][i];
+        mFrustum[i+1].y = VP[1][3] - VP[1][i];
+        mFrustum[i+1].z = VP[2][3] - VP[2][i];
+        mFrustum[i+1].w = VP[3][3] - VP[3][i];
+        mFrustum[i] = glm::normalize(mFrustum[i]);
+        mFrustum[i+1] = glm::normalize(mFrustum[i+1]);
+    }
+
+    glm::vec3 mins = glm::vec3(pos,-4096);
+    glm::vec3 maxs = mins + glm::vec3(chunkSize,chunkSize,8192);
+    glm::vec3 vmin, vmax;
+
+    for(int i =0; i < 6; i++) {
+        const float w = mFrustum[i].w;
+        const glm::vec3 normal = vec3(mFrustum[i]);
+
+        // X axis
+        if(mFrustum[i].x > 0) {
+            vmin.x = mins.x;
+            vmax.x = maxs.x;
+        } else {
+            vmin.x = maxs.x;
+            vmax.x = mins.x;
+        }
+        // Y axis
+        if(mFrustum[i].y > 0) {
+            vmin.y = mins.y;
+            vmax.y = maxs.y;
+        } else {
+            vmin.y = maxs.y;
+            vmax.y = mins.y;
+        }
+        // Z axis
+        if(mFrustum[i].z > 0) {
+            vmin.z = mins.z;
+            vmax.z = maxs.z;
+        } else {
+            vmin.z = maxs.z;
+            vmax.z = mins.z;
+        }
+
+        if(glm::dot(normal,vmin)   + w > 0){
+            return true;
+        }
+        if(glm::dot(normal,vmax) + w < 0){
+            return false;
+        }
+    }
+    return false;
+}
+
 void Light::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
