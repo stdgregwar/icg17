@@ -81,7 +81,8 @@ void main() {
 	value += (value*0.3+0.9)*fbm(p*0.5,8)*0.25;
 	value += fbm(p*0.01,3)*240+120;
 	value /= s/1.5;
-	//value*=0.1;
+        value*=0.1;
+        value*=32;
 	//value = p.x*20;
 	//value = max(0,value);
 

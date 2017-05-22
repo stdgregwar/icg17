@@ -15,6 +15,7 @@ void ChunkTexGenerator::init(GLFWwindow* parentWindow,const string& vshader, con
     mFShader = fshader;
     glfwWindowHint(GLFW_VISIBLE, false);
     mWindow = glfwCreateWindow(512, 512, "Second Window",NULL, parentWindow);
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FIXED_ONLY);
     start();
 }
 
@@ -60,7 +61,7 @@ SharedTexture ChunkTexGenerator::prod(const glm::ivec3& k) {
     mGenerator.draw(model,k.z);
     fb.unbind();
     glFinish();
-    return SharedTexture(tex);
+    return SharedTexture(tex,k.z,k.z);
 }
 
 void ChunkTexGenerator::work() {

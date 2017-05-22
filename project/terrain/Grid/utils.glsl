@@ -12,11 +12,9 @@ vec3 fdiff(vec2 p) {
     // deduce terrain normal
     norm.x = hL - hR;
     norm.y = hD - hU;
-    norm.z = 1500*d;
+    norm.z = 150000*d;
     return normalize(norm);
 }
-
-
 
 vec3 triplanar(vec3 x, vec3 y, vec3 z, vec3 normal) {
     float xf = abs(dot(normal,vec3(1,0,0)));

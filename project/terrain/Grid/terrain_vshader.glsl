@@ -31,9 +31,9 @@ void main() {
     vertex.uv+=vec2(1/tres);
 
     float value = height(vertex.uv);
-    vertex.base_color = value*0.01+0.4;
+    vertex.base_color = value/320+0.4;
 
-    vec3 pos_3d = vec3(position.x,position.y,value*0.1+shift);
+    vec3 pos_3d = vec3(position.x,position.y,value+shift);
     vertex.w_pos = (M*vec4(pos_3d,1)).xyz;
 
     vec3 n = fdiff(vertex.uv);

@@ -84,7 +84,7 @@ void main() {
     color.rgb = triplanar(rockx,rocky,color.rgb,normal_m).rgb;
     norm = triplanar(rockx_nor,rocky_nor,norm,normal_m);
     norm = normalize(norm);
-    n = normalize(n+norm*0.2);
+    n = normalize(n);//+norm*0.1);
     //tnormal = xytspace*norm;
     color.a = clamp(spec,0,1); //This is specular amount
     normal.a = clamp(power,0,1); //This is specular power

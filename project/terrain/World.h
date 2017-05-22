@@ -32,7 +32,7 @@ typedef std::list<ChunkTask> Tasks;
 class World
 {
 public:
-    World(float chunkSize,const Camera& camera);
+    World(float chunkSize, Camera &camera);
     void init(const glm::i32vec2& screenSize, GLFWwindow *window);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
@@ -57,7 +57,7 @@ public:
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
 private:
-    const Camera& mCamera;
+    Camera& mCamera;
     Light mLight;
     Material mTerrainMaterial;
     Material mTerrainShadows;

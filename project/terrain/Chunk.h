@@ -19,7 +19,10 @@ public:
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
     void setFrameID(long id);
     long frameID() { return mFrameId;}
+    GLuint hMap() const {return mHmap.get() ? mHmap->id() : 0;}
     const glm::vec2& pos() const {return mOffset;}
+    const glm::vec2& size() const {return mSize;}
+    int res() const {return mRes;}
     ~Chunk();
 private:
     float mAlpha;

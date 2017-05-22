@@ -7,7 +7,7 @@
 using namespace glm;
 
 Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
-    : mOffset(offset), mSize(size), mRes(-1), mReady(false), mTexJob(nullptr) ,mTTime(0), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,mSize.x*(32/mSize.x)))) {
+    : mOffset(offset), mSize(size), mRes(-1), mReady(false), mTexJob(nullptr) ,mTTime(0), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,1))) {
 }
 
 void Chunk::update(float delta_s) {

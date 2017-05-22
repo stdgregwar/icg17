@@ -9,7 +9,7 @@ using namespace std;
 
 #define Mb *1024*1024
 
-World::World(float chunkSize,const Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
+World::World(float chunkSize, Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
     //mLight({3000,4096,3000},{3,3,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
@@ -144,6 +144,13 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 }
 
 void World::update(float dt,const glm::vec2& worldPos) {
+
+    //First update camera
+    auto it = mChunks.find(mCenter);
+    if(it != mChunks.end()) {
+        mCamera.update(dt,it->second);
+    }
+
     static float time = 0;
     time += 0.2*dt;
     //mLight.setDirection(vec3(3*cos(time),3*sin(time),-1));

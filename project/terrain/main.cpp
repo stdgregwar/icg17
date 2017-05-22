@@ -39,7 +39,7 @@ int old_wh;
 //                     {{-5000.f,-5000.f,700.f},{1.f,2.f,1.f}},
 //                     {{0.f,0.f,300.f},{2.f,1.f,0.f}}
 //                 });
-CameraFreefly cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4});
+CameraFreefly cam({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 
 World world(256,cam);
@@ -52,6 +52,7 @@ void Init(GLFWwindow* window) {
     cam.setBaseSpeed(250);
     glClearColor(1.f, 1.f, 1.f /*white*/, 0.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FIXED_ONLY);
     //glEnable(GL_MULTISAMPLE);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -139,7 +140,7 @@ void CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void update(float dt) {
-    cam.update(dt);
+    //cam.update(dt);
     world.update(dt,cam.wPos());
 }
 

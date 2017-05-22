@@ -4,11 +4,13 @@
 #include <glm/mat4x4.hpp>
 #include <GLFW/glfw3.h>
 
+class Chunk;
+
 class Camera
 {
 public:
     Camera(const glm::vec3& pos, const glm::vec3& orientation = {0,0,0});
-    virtual void update(float delta_s) = 0;
+    virtual void update(float delta_s, const Chunk& c) = 0;
     virtual void rotate(glm::vec2 delta) = 0;
     virtual void speed(glm::vec2 delta) = 0;
     virtual void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) = 0;
