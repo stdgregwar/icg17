@@ -18,7 +18,7 @@ out vec3 color;
 #include shadows.glsl
 
 const float maxdiff = 30;
-const float density = 2;
+const float density = 3;
 
 void main(void) {
     float depth = texture(buffer_depth,uv).r;

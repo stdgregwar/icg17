@@ -15,7 +15,7 @@ public:
 
     K curveAtTime(float time) {
         vector<K> newPoints(mControlPoints);
-        return bezier(newPoints,newPoints.size(),fmod(time,1));
+        return bezier(newPoints,newPoints.size(),time);
     }
 
 private:

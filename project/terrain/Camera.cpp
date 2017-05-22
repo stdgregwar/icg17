@@ -29,7 +29,7 @@ void Camera::setProjection(const glm::mat4& projection) {
 }
 
 glm::vec3 Camera::forward() const {
-    return inverse(mView)*vec4(0,0,-1,0);
+    return vec3(inverse(mView)*vec4(0,0,-1,0));
 }
 
 bool Camera::inFrustum(const glm::vec2& pos, const float &chunkSize) const {
