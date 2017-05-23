@@ -10,18 +10,19 @@ template<class K>
 class Bezier
 {
 public:
-    Bezier(vector<K> controlPoints): mControlPoints(controlPoints)
+    Bezier(vector< vector<K> > controlPoints): mControlPoints(controlPoints)
     {
 
     }
 
     K curveAtTime(float time) {
-        vector<K> newPoints(mControlPoints);
+        int idx = ((int) floor(time))%mControlPoints.size();
+        vector<K> newPoints(mControlPoints[idx]);
         return bezier(newPoints,newPoints.size(),fmod(time,1.f));
     }
 
 private:
-    vector<K> mControlPoints;
+    vector< vector<K> > mControlPoints;
 
     K lerp(const K& a, const K& b, const float t) {
         return a + (b-a)*t;
