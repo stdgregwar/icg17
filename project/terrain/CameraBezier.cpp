@@ -2,6 +2,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <unordered_map>
+#include <iostream>
 
 #ifndef M_PI
 #define M_PI 3.1415
@@ -10,7 +11,7 @@
 using namespace glm;
 using namespace std;
 
-CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vector<VecAndDiff> &pathControlPoints) : Camera(pos,orientation), mSSpeed(20), mLSpeed(0),
+CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vector< vector<VecAndDiff> > &pathControlPoints) : Camera(pos,orientation), mSSpeed(20), mLSpeed(1),
     mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(pathControlPoints)
 {
 
@@ -20,11 +21,13 @@ void CameraBezier::setBaseSpeed(float speed) {
     mSSpeed = speed;
 }
 
-void CameraBezier::update(float delta_s) {
+void CameraBezier::update(float delta_s, const Chunk& c) {
     static float time = 0;
     time += delta_s;
-    VecAndDiff point = mBezierPath.curveAtTime(time*0.01);
-//    mTargetRotation = point.d;
+    float dtime = time*0.01*mLSpeed.x;
+    VecAndDiff point = mBezierPath.curveAtTime(dtime);
+//    cout << "time: " << dtime << " x: " << point.v.x << " y: " << point.v.y << endl;
+    mTargetRotation = point.d;
     mRotation = mRotation + (mTargetRotation - mRotation) * std::min(10.f * delta_s,1.f);
 
     vec3& rot = mRotation;
@@ -66,9 +69,7 @@ void CameraBezier::onKey(GLFWwindow* window, int key, int scancode, int action, 
     };
     if(pressed.count(key)) {
         if(action == GLFW_PRESS) {
-            speed(pressed.at(key));
-        } else if (action == GLFW_RELEASE) {
-            speed(-pressed.at(key));
+            mLSpeed.x += pressed.at(key).x;
         }
     }
     if(key == GLFW_KEY_LEFT_SHIFT) {

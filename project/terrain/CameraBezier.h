@@ -10,9 +10,9 @@
 class CameraBezier: public Camera
 {
 public:
-    CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const vector<VecAndDiff> &pathControlPoints);
+    CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const vector< vector<VecAndDiff> > &pathControlPoints);
     void setBaseSpeed(float speed);
-    void update(float delta_s);
+    void update(float delta_s, const Chunk& c);
     void rotate(glm::vec2 delta);
     void speed(glm::vec2 delta);
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
