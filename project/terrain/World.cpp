@@ -108,7 +108,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mGBuffer.init(mScreenSize.x,mScreenSize.y);
     mGMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     mFront.init(mScreenSize.x,mScreenSize.y);
-    mHalf.init(mScreenSize.x/4,mScreenSize.y/4);
+    mHalf.init(mScreenSize.x/8,mScreenSize.y/8);
 
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
     mRays.init("vbuffercopy.glsl","godrays.glsl");

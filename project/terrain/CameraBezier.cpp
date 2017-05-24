@@ -14,7 +14,7 @@ using namespace std;
 
 
 CameraBezier::CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const Bezier<VecAndDiff>& bezier): Camera(pos,orientation), mSSpeed(250), mLSpeed(1),
-    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(bezier), mBezierSpeed({{1.0f,2.0f,100.0f,1.0f}})
+    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(bezier), mBezierSpeed({{1.0f,2.0f,60.0f,1.0f}})
 {
 
 }
