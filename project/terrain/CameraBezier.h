@@ -13,12 +13,13 @@ public:
     CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const Bezier<VecAndDiff>& bezier);
     CameraBezier(const Bezier<VecAndDiff>& bezier);
     CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const vector< vector<VecAndDiff> > &pathControlPoints);
-    void setBaseSpeed(float speed);
     void update(float delta_s, const Chunk& c);
     void rotate(glm::vec2 delta);
     void speed(glm::vec2 delta);
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
     void onMouse(GLFWwindow* window, double xpos, double ypos);
+    void tGravity() {}
+    void updateBezier(const Bezier<VecAndDiff>& bezier) {mBezierPath = bezier;}
 private:
     enum Plane
                    {

@@ -35,13 +35,15 @@ typedef std::list<ChunkTask> Tasks;
 class World
 {
 public:
-    World(float chunkSize, Camera &camera);
+    World(float chunkSize);
     void init(const glm::i32vec2& screenSize, GLFWwindow *window);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
     void pushForPos(i32vec2 cpos);
     void draw(float time);
+
+    Camera& cam() {return *mCamera;}
 
     void drawShadows(float time,const glm::mat4& view, const glm::mat4& projection);
     void drawGrass(float time, const glm::mat4& view, const glm::mat4& projection);
@@ -63,8 +65,9 @@ public:
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
 private:
-    Camera& mCamera;
-    Camera& mDefaultCamera;
+    Camera* mCamera;
+    CameraFreefly mCamFreefly;
+    CameraBezier mCamBezier;
     BezierVecAndDiffBuilder mBezierBuilder;
     Light mLight;
     Material mTerrainMaterial;

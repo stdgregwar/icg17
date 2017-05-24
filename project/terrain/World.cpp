@@ -4,6 +4,7 @@
 #include <iostream>
 #include "ShaderBuilder.h"
 #include "VecAndDiff.h"
+#include "Bezier.h"
 #include "CameraBezier.h"
 
 using namespace glm;
@@ -11,8 +12,9 @@ using namespace std;
 
 #define Mb *1024*1024
 
-World::World(float chunkSize, Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
+World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
+{{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(16),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(16), mTaskPerFrame(8),
     mNoise(1024 Mb, chunkSize),
     //mLight({3000,4096,3000},{3,3,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
@@ -23,13 +25,15 @@ World::World(float chunkSize, Camera& camera) : mChunkSize(chunkSize), mViewDist
     mRenderSkybox(true),
     mRenderWater(true),
     mBezierCam(false)
+
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
+    mCamera = &mCamFreefly;
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(1024);
+    mLight.init(512);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -104,7 +108,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mGBuffer.init(mScreenSize.x,mScreenSize.y);
     mGMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     mFront.init(mScreenSize.x,mScreenSize.y);
-    mHalf.init(mScreenSize.x/2,mScreenSize.y/2);
+    mHalf.init(mScreenSize.x/4,mScreenSize.y/4);
 
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
     mRays.init("vbuffercopy.glsl","godrays.glsl");
@@ -151,7 +155,7 @@ void World::update(float dt,const glm::vec2& worldPos) {
     //First update camera
     auto it = mChunks.find(mCenter);
     if(it != mChunks.end()) {
-        mCamera.update(dt,it->second);
+        mCamera->update(dt,it->second);
     }
 
     static float time = 0;
@@ -282,7 +286,7 @@ void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
 
     mTerrainShadows.bind();
     for(int i = 0; i < 3; i++) {
-        mLight.bind(mCamera,i);
+        mLight.bind(cam(),i);
         for(Chunks::value_type& p : mChunks) {
             //if(mLight.inFrustum(p.second.pos(),mChunkSize,i)) {
                 p.second.drawTerrain(time,mLight.view(i),mLight.proj(i),mTerrainShadows,true);
@@ -298,7 +302,7 @@ void World::drawGrass(float time, const mat4 &view, const mat4 &projection) {
     mGrassMaterial.bind();
     mLight.uniforms(mGrassMaterial);
     for(Chunks::value_type& p : mChunks) {
-        if(distance(vec2(p.first),vec2(mCenter)) < 3 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+        if(distance(vec2(p.first),vec2(mCenter)) < 3 && mCamera->inFrustum(p.second.pos(),mChunkSize)) {
             p.second.drawGrass(time,view,projection,mGrassMaterial);
         }
     }
@@ -310,7 +314,7 @@ void World::drawTerrain(float time, const glm::mat4& view, const glm::mat4& proj
     mTerrainMaterial.bind();
     mLight.uniforms(mTerrainMaterial);
     for(Chunks::value_type& p : mChunks) {
-        if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+        if(mCamera->inFrustum(p.second.pos(),mChunkSize)) {
             p.second.drawTerrain(time,view,projection,mTerrainMaterial);
         }
     }
@@ -322,7 +326,7 @@ void World::drawWater(float time, const glm::mat4& view, const glm::mat4& projec
     mWaterMaterial.bind();
     mLight.uniforms(mWaterMaterial);
     for(Chunks::value_type& p : mChunks) {
-        if(mCamera.inFrustum(p.second.pos(),mChunkSize))
+        if(mCamera->inFrustum(p.second.pos(),mChunkSize))
             p.second.drawWater(time,view,projection,mWaterMaterial);
     }
     mWaterMaterial.unbind();
@@ -341,7 +345,7 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
         glEnable(GL_CLIP_DISTANCE0);
         mTerrainMaterial.bind();
         for(Chunks::value_type& p : mChunks) {
-            if(mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+            if(mCamera->inFrustum(p.second.pos(),mChunkSize)) {
                 p.second.drawTerrain(time,mirror,projection,mTerrainMaterial);
             }
         }
@@ -353,7 +357,7 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
         glDisable(GL_CULL_FACE);
         mGrassMaterial.bind();
         for(Chunks::value_type& p : mChunks) {
-            if(distance(vec2(p.first),vec2(mCenter)) < 2.5 && mCamera.inFrustum(p.second.pos(),mChunkSize)) {
+            if(distance(vec2(p.first),vec2(mCenter)) < 2.5 && mCamera->inFrustum(p.second.pos(),mChunkSize)) {
                 p.second.drawGrass(time,mirror,projection,mGrassMaterial);
             }
         }
@@ -376,8 +380,8 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
 }
 
 void World::draw(float time) {
-    const mat4 view = mCamera.view();
-    const mat4 projection = mCamera.projection();
+    const mat4 view = mCamera->view();
+    const mat4 projection = mCamera->projection();
     if(mRenderShadow) drawShadows(time,view,projection);
     if(mRenderReflexion) drawReflexions(time,view,projection);
 
@@ -425,14 +429,22 @@ void World::stop() {
 }
 
 void World::registerPoint() {
-    VecAndDiff v(mCamera.pos(),mCamera.rotation());
+    VecAndDiff v(mCamera->pos(),mCamera->rotation());
     mBezierBuilder.addPoint(v);
 }
 
 void World::tBezierCam() {
     mBezierCam = !mBezierCam;
-    Bezier<VecAndDiff> bezier = mBezierBuilder.build();
     if(mBezierCam){
-        mCamera = CameraBezier(bezier.firstPoint().v,bezier.firstPoint().d,bezier);
+        Bezier<VecAndDiff> bezier = mBezierBuilder.build();
+        mCamBezier.updateBezier(bezier);
+        mCamBezier.setProjection(mCamera->projection());
+        mCamera = &mCamBezier;
+        mCamera->setPos(bezier.firstPoint().v);
+        mCamera->setRotation(bezier.firstPoint().d);
+    } else {
+        mCamFreefly.setPos(mCamera->pos());
+        mCamFreefly.setRotation(mCamera->rotation());
+        mCamera = &mCamFreefly;
     }
 }

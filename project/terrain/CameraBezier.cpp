@@ -13,8 +13,8 @@ using namespace std;
 
 
 
-CameraBezier::CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const Bezier<VecAndDiff>& bezier): Camera(pos,orientation), mSSpeed(20), mLSpeed(1),
-    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(bezier), mBezierSpeed({{1.0f,2.0f,30.0f,1.0f}})
+CameraBezier::CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const Bezier<VecAndDiff>& bezier): Camera(pos,orientation), mSSpeed(250), mLSpeed(1),
+    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(bezier), mBezierSpeed({{1.0f,2.0f,100.0f,1.0f}})
 {
 
 }
@@ -29,12 +29,6 @@ CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vecto
 
 }
 
-
-
-void CameraBezier::setBaseSpeed(float speed) {
-    mSSpeed = speed;
-}
-
 void CameraBezier::update(float delta_s, const Chunk& c) {
     static float time = 0;
     float speed = mBezierSpeed.curveAtTime(time*0.01)+mLSpeed.x;
@@ -42,7 +36,7 @@ void CameraBezier::update(float delta_s, const Chunk& c) {
     float dtime = time*0.01;
 //    cout << "dtime: " << dtime << " speed: " << speed << endl;
     VecAndDiff point = mBezierPath.curveAtTime(dtime);
-//    cout << "time: " << dtime << " x: " << point.v.x << " y: " << point.v.y << endl;
+    cout << "time: " << dtime << " x: " << point.v.x << " y: " << point.v.y << endl;
     mTargetRotation = point.d;
     mRotation = mRotation + (mTargetRotation - mRotation) * std::min(10.f * delta_s,1.f);
 

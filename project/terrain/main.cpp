@@ -77,17 +77,15 @@ int old_wh;
 //                         {{0.f,0.f,300.f},{M_PI,0.f,0.f}}
 //                     }
 //                 });
-CameraFreefly cam({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 
-World world(256,cam);
+World world(256);
 
 using namespace glm;
 
 void Init(GLFWwindow* window) {
     float ratio = window_width / (float) window_height;
-    cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
-    cam.setBaseSpeed(250);
+
     glClearColor(1.f, 1.f, 1.f /*white*/, 0.0 /*solid*/);
     glEnable(GL_DEPTH_TEST);
     glClampColor(GL_CLAMP_READ_COLOR, GL_FIXED_ONLY);
@@ -99,6 +97,7 @@ void Init(GLFWwindow* window) {
 
 
     world.init({window_width,window_height},window);
+    world.cam().setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
 }
 
 void Display() {
@@ -113,7 +112,7 @@ void Display() {
 void resize_callback(GLFWwindow* window, int width, int height) {
     glfwGetFramebufferSize(window, &window_width, &window_height);
     float ratio = window_width / (float) window_height;
-    cam.setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
+    world.cam().setProjection(perspective(45.0f, ratio, 0.5f, 10000.0f));
     glViewport(0, 0, window_width, window_height);
     world.setScreenSize({width,height});
 }
@@ -154,6 +153,8 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
     if(action == GLFW_RELEASE) {
         switch(key) {
+        case GLFW_KEY_G:
+            world.cam().tGravity(); break;
         case GLFW_KEY_SPACE:
             world.registerPoint(); break;
         case GLFW_KEY_F2:
@@ -174,16 +175,16 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         }
     }
 
-    cam.onKey(window,key,scancode,action,mods);
+    world.cam().onKey(window,key,scancode,action,mods);
 }
 
 void CursorCallback(GLFWwindow* window, double xpos, double ypos) {
-    cam.onMouse(window,xpos,ypos);
+    world.cam().onMouse(window,xpos,ypos);
 }
 
 void update(float dt) {
     //cam.update(dt);
-    world.update(dt,cam.wPos());
+    world.update(dt,world.cam().wPos());
 }
 
 int main(int argc, char *argv[]) {

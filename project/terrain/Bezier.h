@@ -55,10 +55,13 @@ public:
         if(mControlPoints.size() == 0){
             points.push_back(point);
         } else {
-            VecAndDiff lastPoint = mControlPoints.back().back();
-            // If we are not adding the 2nd point, we add the last one
-            if(mControlPoints.size() != 1 || mControlPoints[0].size() != 1){
-                points.push_back(lastPoint);
+            VecAndDiff lastPoint = mControlPoints[0][0];
+            // If we only have one point
+            if(mControlPoints.size() == 1 && mControlPoints[0].size() == 1){
+                points = mControlPoints[0];
+            } else {
+                 lastPoint = mControlPoints.back().back();
+                 points.push_back(lastPoint);
             }
             // We add a control point at average height and at mix between last and current point
             glm::vec3 v(lastPoint.v.x,point.v.y,(lastPoint.v.z+point.v.z)/2.f);
@@ -68,7 +71,11 @@ public:
             // We add the current point
             points.push_back(point);
         }
-        mControlPoints.push_back(points);
+        if(mControlPoints.size() == 1 && mControlPoints[0].size() == 1){
+            mControlPoints[0] = points;
+        }   else {
+            mControlPoints.push_back(points);
+        }
     }
 
     void reset() {

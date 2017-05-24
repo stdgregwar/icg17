@@ -15,6 +15,7 @@ public:
     virtual void speed(glm::vec2 delta) = 0;
     virtual void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) = 0;
     virtual void onMouse(GLFWwindow* window, double xpos, double ypos) = 0;
+    virtual void tGravity() = 0;
     const glm::mat4& view() const;
     glm::vec3 forward() const;
     const glm::mat4& projection() const;
@@ -23,6 +24,8 @@ public:
     glm::vec2 wPos() const;
     const glm::vec3 pos() const {return mPosition;}
     const glm::vec3 rotation() const {return mRotation;}
+    void setPos(const glm::vec3& pos) {mPosition = pos;}
+    void setRotation(const glm::vec3& rot) {mRotation = rot;}
 protected:
     glm::vec3 mPosition;
     glm::vec3 mRotation;

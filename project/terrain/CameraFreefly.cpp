@@ -12,14 +12,11 @@
 using namespace glm;
 using namespace std;
 
-CameraFreefly::CameraFreefly(const vec3 &pos, const vec3 &orientation) : Camera(pos,orientation), mSSpeed(20), mLSpeed(0), mTargetRotation(orientation), mTargetPosition(pos), mGravity(true)
+CameraFreefly::CameraFreefly(const vec3 &pos, const vec3 &orientation) : Camera(pos,orientation), mSSpeed(250), mLSpeed(0), mTargetRotation(orientation), mTargetPosition(pos), mGravity(false)
 {
 
 }
 
-void CameraFreefly::setBaseSpeed(float speed) {
-    mSSpeed = speed;
-}
 
 glm::vec3 CameraFreefly::inMap(const glm::vec3& pos, const Chunk& c) {
     const SharedTexture& st = c.hMap();

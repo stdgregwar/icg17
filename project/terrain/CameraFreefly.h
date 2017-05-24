@@ -10,12 +10,12 @@ class CameraFreefly: public Camera
 {
 public:
     CameraFreefly(const glm::vec3& pos, const glm::vec3& orientation = {0,0,0});
-    void setBaseSpeed(float speed);
     void update(float delta_s, const Chunk &c) override;
     void rotate(glm::vec2 delta);
     void speed(glm::vec2 delta);
     void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
     void onMouse(GLFWwindow* window, double xpos, double ypos);
+    void tGravity() {mGravity = !mGravity;}
 private:
     glm::vec3 inMap(const glm::vec3& pos, const Chunk& c);
     enum Plane
