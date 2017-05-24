@@ -59,9 +59,11 @@ SharedTexture ChunkTexGenerator::prod(const glm::ivec3& k) {
     vec2 pos(k.x*mChunkSize,k.y*mChunkSize);
     mat4 model(scale(translate(mat4(),vec3(pos,0)),vec3(mChunkSize)));
     mGenerator.draw(model,k.z);
+    GCTexture* gct = new GCTexture(tex,k.z,k.z);
+    glReadPixels(0,0,k.z,k.z,GL_RED,GL_FLOAT,gct->data());
     fb.unbind();
     glFinish();
-    return SharedTexture(tex,k.z,k.z);
+    return SharedTexture(gct);
 }
 
 void ChunkTexGenerator::work() {

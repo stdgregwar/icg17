@@ -12,7 +12,7 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize, Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera), mDefaultCamera(camera),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
     mNoise(1024 Mb, chunkSize),
     //mLight({3000,4096,3000},{3,3,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
@@ -83,7 +83,7 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
         mGrass.emplace(std::piecewise_construct,
                        std::forward_as_tuple(res),
                        std::forward_as_tuple(mGrassMaterial));
-        mGrass.at(res).init(res*2,false);
+        mGrass.at(res).init(res*4,false);
         mWaters.emplace(std::piecewise_construct,
                         std::forward_as_tuple(res),
                         std::forward_as_tuple(mWaterMaterial));
@@ -104,7 +104,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mGBuffer.init(mScreenSize.x,mScreenSize.y);
     mGMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     mFront.init(mScreenSize.x,mScreenSize.y);
-    mHalf.init(mScreenSize.x/4,mScreenSize.y/4);
+    mHalf.init(mScreenSize.x/2,mScreenSize.y/2);
 
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
     mRays.init("vbuffercopy.glsl","godrays.glsl");

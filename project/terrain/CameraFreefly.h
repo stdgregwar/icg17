@@ -28,6 +28,7 @@ private:
                            PLANE_BOTTOM
                    };
     float mSSpeed;
+    bool mGravity;
     glm::vec3 mLSpeed;
     glm::vec3 mTargetPosition;
     glm::vec3 mTargetRotation;

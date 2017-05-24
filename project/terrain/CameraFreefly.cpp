@@ -12,7 +12,7 @@
 using namespace glm;
 using namespace std;
 
-CameraFreefly::CameraFreefly(const vec3 &pos, const vec3 &orientation) : Camera(pos,orientation), mSSpeed(20), mLSpeed(0), mTargetRotation(orientation), mTargetPosition(pos)
+CameraFreefly::CameraFreefly(const vec3 &pos, const vec3 &orientation) : Camera(pos,orientation), mSSpeed(20), mLSpeed(0), mTargetRotation(orientation), mTargetPosition(pos), mGravity(true)
 {
 
 }
@@ -22,27 +22,17 @@ void CameraFreefly::setBaseSpeed(float speed) {
 }
 
 glm::vec3 CameraFreefly::inMap(const glm::vec3& pos, const Chunk& c) {
-    GLuint map = c.hMap();
-    if(!map) return pos;
+    const SharedTexture& st = c.hMap();
+    if(!st.get()) return pos;
 
     glClampColor(GL_CLAMP_READ_COLOR, GL_FIXED_ONLY);
-    float pixels[2][2];
     int x; int y;
     vec2 size = c.size();
     vec2 cpos = c.pos();
     vec2 rcpos = {pos.x-cpos.x,pos.y-cpos.y};
     vec2 texPos = rcpos*float(c.res()) / size;
-    x = texPos.x;
-    y = texPos.y;
-    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glReadPixels(x,y,2,2,GL_RED,GL_FLOAT,&pixels);
-    float tx = fract(texPos.x);
-    float ty = fract(texPos.y);
-    float xv = pixels[0][0]*(1-tx)+pixels[0][1]*tx;
-    float xv2 = pixels[1][0]*(1-tx)+pixels[1][1]*tx;
-    float h = xv*(1-ty)+xv2*ty;
-    h*=256;
-    h+=3;
+    float h = st->valAt(texPos.x,texPos.y);
+    h+=6;
     h = pos.z < h ? h : pos.z;
     return vec3{pos.x,pos.y,h};
 }
@@ -57,7 +47,11 @@ void CameraFreefly::update(float delta_s, const Chunk& c) {
 
     vec3 up = vec3(0,0,1);
     vec3 side = normalize(cross(look,up));
-    vec3 wspeed = look*mLSpeed.x + side*mLSpeed.y;
+    float fac = mGravity ? 0.1 : 1;
+    vec3 wspeed = look*mLSpeed.x*fac + side*mLSpeed.y*fac;
+    if(mGravity) {
+        wspeed.z -= 9.81*delta_s;
+    }
 
     mTargetPosition += wspeed*mSSpeed*delta_s;
     mTargetPosition = inMap(mTargetPosition,c);

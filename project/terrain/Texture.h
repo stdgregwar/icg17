@@ -13,7 +13,7 @@
 class GCTexture {
 public:
     GCTexture(GLuint tex, int w, int h) : mID(tex), mW(w),mH(h) {
-        mVals.reserve(w*h);
+        mVals.resize(w*h,0);
     }
     GCTexture(const GCTexture& other) = delete;
     GCTexture& operator=(const GCTexture& other) = delete;
@@ -32,8 +32,8 @@ public:
     float val(int x, int y) {
         using std::min;
         using std::max;
-        x = max(0,min(mW,x));
-        y = max(0,min(mH,y));
+        x = max(0,min(mW-1,x));
+        y = max(0,min(mH-1,y));
         return mVals.at(y*mW+x); //TODO check if this correspond to GL
     }
 
