@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <cmath>
+#include <glm/vec3.hpp>
+#include "VecAndDiff.h"
 
 using namespace std;
 
@@ -19,6 +21,10 @@ public:
         int idx = ((int) floor(time))%mControlPoints.size();
         vector<K> newPoints(mControlPoints[idx]);
         return bezier(newPoints,newPoints.size(),fmod(time,1.f));
+    }
+
+    const K& firstPoint() const {
+        return mControlPoints[0][0];
     }
 
 private:
@@ -38,6 +44,48 @@ private:
             return bezier(points,maxIdx-1, time);
         }
     }
+};
+
+class BezierVecAndDiffBuilder
+{
+public:
+    void addPoint(const VecAndDiff& point){
+        vector<VecAndDiff> points;
+        // If mControlPoints is empty, we initialize it
+        if(mControlPoints.size() == 0){
+            points.push_back(point);
+        } else {
+            VecAndDiff lastPoint = mControlPoints.back().back();
+            // If we are not adding the 2nd point, we add the last one
+            if(mControlPoints.size() != 1 || mControlPoints[0].size() != 1){
+                points.push_back(lastPoint);
+            }
+            // We add a control point at average height and at mix between last and current point
+            glm::vec3 v(lastPoint.v.x,point.v.y,(lastPoint.v.z+point.v.z)/2.f);
+            glm::vec3 d(lastPoint.d.x,point.d.y,(lastPoint.d.z+point.d.z)/2.f);
+            VecAndDiff p(v,d);
+            points.push_back(p);
+            // We add the current point
+            points.push_back(point);
+        }
+        mControlPoints.push_back(points);
+    }
+
+    void reset() {
+        vector< vector<VecAndDiff> > points;
+        mControlPoints = points;
+    }
+
+    Bezier<VecAndDiff> build(){
+        if(mControlPoints.size() != 0){
+            // We close the loop
+            addPoint(mControlPoints[0][0]);
+        }
+        return Bezier<VecAndDiff>(mControlPoints);
+    }
+
+private:
+    vector< vector<VecAndDiff> > mControlPoints;
 };
 
 #endif // BEZIER_H

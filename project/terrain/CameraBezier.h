@@ -10,6 +10,8 @@
 class CameraBezier: public Camera
 {
 public:
+    CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const Bezier<VecAndDiff>& bezier);
+    CameraBezier(const Bezier<VecAndDiff>& bezier);
     CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const vector< vector<VecAndDiff> > &pathControlPoints);
     void setBaseSpeed(float speed);
     void update(float delta_s, const Chunk& c);
@@ -29,6 +31,7 @@ private:
                    };
     float mSSpeed;
     Bezier<VecAndDiff> mBezierPath;
+    Bezier<float> mBezierSpeed;
     glm::vec3 mLSpeed;
     glm::vec3 mTargetPosition;
     glm::vec3 mTargetRotation;

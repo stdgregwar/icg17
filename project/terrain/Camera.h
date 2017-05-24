@@ -22,6 +22,7 @@ public:
     bool inFrustum(const glm::vec2& pos, const float &chunkSize) const;
     glm::vec2 wPos() const;
     const glm::vec3 pos() const {return mPosition;}
+    const glm::vec3 rotation() const {return mRotation;}
 protected:
     glm::vec3 mPosition;
     glm::vec3 mRotation;

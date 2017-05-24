@@ -4,6 +4,7 @@
 #include <glm/mat4x4.hpp>
 #include <GLFW/glfw3.h>
 #include "Camera.h"
+#include "Bezier.h"
 
 class CameraFreefly: public Camera
 {

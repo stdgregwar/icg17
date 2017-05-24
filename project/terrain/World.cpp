@@ -3,6 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include "ShaderBuilder.h"
+#include "VecAndDiff.h"
+#include "CameraBezier.h"
 
 using namespace glm;
 using namespace std;
@@ -10,7 +12,7 @@ using namespace std;
 #define Mb *1024*1024
 
 World::World(float chunkSize, Camera& camera) : mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(32), mTaskPerFrame(8), mCamera(camera), mDefaultCamera(camera),
     mNoise(1024 Mb, chunkSize),
     //mLight({3000,4096,3000},{3,3,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
@@ -19,7 +21,8 @@ World::World(float chunkSize, Camera& camera) : mChunkSize(chunkSize), mViewDist
     mRenderReflexion(true),
     mRenderShadow(true),
     mRenderSkybox(true),
-    mRenderWater(true)
+    mRenderWater(true),
+    mBezierCam(false)
 {
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
 }
@@ -274,7 +277,7 @@ void World::pushTask(ChunkTask task) {
     mToDo.push_back(task);
 }
 
-void World::drawShadows(float time,const glm::mat4& view, const glm::mat4& projection){
+void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
 
 
     mTerrainShadows.bind();
@@ -290,7 +293,7 @@ void World::drawShadows(float time,const glm::mat4& view, const glm::mat4& proje
     mTerrainShadows.unbind();
 }
 
-void World::drawGrass(float time, const glm::mat4& view, const glm::mat4& projection) {
+void World::drawGrass(float time, const mat4 &view, const mat4 &projection) {
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     mLight.uniforms(mGrassMaterial);
@@ -372,7 +375,9 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
     mMirror.unbind();
 }
 
-void World::draw(float time, const mat4 &view, const mat4 &projection) {
+void World::draw(float time) {
+    const mat4 view = mCamera.view();
+    const mat4 projection = mCamera.projection();
     if(mRenderShadow) drawShadows(time,view,projection);
     if(mRenderReflexion) drawReflexions(time,view,projection);
 
@@ -417,4 +422,17 @@ void World::draw(float time, const mat4 &view, const mat4 &projection) {
 
 void World::stop() {
     mNoise.stop();
+}
+
+void World::registerPoint() {
+    VecAndDiff v(mCamera.pos(),mCamera.rotation());
+    mBezierBuilder.addPoint(v);
+}
+
+void World::tBezierCam() {
+    mBezierCam = !mBezierCam;
+    Bezier<VecAndDiff> bezier = mBezierBuilder.build();
+    if(mBezierCam){
+        mCamera = CameraBezier(bezier.firstPoint().v,bezier.firstPoint().d,bezier);
+    }
 }

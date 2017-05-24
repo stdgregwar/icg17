@@ -11,11 +11,25 @@
 using namespace glm;
 using namespace std;
 
-CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vector< vector<VecAndDiff> > &pathControlPoints) : Camera(pos,orientation), mSSpeed(20), mLSpeed(1),
-    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(pathControlPoints)
+
+
+CameraBezier::CameraBezier(const glm::vec3& pos, const glm::vec3& orientation, const Bezier<VecAndDiff>& bezier): Camera(pos,orientation), mSSpeed(20), mLSpeed(1),
+    mTargetRotation(orientation), mTargetPosition(pos), mBezierPath(bezier), mBezierSpeed({{1.0f,2.0f,30.0f,1.0f}})
 {
 
 }
+
+CameraBezier::CameraBezier(const Bezier<VecAndDiff>& bezier): CameraBezier(bezier.firstPoint().v,bezier.firstPoint().d,bezier)
+{
+
+}
+
+CameraBezier::CameraBezier(const vec3 &pos, const vec3 &orientation, const vector< vector<VecAndDiff> > &pathControlPoints) : CameraBezier(pos, orientation, Bezier<VecAndDiff>(pathControlPoints))
+{
+
+}
+
+
 
 void CameraBezier::setBaseSpeed(float speed) {
     mSSpeed = speed;
@@ -23,8 +37,10 @@ void CameraBezier::setBaseSpeed(float speed) {
 
 void CameraBezier::update(float delta_s, const Chunk& c) {
     static float time = 0;
-    time += delta_s;
-    float dtime = time*0.01*mLSpeed.x;
+    float speed = mBezierSpeed.curveAtTime(time*0.01)+mLSpeed.x;
+    time += delta_s*speed;
+    float dtime = time*0.01;
+//    cout << "dtime: " << dtime << " speed: " << speed << endl;
     VecAndDiff point = mBezierPath.curveAtTime(dtime);
 //    cout << "time: " << dtime << " x: " << point.v.x << " y: " << point.v.y << endl;
     mTargetRotation = point.d;
@@ -69,7 +85,7 @@ void CameraBezier::onKey(GLFWwindow* window, int key, int scancode, int action, 
     };
     if(pressed.count(key)) {
         if(action == GLFW_PRESS) {
-            mLSpeed.x += pressed.at(key).x;
+            mLSpeed.x += pressed.at(key).x*0.5 ;
         }
     }
     if(key == GLFW_KEY_LEFT_SHIFT) {

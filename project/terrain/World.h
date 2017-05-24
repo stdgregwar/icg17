@@ -7,6 +7,9 @@
 #include "ScreenQuad/ScreenQuad.h"
 #include "Skybox/Skybox.h"
 #include "Camera.h"
+#include "CameraBezier.h"
+#include "CameraFreefly.h"
+#include "Bezier.h"
 #include "FrameBuffer.h"
 #include "GBuffer.h"
 #include "Light.h"
@@ -38,7 +41,7 @@ public:
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
     void pushForPos(i32vec2 cpos);
-    void draw(float time,const glm::mat4& view, const glm::mat4& projection);
+    void draw(float time);
 
     void drawShadows(float time,const glm::mat4& view, const glm::mat4& projection);
     void drawGrass(float time, const glm::mat4& view, const glm::mat4& projection);
@@ -53,11 +56,16 @@ public:
     void tSkybox() {mRenderSkybox = !mRenderSkybox;}
     void tGrass() {mRenderGrass = !mRenderGrass;}
 
+    void registerPoint();
+    void tBezierCam();
+
     void pushTask(ChunkTask task);
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
 private:
     Camera& mCamera;
+    Camera& mDefaultCamera;
+    BezierVecAndDiffBuilder mBezierBuilder;
     Light mLight;
     Material mTerrainMaterial;
     Material mTerrainShadows;
@@ -94,6 +102,7 @@ private:
     bool mRenderShadow;
     bool mRenderSkybox;
     bool mRenderWater;
+    bool mBezierCam;
 };
 
 #endif // WORLD_H

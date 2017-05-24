@@ -54,7 +54,29 @@ int old_wh;
 //                         {{0.f,0.f,300.f},{M_PI,0.f,0.f}}
 //                     }
 //                 });
-
+//CameraBezier cam({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
+//{
+//                     {
+//                        {{0.f,0.f,300.f},{M_PI,0.f,0.f}},
+//                        {{0.f,500.f,300.f},{-M_PI/4.f,0.f,0.f}},
+//                        {{500.f,500.f,300.f},{-M_PI/2.f,0.f,0.f}}
+//                     },
+//                     {
+//                         {{500.f,500.f,300.f},{-M_PI/2.f,0.f,0.f}},
+//                         {{1000.f,500.f,300.f},{-3*M_PI/4.f,0.f,0.f}},
+//                         {{1000.f,1000.f,300.f},{0.f,0.f,0.f}}
+//                     },
+//                     {
+//                         {{1000.f,1000.f,300.f},{0.f,0.f,0.f}},
+//                         {{1500.f,1000.f,300.f},{M_PI/4.f,0.f,0.f}},
+//                         {{1500.f,500.f,300.f},{M_PI/2.f,0.f,0.f}}
+//                     },
+//                     {
+//                         {{1500.f,500.f,300.f},{M_PI/2.f,0.f,0.f}},
+//                         {{500.f,0.f,300.f},{3*M_PI/4.f,0.f,0.f}},
+//                         {{0.f,0.f,300.f},{M_PI,0.f,0.f}}
+//                     }
+//                 });
 CameraFreefly cam({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4});
 
 
@@ -84,7 +106,7 @@ void Display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float time = 0.3*glfwGetTime();
 
-    world.draw(time,cam.view(),cam.projection());
+    world.draw(time);
 }
 
 // Gets called when the windows/framebuffer is resized.
@@ -132,6 +154,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
     if(action == GLFW_RELEASE) {
         switch(key) {
+        case GLFW_KEY_SPACE:
+            world.registerPoint(); break;
+        case GLFW_KEY_F2:
+            world.tBezierCam(); break;
         case GLFW_KEY_F5:
             world.tGrass(); break;
         case GLFW_KEY_F6:
