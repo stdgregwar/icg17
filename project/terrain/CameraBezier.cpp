@@ -36,7 +36,7 @@ void CameraBezier::update(float delta_s, const Chunk& c) {
     float dtime = time*0.01;
 //    cout << "dtime: " << dtime << " speed: " << speed << endl;
     VecAndDiff point = mBezierPath.curveAtTime(dtime);
-    cout << "time: " << dtime << " x: " << point.v.x << " y: " << point.v.y << endl;
+    //cout << "time: " << dtime << " x: " << point.v.x << " y: " << point.v.y << endl;
     mTargetRotation = point.d;
     mRotation = mRotation + (mTargetRotation - mRotation) * std::min(10.f * delta_s,1.f);
 

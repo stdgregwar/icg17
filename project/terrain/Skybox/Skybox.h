@@ -9,6 +9,7 @@ public:
     GLuint init();
     void cleanup();
     void draw(const glm::mat4 &view, const glm::mat4 &projection);
+    Material& material() {return mMaterial;}
 private:
     Material mMaterial; // Material containing the cube map texture
     GLuint skyboxVAO;  // Vertex array

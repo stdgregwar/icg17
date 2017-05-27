@@ -67,7 +67,7 @@ void main() {
     float ttime = time * 0.1;
     vec3 normal = unpackNormal(waterNormal,w_pos.xy*0.03+vec2(1,-0.453)*ttime);
     normal += unpackNormal(waterNormal,w_pos.xy*0.01+vec2(1,1)*ttime);
-    normal += unpackNormal(waterNormal,w_pos.xy*0.212+vec2(0.12,0.45)*4*ttime);
+    normal += unpackNormal(waterNormal,w_pos.xy*0.112+vec2(0.12,0.45)*4*ttime);
     normal += vec3(0,0,1);
     normal = normalize(normal);
     //normal = vec3(0,0,1);

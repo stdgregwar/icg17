@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "Camera.h"
 #include "ScreenQuad/ScreenQuad.h"
+#include "Bezier.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,6 +25,8 @@ public:
     };
 
     Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm::vec3& color, const glm::vec3 ambient);
+    void update(float delta_s);
+    void setupCycle();
     void addTexture(Material& m);
     bool init(size_t texSize = 1024);
     void bind(const Camera& cam, int i);
@@ -37,11 +40,15 @@ public:
     void draw() const;
 private:
     GLuint mFramebuffer;
-
+    Bezier<glm::vec3> mDirCycle;
+    Bezier<glm::vec3> mColCycle;
+    Bezier<glm::vec3> mAmbientCycle;
+    Bezier<float> mDenCycle;
     std::array<Cas,3> mCascades;
     ScreenQuad mScreenQuad;
     size_t mTexSize;
     glm::vec3 mDirection;
+    float mDensity;
     glm::vec3 mColor;
     glm::vec3 mAmbient;
 };

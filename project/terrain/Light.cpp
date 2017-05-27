@@ -14,6 +14,63 @@ Light::Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm:
         size.x /= 4;
         size.y /= 4;
     }
+    setupCycle();
+}
+
+void Light::setupCycle() {
+    //Setup orientation
+    {
+        BezierBuilder<glm::vec3> b;
+        b
+                (-3,-3,-1)
+                (-3,3,-3)
+                (3,3,-1)
+                (3,3,-0.5)
+                (-3,-3,-3);
+        mDirCycle = b.build();
+    }
+    {
+        //Setup color
+        BezierBuilder<glm::vec3> b;
+        b
+                (1,250.f/255,223.f/255)
+                (255.f/255,251.f/255,162.f/255)
+                (1,0.5,0.25)
+                (0.1,0.05,0.025)
+                (0.1,0.1,0.2);
+        mColCycle = b.build();
+    }
+    {
+        //Setup ambient
+        BezierBuilder<glm::vec3> b;
+        b
+                (0.2,0.3,0.3)
+                (0.2,0.3,0.3)
+                (0.2,0.3,0.3)
+                (0.1,0.1,0.1)
+                (0.1,0.1,0.1);
+        mAmbientCycle = b.build();
+    }
+    {
+        //Setup density
+        BezierBuilder<float> b;
+        b
+                (2)
+                (1)
+                (4)
+                (2)
+                (1);
+        mDenCycle = b.build();
+    }
+}
+
+void Light::update(float delta_s) {
+    static float  time = 0;
+    time += 0.05*delta_s;
+    setDirection(mDirCycle.curveAtTime(time));
+    mColor = mColCycle.curveAtTime(time);
+    mAmbient = mAmbientCycle.curveAtTime(time);
+    mDensity = mDenCycle.curveAtTime(time);
 }
 
 void Light::setDirection(const glm::vec3& dir) {
@@ -159,4 +216,5 @@ void Light::uniforms(Material& m) {
     }
     glUniform3f(m.uniformLocation("l_color"),mColor.x,mColor.y,mColor.z);
     glUniform3f(m.uniformLocation("l_ambient"),mAmbient.x,mAmbient.y,mAmbient.z);
+    glUniform1f(m.uniformLocation("l_density"),mDensity);
 }

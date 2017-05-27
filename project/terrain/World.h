@@ -68,7 +68,7 @@ private:
     Camera* mCamera;
     CameraFreefly mCamFreefly;
     CameraBezier mCamBezier;
-    BezierVecAndDiffBuilder mBezierBuilder;
+    BezierBuilder<VecAndDiff> mBezierBuilder;
     Light mLight;
     Material mTerrainMaterial;
     Material mTerrainShadows;

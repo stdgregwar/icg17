@@ -38,6 +38,6 @@ void main() {
     spec *= shad;
     //color = s_coords.rgb;
     color = gcol.rgb*(l_ambient+diff*l_color)+spec*l_color;
-    //color = vec3(diff);
-    //color  += debug(vec4(wpos,1))*0.125;
+    //color = normal;
+    //color = mix(color,debug(vec4(wpos,1)),0.125f);
 }

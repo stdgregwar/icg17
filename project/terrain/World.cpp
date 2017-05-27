@@ -14,10 +14,10 @@ using namespace std;
 
 World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
 {{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(16), mTaskPerFrame(8),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64), mTaskPerFrame(8),
     mNoise(1024 Mb, chunkSize),
-    //mLight({3000,4096,3000},{3,3,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
-    mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
+    mLight({3000,3000,2*8192},{1,1,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
+    //mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
     mRenderGrass(false),
     mRenderTerrain(true),
     mRenderReflexion(true),
@@ -33,7 +33,7 @@ World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(512);
+    mLight.init(2048);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
@@ -87,7 +87,7 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
         mGrass.emplace(std::piecewise_construct,
                        std::forward_as_tuple(res),
                        std::forward_as_tuple(mGrassMaterial));
-        mGrass.at(res).init(res*4,false);
+        mGrass.at(res).init(res*2,false);
         mWaters.emplace(std::piecewise_construct,
                         std::forward_as_tuple(res),
                         std::forward_as_tuple(mWaterMaterial));
@@ -108,7 +108,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mGBuffer.init(mScreenSize.x,mScreenSize.y);
     mGMirror.init(mScreenSize.x/2,mScreenSize.y/2);
     mFront.init(mScreenSize.x,mScreenSize.y);
-    mHalf.init(mScreenSize.x/8,mScreenSize.y/8);
+    mHalf.init(mScreenSize.x/4,mScreenSize.y/4);
 
     mScreen.init("vbuffercopy.glsl","fbuffercopy.glsl",0);
     mRays.init("vbuffercopy.glsl","godrays.glsl");
@@ -157,6 +157,7 @@ void World::update(float dt,const glm::vec2& worldPos) {
     if(it != mChunks.end()) {
         mCamera->update(dt,it->second);
     }
+    mLight.update(dt);
 
     static float time = 0;
     time += 0.2*dt;
@@ -218,7 +219,7 @@ void World::pushForPos(i32vec2 cpos) {
 
     int maxRes = mMaxRes;
 
-    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-3),(int)std::log2(mMaxRes)-1);
+    int dist = std::min(std::max(0,std::max(abs(cpos.x-center.x),abs(cpos.y-center.y))-4),(int)std::log2(mMaxRes)-1);
     int res = maxRes >> dist;
     Chunks::iterator it = mChunks.find(cpos);
     if(it == mChunks.end()) { //Chunk does not exist
@@ -385,6 +386,8 @@ void World::draw(float time) {
     if(mRenderShadow) drawShadows(time,view,projection);
     if(mRenderReflexion) drawReflexions(time,view,projection);
 
+
+
     mGBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(mRenderTerrain) drawTerrain(time,view,projection);
@@ -399,6 +402,8 @@ void World::draw(float time) {
     mLight.uniforms(mLightPass.material());
     mLightPass.draw(view,projection);
 
+    mSkybox.material().bind();
+    mLight.uniforms(mSkybox.material());
     if(mRenderSkybox) mSkybox.draw(view, projection);
     mFront.unbind();
 

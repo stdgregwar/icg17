@@ -84,7 +84,7 @@ void main() {
     color.rgb = triplanar(rockx,rocky,color.rgb,normal_m).rgb;
     norm = triplanar(rockx_nor,rocky_nor,norm,normal_m);
     norm = normalize(norm);
-    n = normalize(n);//+norm*0.1);
+    n = normalize(n+norm*0.01);
     //tnormal = xytspace*norm;
     color.a = clamp(spec,0,1); //This is specular amount
     normal.a = clamp(power,0,1); //This is specular power
@@ -94,7 +94,7 @@ void main() {
     vec3 tnormal = normalize((MV*vec4(n,0)).xyz);
     normal.xyz = packNormal(tnormal);
 
-    float fog = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);
+    float fog = clamp(exp(7-0.0002*gl_FragCoord.z/gl_FragCoord.w),0,1);
     if(sdoor(gl_FragCoord.xy,fog)) discard;
 
  }

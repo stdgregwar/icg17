@@ -154,7 +154,7 @@ void main()
 	      vertex.normal = -(V*vec4(normal,0)).xyz;
 	      float normalFac = pow(dot(normal,vec3(0,0,1)),8);
 	      float bdist = distance(bpos,vPos);
-	      if(bdist < dist && bpos.z > 0 && bpos.z < 180 && normalFac > 0.1f) {
+	      if(bdist < dist && bpos.z > 0 && bpos.z < 280 && normalFac > 0.1f) {
 		float alpha = clamp((dist-bdist)/(dist-adist),0,1);
 		vertex.alpha = alpha;
 		vertex.color = texture(grass_col,vec2(rand(bpos.xy),0)).rgb;

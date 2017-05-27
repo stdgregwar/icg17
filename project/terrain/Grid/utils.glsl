@@ -19,7 +19,7 @@ vec3 fdiff(vec2 p) {
 vec3 triplanar(vec3 x, vec3 y, vec3 z, vec3 normal) {
     float xf = abs(dot(normal,vec3(1,0,0)));
     float yf = abs(dot(normal,vec3(0,1,0)));
-    float zf = pow(abs(dot(normal,vec3(0,0,1))),3);
+    float zf = pow(abs(dot(normal,vec3(0,0,1)))+0.3,4);
     float t = 1.f/(xf+yf+zf);
     return x*xf*t+y*yf*t+z*zf*t;
 }
