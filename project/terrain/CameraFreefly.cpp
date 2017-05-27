@@ -51,9 +51,9 @@ void CameraFreefly::update(float delta_s, const Chunk& c) {
     }
 
     mTargetPosition += wspeed*mSSpeed*delta_s;
-    mTargetPosition = inMap(mTargetPosition,c);
+    if(mGravity) mTargetPosition = inMap(mTargetPosition,c);
     mPosition += (mTargetPosition - mPosition) * std::min(5.f * delta_s,1.f);
-    mPosition = inMap(mPosition,c);
+    if(mGravity)  mPosition = inMap(mPosition,c);
 
     mView = lookAt(mPosition,mPosition+look,up);
 }

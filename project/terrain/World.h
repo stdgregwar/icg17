@@ -15,6 +15,7 @@
 #include "Light.h"
 #include <list>
 #include <functional>
+#include "Tree.h"
 
 typedef std::unordered_map<glm::i32vec2,Chunk> Chunks;
 typedef std::unordered_map<int,Grid> Grids;
@@ -65,6 +66,7 @@ public:
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
 private:
+    Tree mTree;
     Camera* mCamera;
     CameraFreefly mCamFreefly;
     CameraBezier mCamBezier;

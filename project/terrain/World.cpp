@@ -94,6 +94,8 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
         mWaters.at(res).init(1,false);
         res = res >> 1;
     }
+
+    mTree.build({0,0,300},{9,9,9},2);
 }
 
 void World::setScreenSize(const glm::i32vec2& screenSize) {
@@ -391,6 +393,7 @@ void World::draw(float time) {
     mGBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(mRenderTerrain) drawTerrain(time,view,projection);
+    mTree.draw(view,projection);
     if(mRenderGrass) drawGrass(time, view,projection);
     mGBuffer.unbind();
 
