@@ -19,34 +19,39 @@
 #include <glm/gtx/hash.hpp>
 #include "HashCache.h"
 
-typedef std::promise<SharedTexture> TexPromise;
-typedef std::future<SharedTexture> TexFuture;
-typedef std::function<void(ScreenQuad& rd)> RenderFunc;
+#include "Chunk.h"
+#include "Grid/Grid.h"
+
+typedef std::promise<SharedChunk> ChunkPromise;
+typedef std::future<SharedChunk> ChunkFuture;
 typedef std::lock_guard<std::mutex> Lock;
 
-class ChunkTexGenerator
+typedef std::unordered_map<int,Grid> Grids;
+
+class ChunkGenerator
 {
 public:
     struct Job {
         Job(const glm::ivec3& posAndSize)
-            : posAndSize(posAndSize), valid(true), promise(TexPromise())
+            : posAndSize(posAndSize), valid(true), promise(ChunkPromise())
         {}
-        TexPromise promise;
+        ChunkPromise promise;
+        ChunkFuture future;
         glm::ivec3 posAndSize;
-        //RenderFunc render;
         bool valid;
     };
-    typedef std::queue<Job> Jobs;
+    typedef std::shared_ptr<Job> SharedJob;
+    typedef std::queue<SharedJob> Jobs;
 
-    ChunkTexGenerator(size_t cacheByteSize, float csize);
+    ChunkGenerator(size_t cacheByteSize, float csize, const Grids& terrains, const Grids& waters, const Grids& grass);
     SharedTexture prod(const glm::ivec3& k);
     void init(GLFWwindow* parentWindow, const string &vshader, const string &fshader);
     void start();
     void stop();
     /*TexFuture getTexture(const glm::ivec2 size,
                          const RenderFunc& render, Job*& handle);*/
-    TexFuture getChunkTex(const glm::ivec3 &posAndSize, float csize, Job*& handle);
-    ~ChunkTexGenerator();
+    SharedJob getChunkJob(const glm::ivec3 &posAndSize, float csize);
+    ~ChunkGenerator();
 private:
     void work();
     float mChunkSize;
@@ -59,6 +64,9 @@ private:
     string mFShader;
     ScreenQuad mGenerator;
     rmg::HashCache<glm::ivec3,SharedTexture> mCache;
+    const Grids& mTerrains;
+    const Grids& mWaters;
+    const Grids& mGrass;
 };
 
 #endif // GLWORKER_H

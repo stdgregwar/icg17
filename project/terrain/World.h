@@ -15,33 +15,23 @@
 #include "Light.h"
 #include <list>
 #include <functional>
-#include "Tree.h"
+#include "Tree/Tree.h"
+#include "TexGenerator.h"
 
-typedef std::unordered_map<glm::i32vec2,Chunk> Chunks;
-typedef std::unordered_map<int,Grid> Grids;
+typedef std::unordered_map<glm::ivec2,SharedChunk> Chunks;
 
-struct ChunkTask {
-    enum Type{
-        CREATE,
-        UPDATE,
-        DELETE
-    };
-    Type type;
-    glm::i32vec2 chunk;
-    std::function<int(Chunk* c)> task;
-};
 
-typedef std::list<ChunkTask> Tasks;
+typedef std::list<ChunkGenerator::SharedJob> ChunkJobs;
 
 class World
 {
 public:
     World(float chunkSize);
-    void init(const glm::i32vec2& screenSize, GLFWwindow *window);
+    void init(const glm::ivec2& screenSize, GLFWwindow *window);
     void setViewDistance(int chunks);
     void update(float dt,const glm::vec2& worldPos);
     void updateChunks();
-    void pushForPos(i32vec2 cpos);
+    void pushForPos(const ivec2& cpos);
     void draw(float time);
 
     Camera& cam() {return *mCamera;}
@@ -62,11 +52,9 @@ public:
     void registerPoint();
     void tBezierCam();
 
-    void pushTask(ChunkTask task);
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
 private:
-    Tree mTree;
     Camera* mCamera;
     CameraFreefly mCamFreefly;
     CameraBezier mCamBezier;
@@ -80,9 +68,9 @@ private:
     Grids mTerrains;
     Grids mWaters;
     Grids mGrass;
-    Tasks mToDo;
     Chunks mChunks;
-    ChunkTexGenerator mNoise;
+    ChunkJobs mCJobs;
+    ChunkGenerator mChunkGenerator;
     ScreenQuad mScreen;
     ScreenQuad mRays;
     ScreenQuad mCompositor;
@@ -100,7 +88,6 @@ private:
     int mViewDistance;
     long mFrameID;
     int mMaxRes;
-    int mTaskPerFrame;
     bool mRenderGrass;
     bool mRenderTerrain;
     bool mRenderReflexion;

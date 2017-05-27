@@ -7,16 +7,16 @@
 using namespace glm;
 
 Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
-    : mOffset(offset), mSize(size), mRes(-1), mReady(false), mTexJob(nullptr) ,mTTime(0), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,1))) {
+    : mOffset(offset), mSize(size), mRes(-1), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,1))) {
 }
 
 void Chunk::update(float delta_s) {
-    constexpr float t_max = 0.5f;
+    /*constexpr float t_max = 0.5f;
     if(mTexFuture.valid()) {
         if(mTexFuture.wait_for(std::chrono::microseconds(1)) == future_status::ready) {
             //Texture is available!
             mNextHmap = mTexFuture.get();
-            mTexFuture = TexFuture();
+            mTexFuture = ChunkFuture();
             mTexJob = nullptr;
         }
     }
@@ -24,7 +24,7 @@ void Chunk::update(float delta_s) {
         /*mTTime += delta_s;
         mNextAlpha =  std::min(1.f,mTTime*2/t_max);
         mAlpha = std::min(1.f,2-mTTime*2/t_max);
-        if(mTTime > t_max) {*/
+        if(mTTime > t_max) {
             mAlpha = 1;
             mHmap = mNextHmap;
             mNextHmap.reset();
@@ -35,32 +35,34 @@ void Chunk::update(float delta_s) {
             mReady = true;
             mTTime = 0;
         //}
-    }
+    }*/
 }
 
-int Chunk::updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid &water, const Grid &grass) {
-    size_t tres = res*8+2;
-    if(mRes == tres) return 0;
-    mNextRes = tres;
-    mNextTerrain = &terrain;
-    mNextWater = &water;
-    mNextGrass = &grass;
-
+int Chunk::setAttrs(int res,SharedTexture hmap, const Grid& terrain, const Grid &water, const Grid &grass) {
+    mRes = res;
+    mHmap = hmap;
+    mTerrain = &terrain;
+    mWater = &water;
+    mGrass = &grass;
 
     //if(mTexFuture.valid()) mTexFuture.get(); //Throw future result
     //if(mTexJob) mTexJob->valid = false; //invalidate previous job
-    ChunkTexGenerator::Job* job;
+    //ChunkGenerator::Job* job;
 
     /*mTexFuture = texGen.getTexture({tres,tres},
                                    [tres,this](ScreenQuad& q){
                                         q.draw(mModel,tres);},
                                    job
                                    );*/
-    glm::ivec3 key(mOffset/mSize,tres);
-    mTexFuture = texGen.getChunkTex(key,mSize.x,job);
+    //glm::ivec3 key(mOffset/mSize,tres);
+    //mTexFuture = texGen.getChunkTex(key,mSize.x,job);
     //if(mTexJob) mTexJob->valid = false;
-    mTexJob = job;
+    //mTexJob = job;
     return 1;
+}
+
+glm::ivec2 Chunk::key() const {
+    return mOffset/mSize;
 }
 
 void Chunk::setFrameID(long id) {
@@ -70,7 +72,7 @@ void Chunk::setFrameID(long id) {
 void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection, Material &mat, bool shad) {
     //if(!mReady) return;
     if(mHmap.get()) {
-        mTerrain->draw(time,mModel,view,projection,mat,mAlpha,mHmap,mRes);
+        mTerrain->draw(time,mModel,view,projection,mat,1,mHmap,mHmap->res());
     }
     //Transition
     /*if(mNextHmap.get()) {
@@ -79,13 +81,11 @@ void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection, Ma
 }
 
 void Chunk::drawGrass(float time, const mat4 &view, const mat4 &projection,Material& mat) {
-    if(!mReady) return;
-    mGrass->draw(time,mModel,view,projection,mat,1,mHmap,mRes);
+    mGrass->draw(time,mModel,view,projection,mat,1,mHmap,mHmap->res());
 }
 
 void Chunk::drawWater(float time, const mat4 &view, const mat4 &projection,Material& mat) {
-    if(!mReady) return;
-    mWater->draw(time,mModel,view,projection,mat,1,mHmap,mRes);
+    mWater->draw(time,mModel,view,projection,mat,1,mHmap,mHmap->res());
 }
 
 Chunk::~Chunk() {
