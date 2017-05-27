@@ -44,6 +44,10 @@ GLuint Material::uniformLocation(const string& name) const {
 }
 
 GLuint Material::addTexture(GLuint no, const string& filename, const string& uName, GLuint filter,GLuint repeat,bool genMipmaps) {
+    addTexture(no, filename, uName, filter, repeat, repeat, genMipmaps);
+}
+
+GLuint Material::addTexture(GLuint no, const string& filename, const string& uName, GLuint filter,GLuint repeatS, GLuint repeatT,bool genMipmaps) {
     int width;
     int height;
     int nb_component;
@@ -57,11 +61,14 @@ GLuint Material::addTexture(GLuint no, const string& filename, const string& uNa
     }
     unsigned int uwidth = width;
     unsigned int uheight = height;
-    addTexture(GL_TEXTURE_2D,no,image,nb_component == 3 ? GL_RGB : GL_RGBA,GL_UNSIGNED_BYTE,{uwidth,uheight},uName,filter,repeat,genMipmaps);
+    addTexture(GL_TEXTURE_2D,no,image,nb_component == 3 ? GL_RGB : GL_RGBA,GL_UNSIGNED_BYTE,{uwidth,uheight},uName,filter,repeatS, repeatT,genMipmaps);
     stbi_image_free(image);
 }
-
 GLuint Material::addTexture(GLuint target, GLuint no, const void* data, GLuint format, GLuint type, const vector<size_t>& dim, const string& uName, GLuint filter, GLuint repeat, bool genMipmaps) {
+    addTexture(target, no, data, format, type, dim, uName, filter, repeat, repeat, genMipmaps);
+}
+
+GLuint Material::addTexture(GLuint target, GLuint no, const void* data, GLuint format, GLuint type, const vector<size_t>& dim, const string& uName, GLuint filter, GLuint repeatS, GLuint repeatT, bool genMipmaps) {
     glUseProgram(mProgramId);
     GLuint tid;
     glGenTextures(1,&tid);
@@ -78,8 +85,8 @@ GLuint Material::addTexture(GLuint target, GLuint no, const void* data, GLuint f
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
     //glTexParameterf(target,GL_TEXTURE_MAX_ANISOTROPY_EXT,16);
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
-    glTexParameterf( target, GL_TEXTURE_WRAP_S, repeat);
-    glTexParameterf( target, GL_TEXTURE_WRAP_T, repeat);
+    glTexParameterf( target, GL_TEXTURE_WRAP_S, repeatS);
+    glTexParameterf( target, GL_TEXTURE_WRAP_T, repeatT);
 
     if(genMipmaps) {
         glGenerateMipmap(target);
