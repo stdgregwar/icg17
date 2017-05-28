@@ -2,22 +2,35 @@
 #define CHUNK_H
 
 #include <glm/vec2.hpp>
+
+#include <memory>
+
 #include "Grid/Grid.h"
 #include "ScalarFrameBuffer.h"
 
 #include "ScreenQuad/ScreenQuad.h"
-#include "TexGenerator.h"
+#include "Texture.h"
+#include "Tree/Tree.h"
+
+class Chunk;
+
+typedef std::shared_ptr<Chunk> SharedChunk;
 
 class Chunk
 {
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
     void update(float delta_s);
-    int updateRes(int res, ChunkTexGenerator &texGen, const Grid& terrain, const Grid& water, const Grid& grass);
+    void finish();
+    int setAttrs(int res, SharedTexture hmap, const Grid& terrain, const Grid& water, const Grid& grass);
+    void addTrees(Material& trunc, Material& leaves);
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection, Material& mat, bool shad = false);
     void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
+    void drawTruncs(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat);
+    void drawLeaves(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat);
     void setFrameID(long id);
+    glm::ivec2 key() const;
     long frameID() { return mFrameId;}
     const SharedTexture& hMap() const {return mHmap;}
     const glm::vec2& pos() const {return mOffset;}
@@ -25,12 +38,11 @@ public:
     int res() const {return mRes;}
     ~Chunk();
 private:
-    float mAlpha;
-    float mNextAlpha;
-    bool mReady;
+    std::uniform_real_distribution<float> mRand;
+    std::default_random_engine mEng;
+    std::vector<Tree> mTrees;
     SharedTexture mHmap;
     SharedTexture mNextHmap;
-    float mTTime;
     ScalarFrameBuffer mNoiseBuffer;
     const Grid* mTerrain;
     const Grid* mWater;
@@ -41,13 +53,8 @@ private:
     glm::vec2 mSize;
     glm::mat4 mModel;
 
-    ChunkTexGenerator::Job* mTexJob;
-    TexFuture mTexFuture;
-    int mNextRes;
-    const Grid* mNextTerrain;
-    const Grid* mNextWater;
-    const Grid* mNextGrass;
-
+    //ChunkGenerator::Job* mTexJob;
+    //ChunkFuture mTexFuture;
 };
 
 #endif // CHUNK_H

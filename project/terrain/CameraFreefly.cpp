@@ -27,7 +27,7 @@ glm::vec3 CameraFreefly::inMap(const glm::vec3& pos, const Chunk& c) {
     vec2 size = c.size();
     vec2 cpos = c.pos();
     vec2 rcpos = {pos.x-cpos.x,pos.y-cpos.y};
-    vec2 texPos = rcpos*float(c.res()) / size;
+    vec2 texPos = rcpos*float(st->res()) / size;
     float h = st->valAt(texPos.x,texPos.y);
     h+=6;
     h = pos.z < h ? h : pos.z;
@@ -51,9 +51,9 @@ void CameraFreefly::update(float delta_s, const Chunk& c) {
     }
 
     mTargetPosition += wspeed*mSSpeed*delta_s;
-    if(mGravity) mTargetPosition = inMap(mTargetPosition,c);
+    mTargetPosition = inMap(mTargetPosition,c);
     mPosition += (mTargetPosition - mPosition) * std::min(5.f * delta_s,1.f);
-    if(mGravity)  mPosition = inMap(mPosition,c);
+    mPosition = inMap(mPosition,c);
 
     mView = lookAt(mPosition,mPosition+look,up);
 }

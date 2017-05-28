@@ -20,7 +20,7 @@ float shadow_val(vec4 wpos) {
 	vec4 shadow_coord = l_VP[i]*wpos;
 	if(clipSpace(shadow_coord.xyz)) {
 	    vec3 fcoords = vec3(shadow_coord.xy*0.5+vec2(0.5),(shadow_coord.z+1)*0.5);
-            val_loop(i,cascades);
+	    val_loop(i,cascades);
 	}
     }
     return 1.f;
@@ -43,8 +43,8 @@ float diffFromShadows(vec4 wpos, float diff, vec3 normal, vec3 light) {
     for(int i = 2; i > -1; i--) {
 	vec4 shadow_coord = l_VP[i]*wpos;
 	if(clipSpace(shadow_coord.xyz)) {
-	    vec3 fcoords = vec3(shadow_coord.xy*0.5+vec2(0.5)+0.001*rand2(gl_FragCoord.xy),(shadow_coord.z+1)*0.5-bias/(i+1));
-            diff_loop(i,cascades,fcoords);
+	    vec3 fcoords = vec3(shadow_coord.xy*0.5+vec2(0.5)+0.001*rand2(gl_FragCoord.xy),(shadow_coord.z+1)*0.5-bias/(i*2+1));
+	    diff_loop(i,cascades,fcoords);
 	    return mix(diff, diff*clamp(d,0,1), dfac);
 	    //color.xyz = vec3(0,1,0);
 	}

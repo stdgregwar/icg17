@@ -8,6 +8,7 @@ file(GLOB TEXTURES
     Grid/*.png
     Skybox/*.jpg
     Skybox/*.png
+    Tree/*.png
    )
 copy_files_once(${TEXTURES})
 
@@ -17,7 +18,7 @@ file(GLOB SHADERS
   ScreenQuad/*.glsl
   Grid/*.glsl
   Skybox/*.glsl
-  *.glsl)
+  Tree/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
