@@ -15,6 +15,7 @@
 #include "Light.h"
 #include <list>
 #include <functional>
+#include "Particles/Particle_generator.h"
 
 typedef std::unordered_map<glm::i32vec2,Chunk> Chunks;
 typedef std::unordered_map<int,Grid> Grids;
@@ -106,6 +107,9 @@ private:
     bool mRenderSkybox;
     bool mRenderWater;
     bool mBezierCam;
+
+
+    ParticleGenerator *mParticles;
 };
 
 #endif // WORLD_H
