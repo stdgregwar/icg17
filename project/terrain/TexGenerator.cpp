@@ -5,7 +5,7 @@
 
 ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &terrains, const Grids &waters, const Grids &grass, int maxRes, Material &trunc, Material &leaf) : mChunkSize(csize),
     mTextureCache(cacheByteSize,[this](const glm::ivec3& k){return texProd(k);}),
-    mChunkCache(cacheByteSize/32,[this](const glm::ivec3& k){return chunkProd(k);}),
+    mChunkCache(cacheByteSize,[this](const glm::ivec3& k){return chunkProd(k);}),
     mTerrains(terrains),
     mWaters(waters),
     mGrass(grass),
@@ -17,7 +17,8 @@ ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &t
 }
 
 
-void ChunkGenerator::init(GLFWwindow* parentWindow,const string& vshader, const string& fshader) {
+void ChunkGenerator::init(GLFWwindow* parentWindow,const string& vshader, const string& fshader, int maxRes) {
+    mMaxRes = maxRes;
     mVShader = vshader;
     mFShader = fshader;
     glfwWindowHint(GLFW_VISIBLE, false);

@@ -89,7 +89,7 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
         dir*=lenght;
         Bezier<vec3> branch({{center,center+dir,center+dir+vec3(1,0,0)}});
         addTrunc(branch,3,3,twidth*0.2);
-        addLeaves(branch,10,twidth+0.5);
+        addLeaves(branch,5,twidth+0.5);
     }
 
     mTruncSize = mTruncIndices.size();
@@ -116,6 +116,10 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
 }
 
 void Tree::finish() {
+
+    if(mFinished) return;
+
+    mFinished = true;
 
     mTruncMaterial.bind();
 
@@ -198,6 +202,10 @@ void Tree::finish() {
     glBindVertexArray(0);
 
     mLeafMaterial.unbind();
+
+    mTruncIndices.clear();
+    mTruncVerts.clear();
+    mLeafVerts.clear();
 }
 
 void Tree::drawTrunc(const glm::mat4& view, const glm::mat4& proj, Material &mat) {
@@ -214,5 +222,9 @@ void Tree::drawLeaves(const glm::mat4& view, const glm::mat4& proj, Material &ma
 }
 
 Tree::~Tree() {
-
+    glDeleteBuffers(1,&mVertexBufferObject);
+    glDeleteBuffers(1,&mVertexBufferObjectIndex);
+    glDeleteBuffers(1,&mLeafVertexBufferObject);
+    glDeleteVertexArrays(1, &mVertexArrayId);
+    glDeleteVertexArrays(1, &mLeafVertexArrayId);
 }

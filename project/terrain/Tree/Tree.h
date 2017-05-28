@@ -32,6 +32,7 @@ public:
     void addLeaves(const Bezier<glm::vec3>& b, float count, float bsize);
     ~Tree();
 private:
+    bool mFinished = false;
     std::uniform_real_distribution<float> mRand;
     std::default_random_engine mEng;
     vector<TruncData> mTruncVerts;

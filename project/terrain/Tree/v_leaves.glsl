@@ -14,10 +14,13 @@ out vData {
     float size;
 } vertex;
 
+#include rand.glsl
+
 void main() {
     vertex.pos = position;
     vertex.color = color;
     vertex.size = size;
-    vec4 eye = iV * vec4(0,0,0,1);
-    vertex.view_dir = normalize(position-eye.xyz);
+    vec4 eye = iV * vec4(0,0,-1,0);
+    vertex.view_dir = normalize(eye.xyz);
+    vertex.tex =  int((color.b)*4);
 }

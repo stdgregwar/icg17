@@ -39,12 +39,13 @@ void main() {
 
     vec3 top = normalize(up+cross(up,rot));
     vec3 side = normalize(cross(top,view));
+    top = normalize(cross(view,side));
     top*=vertices[0].size;
     side*=vertices[0].size;
     vec3 center = vertices[0].pos;
 
     //Make quad
-    vertex.normal = mat3(V)*top;
+    vertex.normal = normalize(mat3(V)*up);
     vertex.color = vertices[0].color;
 
     vec3 pos;
@@ -53,7 +54,6 @@ void main() {
     pos = center+top-side;
     gl_Position = VP*vec4(pos,1);
     EmitVertex();
-
 
 
     vertex.uv = uvFrame(vec2(1,1),tex);

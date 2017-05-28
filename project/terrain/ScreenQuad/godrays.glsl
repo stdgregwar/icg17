@@ -20,6 +20,10 @@ out vec3 color;
 
 const float maxdiff = 30;
 
+float airDen(vec3 wpos) {
+    return clamp(1-exp(-(500-wpos.z)*0.004),0,3);
+}
+
 void main(void) {
     float depth = texture(buffer_depth,uv).r;
     float d = 0;
@@ -32,7 +36,7 @@ void main(void) {
 	float fac = float(i)/max;
 
 	vec4 wpos = vec4(mix(base,eye,fac),1);
-	d += l_density*(shadow_val(wpos));
+	d += airDen(wpos.xyz)*l_density*(shadow_val(wpos));
 	last = wpos.xyz;
     }
     float dist = distance(base,eye);

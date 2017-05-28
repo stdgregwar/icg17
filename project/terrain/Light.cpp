@@ -65,7 +65,7 @@ void Light::setupCycle() {
 }
 
 void Light::update(float delta_s) {
-    mTime += 0.005*delta_s;
+    mTime += 0.05*delta_s;
     setDirection(mDirCycle.curveAtTime(mTime));
     mColor = mColCycle.curveAtTime(mTime);
     mAmbient = mAmbientCycle.curveAtTime(mTime);

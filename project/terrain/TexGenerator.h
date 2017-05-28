@@ -46,7 +46,7 @@ public:
     ChunkGenerator(size_t cacheByteSize, float csize, const Grids& terrains, const Grids& waters, const Grids& grass, int maxRes, Material& trunc, Material& leaf);
     SharedTexture texProd(const glm::ivec3& k);
     SharedChunk chunkProd(const glm::ivec3& k);
-    void init(GLFWwindow* parentWindow, const string &vshader, const string &fshader);
+    void init(GLFWwindow* parentWindow, const string &vshader, const string &fshader, int maxRes);
     void start();
     void stop();
     /*TexFuture getTexture(const glm::ivec2 size,

@@ -14,7 +14,7 @@ using namespace std;
 
 World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
 {{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(64),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(32),
     mChunkGenerator(1024 Mb, chunkSize,mTerrains,mWaters,mGrass,mMaxRes,mTruncMaterial,mLeafMaterial),
     mLight({3000,3000,2*8192},{1,1,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     //mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
@@ -40,6 +40,7 @@ void World::init(const ivec2 &screenSize, GLFWwindow* window) {
     mTruncMaterial.init("v_tree.glsl","f_tree.glsl");
     mTruncShadow.init("v_tree.glsl","foccluder.glsl");
     mLeafMaterial.init("v_leaves.glsl","f_leaves.glsl","g_leaves.glsl");
+    mLeafShadow.init("v_leaves.glsl","f_leaves_occluder.glsl","g_leaves.glsl");
 
     vector<unsigned char> colors = {/*blue*/ 0, 0, 255,
                                     /*yellow*/ 0, 255, 255,
@@ -74,6 +75,7 @@ void World::init(const ivec2 &screenSize, GLFWwindow* window) {
     mTruncMaterial.addTexture(GL_TEXTURE1,"bark1-normal3.png","bark_nor",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
 
     mLeafMaterial.addTexture(GL_TEXTURE0,"pine_leaf_atlas.png","leaves",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
+    mLeafShadow.addTexture(GL_TEXTURE0,"pine_leaf_atlas.png","leaves",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
 
     GLuint skyBoxTex = mSkybox.init();
     mTerrainMaterial.addTexture(GL_TEXTURE_CUBE_MAP,GL_TEXTURE8,skyBoxTex,"skybox");
@@ -98,7 +100,7 @@ void World::init(const ivec2 &screenSize, GLFWwindow* window) {
         mWaters.at(res).init(1,false);
         res = res >> 1;
     }
-    mChunkGenerator.init(window,"NoiseGen_vshader.glsl","NoiseGen_fshader.glsl");
+    mChunkGenerator.init(window,"NoiseGen_vshader.glsl","NoiseGen_fshader.glsl",mMaxRes);
 }
 
 void World::setScreenSize(const glm::i32vec2& screenSize) {
@@ -152,6 +154,8 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mLight.addTexture(mMirrorLightPass.material());
 
     mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE0,mMain.diffuse(),"diffuse");
+    mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE2,mMain.depth(),"depth");
+
     mCompositor.material().addTexture(GL_TEXTURE_2D,GL_TEXTURE1,mHalf.diffuse(),"overlay");
 }
 
@@ -284,6 +288,18 @@ void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
     }
     mLight.unbind();
     mTruncShadow.unbind();
+
+    mLeafShadow.bind();
+    for(int i = 0; i < 3; i++) {
+        mLight.bind(cam(),i);
+        for(Chunks::value_type& p : mChunks) {
+            if(distance(vec2(p.first),vec2(mCenter)) < 3) {
+                p.second->drawLeaves(time,mLight.view(i),mLight.proj(i),mLeafShadow);
+            }
+        }
+    }
+    mLight.unbind();
+    mLeafShadow.unbind();
 }
 
 void World::drawGrass(float time, const mat4 &view, const mat4 &projection) {
