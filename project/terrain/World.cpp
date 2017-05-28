@@ -56,10 +56,10 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
                                     /*grey*/ 255, 0, 0};
     ///*white*/ 255,255,0};
     mTerrainMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
-    {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
+    {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE, false);
     mGrassMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
-    {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE);
-    mGrassMaterial.addTexture(GL_TEXTURE2, "grasscolor.png","grass_col");
+    {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE, false);
+    mGrassMaterial.addTexture(GL_TEXTURE2, "grasscolor.png","grass_col",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
     mGrassMaterial.addTexture(GL_TEXTURE3, "grasspatch.png", "grasspatch",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE2,"moss-albedo.png","moss_alb",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE9,"moss-normal-inverted.png","moss_nor",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
@@ -69,7 +69,7 @@ void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
     mTerrainMaterial.addTexture(GL_TEXTURE5,"rock_sliced_Base_Color.png","rock_alb",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE8,"rock_sliced_Normal.png","rock_nor",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE6,"snow.jpg","snow",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
-    mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise");
+    mTerrainMaterial.addTexture(GL_TEXTURE7,"noise.jpg","noise",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
 
     mNoise.init(window,"NoiseGen_vshader.glsl","NoiseGen_fshader.glsl");
 
@@ -122,7 +122,7 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
     mWaterMaterial.init("water_vshader.glsl", "water_fshader.glsl");
     // Frame buffer for mirror effect initialization
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE1,texMirror,"mirror");
-    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal2.png","waterNormal",GL_LINEAR_MIPMAP_LINEAR);
+    mWaterMaterial.addTexture(GL_TEXTURE2,"water_normal2.png","waterNormal",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE3,mFront.diffuse(),"refract_col");
     mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE4,mFront.depth(),"refract_depth");
     //mWaterMaterial.addTexture(GL_TEXTURE_2D,GL_TEXTURE5,mLight.depth(),"shadowmap");

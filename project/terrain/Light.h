@@ -51,6 +51,7 @@ private:
     float mDensity;
     glm::vec3 mColor;
     glm::vec3 mAmbient;
+    float mTime = 0;
 };
 
 #endif // LIGHT_H
