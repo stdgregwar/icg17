@@ -43,14 +43,15 @@ public:
     typedef std::shared_ptr<Job> SharedJob;
     typedef std::queue<SharedJob> Jobs;
 
-    ChunkGenerator(size_t cacheByteSize, float csize, const Grids& terrains, const Grids& waters, const Grids& grass);
-    SharedTexture prod(const glm::ivec3& k);
+    ChunkGenerator(size_t cacheByteSize, float csize, const Grids& terrains, const Grids& waters, const Grids& grass, int maxRes, Material& trunc, Material& leaf);
+    SharedTexture texProd(const glm::ivec3& k);
+    SharedChunk chunkProd(const glm::ivec3& k);
     void init(GLFWwindow* parentWindow, const string &vshader, const string &fshader);
     void start();
     void stop();
     /*TexFuture getTexture(const glm::ivec2 size,
                          const RenderFunc& render, Job*& handle);*/
-    SharedJob getChunkJob(const glm::ivec3 &posAndSize, float csize);
+    SharedJob getChunkJob(const glm::ivec3 &posAndSize);
     ~ChunkGenerator();
 private:
     void work();
@@ -63,10 +64,14 @@ private:
     string mVShader;
     string mFShader;
     ScreenQuad mGenerator;
-    rmg::HashCache<glm::ivec3,SharedTexture> mCache;
+    rmg::HashCache<glm::ivec3,SharedTexture> mTextureCache;
+    rmg::HashCache<glm::ivec3,SharedChunk> mChunkCache;
     const Grids& mTerrains;
     const Grids& mWaters;
     const Grids& mGrass;
+    int mMaxRes;
+    Material& mTruncMaterial;
+    Material& mLeafMaterial;
 };
 
 #endif // GLWORKER_H

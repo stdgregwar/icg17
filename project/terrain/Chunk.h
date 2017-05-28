@@ -10,6 +10,7 @@
 
 #include "ScreenQuad/ScreenQuad.h"
 #include "Texture.h"
+#include "Tree/Tree.h"
 
 class Chunk;
 
@@ -20,10 +21,14 @@ class Chunk
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
     void update(float delta_s);
+    void finish();
     int setAttrs(int res, SharedTexture hmap, const Grid& terrain, const Grid& water, const Grid& grass);
+    void addTrees(Material& trunc, Material& leaves);
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection, Material& mat, bool shad = false);
     void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
+    void drawTruncs(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat);
+    void drawLeaves(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat);
     void setFrameID(long id);
     glm::ivec2 key() const;
     long frameID() { return mFrameId;}
@@ -33,6 +38,9 @@ public:
     int res() const {return mRes;}
     ~Chunk();
 private:
+    std::uniform_real_distribution<float> mRand;
+    std::default_random_engine mEng;
+    std::vector<Tree> mTrees;
     SharedTexture mHmap;
     SharedTexture mNextHmap;
     ScalarFrameBuffer mNoiseBuffer;

@@ -34,6 +34,8 @@ public:
     void pushForPos(const ivec2& cpos);
     void draw(float time);
 
+    void pushTask(const glm::ivec3& task);
+
     Camera& cam() {return *mCamera;}
 
     void drawShadows(float time,const glm::mat4& view, const glm::mat4& projection);
@@ -41,6 +43,7 @@ public:
     void drawTerrain(float time, const glm::mat4& view, const glm::mat4& projection);
     void drawWater(float time, const glm::mat4& view, const glm::mat4& projection);
     void drawReflexions(float time, const glm::mat4& view, const glm::mat4& projection);
+    void drawTrees(float time, const glm::mat4& view, const glm::mat4& projection);
 
     void tWater() {mRenderWater = !mRenderWater;}
     void tReflexions() {mRenderReflexion = !mRenderReflexion;}
@@ -64,6 +67,10 @@ private:
     Material mTerrainShadows;
     Material mWaterMaterial;
     Material mGrassMaterial;
+    Material mTruncMaterial;
+    Material mTruncShadow;
+    Material mLeafShadow;
+    Material mLeafMaterial;
     Skybox mSkybox;
     Grids mTerrains;
     Grids mWaters;
@@ -75,6 +82,7 @@ private:
     ScreenQuad mRays;
     ScreenQuad mCompositor;
     ScreenQuad mLightPass;
+    std::list<glm::ivec3> mTasks;
     glm::i32vec2 mCenter;
     glm::i32vec2 mScreenSize;
     GBuffer mGBuffer;

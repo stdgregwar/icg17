@@ -8,6 +8,7 @@ file(GLOB TEXTURES
     Grid/*.png
     Skybox/*.jpg
     Skybox/*.png
+    Tree/*.png
    )
 copy_files_once(${TEXTURES})
 

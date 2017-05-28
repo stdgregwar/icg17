@@ -93,7 +93,7 @@ void main() {
     vec3 rdiff = rwn-rwon; //Making diff of reflection with and without normal mapping to estimate displace in reflect lookup
     vec3 refl = texture(mirror,gl_FragCoord.xy/size+rdiff.xy*0.04*fac).rgb;
 
-    float fog2 = clamp(exp(7-0.002*gl_FragCoord.z/gl_FragCoord.w),0,1);
+    float fog2 = clamp(exp(7-0.0002*gl_FragCoord.z/gl_FragCoord.w),0,1);
     if(sdoor(gl_FragCoord.xy,fog2)) discard;
 
     //vec3 waterFog = mix(vec3(0.7, 0.99, 1),vec3(0.1,0.2,0.2),fog2);

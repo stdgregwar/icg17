@@ -25,9 +25,12 @@ class Tree
 public:
     Tree(Material& truncMaterial, Material& leafMaterial);
     void build(const glm::vec3& pos, const glm::vec3& normal, float width);
+    void finish();
     void drawTrunc(const glm::mat4& view, const glm::mat4& proj, Material& mat);
+    void drawLeaves(const glm::mat4& view, const glm::mat4& proj, Material& mat);
     void addTrunc(const Bezier<glm::vec3>& b, float count, float res, float width);
-    void addLeaves(const Bezier<glm::vec3>& b, float count);
+    void addLeaves(const Bezier<glm::vec3>& b, float count, float bsize);
+    ~Tree();
 private:
     std::uniform_real_distribution<float> mRand;
     std::default_random_engine mEng;

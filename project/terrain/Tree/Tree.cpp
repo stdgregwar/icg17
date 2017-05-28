@@ -58,13 +58,13 @@ void Tree::addTrunc(const Bezier<vec3> &b, float count, float res, float width) 
     }
 }
 
-void Tree::addLeaves(const Bezier<glm::vec3>& b, float count) {
+void Tree::addLeaves(const Bezier<glm::vec3>& b, float count, float bsize) {
     for(float i = 0.2; i < 1; i+=1/count) {
         vec3 pos = b.curveAtTime(i);
         vec3 jitter = vec3(mRand(mEng),mRand(mEng),mRand(mEng));
         vec3 col = {i,mRand(mEng)*0.5+0.5,mRand(mEng)*0.5+0.5};
-        float size = 1 + mRand(mEng)*0.3;
-        mLeafVerts.push_back({pos+jitter,col,size});
+        float size = 2 + mRand(mEng)*0.5;
+        mLeafVerts.push_back({pos+jitter,col,size*bsize});
     }
 }
 
@@ -73,46 +73,57 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
 
     mEng.seed(pos.x); //Set the seed of the tree, this way we always end up with the same for a specific place
 
-    std::vector<TruncData>& vertices = mTruncVerts;
-    std::vector<GLuint>& indices = mTruncIndices;
-
-    float count = 20;
-    float res = 12;
+    float count = 10;
+    float res = 8;
     Bezier<vec3> mainTrunc({{pos,pos+normal,pos+normal+vec3(0,0,1)*length(normal)}});
     addTrunc(mainTrunc,count,res,width);
 
     float bCount = 40;
     for(float i = 0.4; i < 0.9; i+=1/bCount) {
         vec3 center, forw, side, bside;
-        float twidth = width*(1-i);
-        float lenght = normal.length()*4*(1-i);
+        float twidth = width*(1-i*0.8)*2;
+        float lenght = normal.length()*4*(1-i*0.5);
         tie(center,forw,side,bside) = bezierBase(mainTrunc,i,i+1/count,vec3(1,0,0));
         float ang = 2*M_PI*mRand(mEng);
         vec3 dir = cos(ang) * side + sin(ang)* bside - forw;
         dir*=lenght;
         Bezier<vec3> branch({{center,center+dir,center+dir+vec3(1,0,0)}});
-        addTrunc(branch,4,4,twidth*0.2);
+        addTrunc(branch,3,3,twidth*0.2);
+        addLeaves(branch,10,twidth+0.5);
     }
+
+    mTruncSize = mTruncIndices.size();
+
+    // position buffer
+    glGenBuffers(1, &mVertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, mTruncVerts.size() * sizeof(TruncData),
+                 mTruncVerts.data(), GL_STATIC_DRAW);
+
+    // vertex indices
+    glGenBuffers(1, &mVertexBufferObjectIndex);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexBufferObjectIndex);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mTruncIndices.size() * sizeof(GLuint),
+                 mTruncIndices.data(), GL_STATIC_DRAW);
+
+    // position buffer
+    glGenBuffers(1, &mLeafVertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, mLeafVertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, mLeafVerts.size() * sizeof(LeafData),
+                 mLeafVerts.data(), GL_STATIC_DRAW);
+
+    mLeafSize = mLeafVerts.size();
+}
+
+void Tree::finish() {
 
     mTruncMaterial.bind();
 
     glGenVertexArrays(1, &mVertexArrayId);
     glBindVertexArray(mVertexArrayId);
 
-    // position buffer
-    glGenBuffers(1, &mVertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(TruncData),
-                 vertices.data(), GL_STATIC_DRAW);
 
-    // vertex indices
-    glGenBuffers(1, &mVertexBufferObjectIndex);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexBufferObjectIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint),
-                 indices.data(), GL_STATIC_DRAW);
-
-    mTruncSize = indices.size();
-
+     glBindBuffer(GL_ARRAY_BUFFER, mVertexBufferObject);
     {
         // position shader attribute
         GLuint locPosition = mTruncMaterial.attrLocation("position");
@@ -132,9 +143,6 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
                               sizeof(TruncData), (void*)offsetof(TruncData,normal));
 
         GLuint locColor = mTruncMaterial.attrLocation("color");
-        if(locColor == -1) {
-            throw std::runtime_error("failed to bind attrib color");
-        }
         glEnableVertexAttribArray(locColor);
         glVertexAttribPointer(locColor, 3, GL_FLOAT, DONT_NORMALIZE,
                               sizeof(TruncData), (void*)offsetof(TruncData,col));
@@ -148,21 +156,23 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
                               sizeof(TruncData), (void*)offsetof(TruncData,uv));
 
     }
+
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexBufferObjectIndex);
+
     glBindVertexArray(0);
 
-    //===================================================================================
-    //Leaf buffers
+    mTruncMaterial.unbind();
+
     mLeafMaterial.bind();
 
     glGenVertexArrays(1, &mLeafVertexArrayId);
     glBindVertexArray(mLeafVertexArrayId);
 
-    // position buffer
-    glGenBuffers(1, &mLeafVertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, mLeafVertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, mLeafVerts.size() * sizeof(LeafData),
-                 mLeafVerts.data(), GL_STATIC_DRAW);
+    //===================================================================================
+    //Leaf buffers
 
+
+      glBindBuffer(GL_ARRAY_BUFFER, mLeafVertexBufferObject);
     {
         // position shader attribute
         GLuint locPosition = mLeafMaterial.attrLocation("position");
@@ -174,9 +184,6 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
                               sizeof(LeafData), (void*)offsetof(LeafData,pos));
 
         GLuint locColor = mLeafMaterial.attrLocation("color");
-        if(locColor == -1) {
-            throw std::runtime_error("failed to bind attrib color");
-        }
         glEnableVertexAttribArray(locColor);
         glVertexAttribPointer(locColor, 3, GL_FLOAT, DONT_NORMALIZE,
                               sizeof(LeafData), (void*)offsetof(LeafData,col));
@@ -189,12 +196,23 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
                               sizeof(LeafData), (void*)offsetof(LeafData,size));
     }
     glBindVertexArray(0);
-    mLeafMaterial.bind();
+
+    mLeafMaterial.unbind();
 }
 
 void Tree::drawTrunc(const glm::mat4& view, const glm::mat4& proj, Material &mat) {
     glBindVertexArray(mVertexArrayId);
-    glUniformMatrix4fv(mat.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(proj*view));
+
     glDrawElements(GL_TRIANGLES, mTruncSize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+
+void Tree::drawLeaves(const glm::mat4& view, const glm::mat4& proj, Material &mat) {
+    glBindVertexArray(mLeafVertexArrayId);
+    glDrawArrays(GL_POINTS, 0, mLeafSize);
+    glBindVertexArray(0);
+}
+
+Tree::~Tree() {
+
 }

@@ -3,11 +3,15 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &terrains, const Grids &waters, const Grids &grass) : mChunkSize(csize),
-    mCache(cacheByteSize,[this](const glm::ivec3& k){return prod(k);}),
+ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &terrains, const Grids &waters, const Grids &grass, int maxRes, Material &trunc, Material &leaf) : mChunkSize(csize),
+    mTextureCache(cacheByteSize,[this](const glm::ivec3& k){return texProd(k);}),
+    mChunkCache(cacheByteSize/32,[this](const glm::ivec3& k){return chunkProd(k);}),
     mTerrains(terrains),
     mWaters(waters),
-    mGrass(grass)
+    mGrass(grass),
+    mMaxRes(maxRes),
+    mTruncMaterial(trunc),
+    mLeafMaterial(leaf)
 {
 
 }
@@ -32,17 +36,7 @@ void ChunkGenerator::stop() {
     mThread.join();
 }
 
-/*TexFuture ChunkTexGenerator::getTexture(
-                     const glm::ivec2 size,
-                     const RenderFunc& render,
-                     Job*& handle) {
-    Lock l(mJobsMutex);
-    mJobs.emplace(size,render);
-    handle = &mJobs.back();
-    return mJobs.back().promise.get_future();
-}*/
-
-ChunkGenerator::SharedJob ChunkGenerator::getChunkJob(const glm::ivec3& posAndSize, float csize) {
+ChunkGenerator::SharedJob ChunkGenerator::getChunkJob(const glm::ivec3& posAndSize) {
     using namespace glm;
     Lock l(mJobsMutex);
     mJobs.emplace(new Job(posAndSize));
@@ -50,7 +44,7 @@ ChunkGenerator::SharedJob ChunkGenerator::getChunkJob(const glm::ivec3& posAndSi
     return mJobs.back();
 }
 
-SharedTexture ChunkGenerator::prod(const glm::ivec3& k) {
+SharedTexture ChunkGenerator::texProd(const glm::ivec3& k) {
     using namespace glm;
     GLuint tex;
     //if(j.valid) {
@@ -69,6 +63,20 @@ SharedTexture ChunkGenerator::prod(const glm::ivec3& k) {
     return SharedTexture(gct);
 }
 
+SharedChunk ChunkGenerator::chunkProd(const glm::ivec3& k) {
+    vec2 offset(k.x*mChunkSize,k.y*mChunkSize);
+    SharedChunk c(new Chunk(offset,{mChunkSize,mChunkSize}));
+
+    int res = k.z;
+    ivec3 tres(k.x,k.y,k.z*8+2);
+    SharedTexture tex = mTextureCache.get(tres);
+    c->setAttrs(res,tex,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
+    if(res > mMaxRes / 2) {
+        c->addTrees(mTruncMaterial,mLeafMaterial);
+    }
+    return c;
+}
+
 void ChunkGenerator::work() {
     using namespace glm;
     glfwMakeContextCurrent(mWindow);
@@ -78,23 +86,14 @@ void ChunkGenerator::work() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
             continue;
         }
-        //cout << "Have " << mJobs.size() << " tex to gen" << endl;
+
         mJobsMutex.lock();
         SharedJob j = mJobs.front();
         mJobsMutex.unlock();
-        //if(j.valid) {
 
-        //Create new chunk
-        vec2 offset(j->posAndSize.x*mChunkSize,j->posAndSize.y*mChunkSize);
-        SharedChunk c(new Chunk(offset,{mChunkSize,mChunkSize}));
+        ivec3 k = j->posAndSize;
+        SharedChunk c = mChunkCache.get(k);
 
-        int res = j->posAndSize.z;
-        ivec3 tres(j->posAndSize.x,j->posAndSize.y,j->posAndSize.z*8+2);
-        SharedTexture tex = mCache.get(tres);
-        c->setAttrs(res,tex,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
-        //} else {
-        //    tex = 0;
-        //}
         try{
             j->promise.set_value(c); //Return the texture to the asker
         } catch(std::future_error e) {
@@ -104,7 +103,7 @@ void ChunkGenerator::work() {
             Lock l(mJobsMutex);
             mJobs.pop();
         }
-        //std::this_thread::sleep_for(std::chrono::milliseconds(max(1,int(100-mJobs.size()))));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
