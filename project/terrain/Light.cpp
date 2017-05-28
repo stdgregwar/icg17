@@ -65,7 +65,7 @@ void Light::setupCycle() {
 }
 
 void Light::update(float delta_s) {
-    mTime += 0.05*delta_s*5;
+    mTime += 0.05*delta_s;
     setDirection(mDirCycle.curveAtTime(mTime));
     mColor = mColCycle.curveAtTime(mTime);
     mAmbient = mAmbientCycle.curveAtTime(mTime);
@@ -129,7 +129,7 @@ void Light::bind(const Camera& cam, int i) {
     glViewport(0, 0, mTexSize, mTexSize);
     glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, c.depth, 0);
-    glClear(GL_DEPTH_BUFFER_BIT);
+
 }
 
 bool Light::inFrustum(const glm::vec2& pos, const float &chunkSize, size_t i) const {

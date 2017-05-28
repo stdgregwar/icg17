@@ -17,7 +17,7 @@ public:
 
     }
 
-    K curveAtTime(float time) {
+    K curveAtTime(float time) const {
         int idx = ((int) floor(time))%mControlPoints.size();
         vector<K> newPoints(mControlPoints[idx]);
         return bezier(newPoints,newPoints.size(),fmod(time,1.f));
@@ -30,11 +30,11 @@ public:
 private:
     vector< vector<K> > mControlPoints;
 
-    K lerp(const K& a, const K& b, const float t) {
+    K lerp(const K& a, const K& b, const float t) const {
         return a + (b-a)*t;
     }
 
-    K bezier(vector<K>& points,int maxIdx, float time) {
+    K bezier(vector<K>& points,int maxIdx, float time) const {
         if(maxIdx == 1){
             return points[0];
         } else {

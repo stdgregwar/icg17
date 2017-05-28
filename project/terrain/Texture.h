@@ -29,6 +29,7 @@ public:
         float h = xv*(1-ty)+xv2*ty;
         return h;
     }
+    int res() { return mW;}
     float val(int x, int y) {
         using std::min;
         using std::max;

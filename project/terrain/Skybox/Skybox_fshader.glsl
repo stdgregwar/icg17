@@ -15,6 +15,7 @@ uniform sampler2D sky;
 //#include atmosphere.glsl
 
 void main() {
+
     vec3 sphere = normalize(texcoords);
     float f = clamp(pow(clamp(dot(sphere,light_dir),0,1),1000)-0.5,0,1.0);
     vec3 ox = vec3(0.6,0.9,1)*length(l_color)*0.4;

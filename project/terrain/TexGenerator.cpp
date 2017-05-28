@@ -3,14 +3,22 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-ChunkTexGenerator::ChunkTexGenerator(size_t cacheByteSize, float csize) : mChunkSize(csize),
-    mCache(cacheByteSize,[this](const glm::ivec3& k){return prod(k);})
+ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &terrains, const Grids &waters, const Grids &grass, int maxRes, Material &trunc, Material &leaf) : mChunkSize(csize),
+    mTextureCache(cacheByteSize,[this](const glm::ivec3& k){return texProd(k);}),
+    mChunkCache(cacheByteSize,[this](const glm::ivec3& k){return chunkProd(k);}),
+    mTerrains(terrains),
+    mWaters(waters),
+    mGrass(grass),
+    mMaxRes(maxRes),
+    mTruncMaterial(trunc),
+    mLeafMaterial(leaf)
 {
 
 }
 
 
-void ChunkTexGenerator::init(GLFWwindow* parentWindow,const string& vshader, const string& fshader) {
+void ChunkGenerator::init(GLFWwindow* parentWindow,const string& vshader, const string& fshader, int maxRes) {
+    mMaxRes = maxRes;
     mVShader = vshader;
     mFShader = fshader;
     glfwWindowHint(GLFW_VISIBLE, false);
@@ -19,35 +27,25 @@ void ChunkTexGenerator::init(GLFWwindow* parentWindow,const string& vshader, con
     start();
 }
 
-void ChunkTexGenerator::start() {
+void ChunkGenerator::start() {
     mContinue = true;
-    mThread = std::thread(std::bind(&ChunkTexGenerator::work,this));
+    mThread = std::thread(std::bind(&ChunkGenerator::work,this));
 }
 
-void ChunkTexGenerator::stop() {
+void ChunkGenerator::stop() {
     mContinue = false;
     mThread.join();
 }
 
-/*TexFuture ChunkTexGenerator::getTexture(
-                     const glm::ivec2 size,
-                     const RenderFunc& render,
-                     Job*& handle) {
-    Lock l(mJobsMutex);
-    mJobs.emplace(size,render);
-    handle = &mJobs.back();
-    return mJobs.back().promise.get_future();
-}*/
-
-TexFuture ChunkTexGenerator::getChunkTex(const glm::ivec3& posAndSize, float csize, Job*& handle) {
+ChunkGenerator::SharedJob ChunkGenerator::getChunkJob(const glm::ivec3& posAndSize) {
     using namespace glm;
     Lock l(mJobsMutex);
-    mJobs.emplace(posAndSize);
-    handle = &mJobs.back();
-    return mJobs.back().promise.get_future();
+    mJobs.emplace(new Job(posAndSize));
+    mJobs.back()->future = move(mJobs.back()->promise.get_future());
+    return mJobs.back();
 }
 
-SharedTexture ChunkTexGenerator::prod(const glm::ivec3& k) {
+SharedTexture ChunkGenerator::texProd(const glm::ivec3& k) {
     using namespace glm;
     GLuint tex;
     //if(j.valid) {
@@ -66,7 +64,21 @@ SharedTexture ChunkTexGenerator::prod(const glm::ivec3& k) {
     return SharedTexture(gct);
 }
 
-void ChunkTexGenerator::work() {
+SharedChunk ChunkGenerator::chunkProd(const glm::ivec3& k) {
+    vec2 offset(k.x*mChunkSize,k.y*mChunkSize);
+    SharedChunk c(new Chunk(offset,{mChunkSize,mChunkSize}));
+
+    int res = k.z;
+    ivec3 tres(k.x,k.y,k.z*8+2);
+    SharedTexture tex = mTextureCache.get(tres);
+    c->setAttrs(res,tex,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
+    if(res > mMaxRes / 2) {
+        c->addTrees(mTruncMaterial,mLeafMaterial);
+    }
+    return c;
+}
+
+void ChunkGenerator::work() {
     using namespace glm;
     glfwMakeContextCurrent(mWindow);
     mGenerator.init(mVShader,mFShader);
@@ -75,18 +87,16 @@ void ChunkTexGenerator::work() {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
             continue;
         }
-        //cout << "Have " << mJobs.size() << " tex to gen" << endl;
-        mJobsMutex.lock();
-        Job& j = mJobs.front();
-        mJobsMutex.unlock();
-        //if(j.valid) {
-        SharedTexture tex = mCache.get(j.posAndSize);
 
-        //} else {
-        //    tex = 0;
-        //}
+        mJobsMutex.lock();
+        SharedJob j = mJobs.front();
+        mJobsMutex.unlock();
+
+        ivec3 k = j->posAndSize;
+        SharedChunk c = mChunkCache.get(k);
+
         try{
-            j.promise.set_value(tex); //Return the texture to the asker
+            j->promise.set_value(c); //Return the texture to the asker
         } catch(std::future_error e) {
             cerr << e.what() << endl;
         }
@@ -94,10 +104,10 @@ void ChunkTexGenerator::work() {
             Lock l(mJobsMutex);
             mJobs.pop();
         }
-        //std::this_thread::sleep_for(std::chrono::milliseconds(max(1,int(100-mJobs.size()))));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
- ChunkTexGenerator::~ChunkTexGenerator() {
+ ChunkGenerator::~ChunkGenerator() {
      //stop();
  }

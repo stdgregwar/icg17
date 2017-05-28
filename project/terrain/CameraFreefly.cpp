@@ -27,7 +27,7 @@ glm::vec3 CameraFreefly::inMap(const glm::vec3& pos, const Chunk& c) {
     vec2 size = c.size();
     vec2 cpos = c.pos();
     vec2 rcpos = {pos.x-cpos.x,pos.y-cpos.y};
-    vec2 texPos = rcpos*float(c.res()) / size;
+    vec2 texPos = rcpos*float(st->res()) / size;
     float h = st->valAt(texPos.x,texPos.y);
     h+=6;
     h = pos.z < h ? h : pos.z;
