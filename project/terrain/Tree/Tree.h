@@ -36,7 +36,7 @@ private:
     bool mFinished = false;
     glm::vec3 mPos;
     std::uniform_real_distribution<float> mRand;
-    std::default_random_engine mEng;
+    std::mt19937 mEng;
     vector<TruncData> mTruncVerts;
     vector<GLuint> mTruncIndices;
     vector<LeafData> mLeafVerts;

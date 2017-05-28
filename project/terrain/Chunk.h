@@ -37,12 +37,13 @@ public:
     long frameID() { return mFrameId;}
     const SharedTexture& hMap() const {return mHmap;}
     const glm::vec2& pos() const {return mOffset;}
+    const glm::vec2 cpos() const {return mOffset/mSize;}
     const glm::vec2& size() const {return mSize;}
     int res() const {return mRes;}
     ~Chunk();
 private:
     std::uniform_real_distribution<float> mRand;
-    std::default_random_engine mEng;
+    std::mt19937 mEng;
     std::vector<Tree> mTrees;
     TreePlanes mTreePlanes;
 

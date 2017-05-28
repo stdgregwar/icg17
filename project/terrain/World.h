@@ -20,7 +20,7 @@
 #include "Tree/PhotoMaton.h"
 
 typedef std::unordered_map<glm::ivec2,SharedChunk> Chunks;
-
+typedef std::vector<Chunk*> ChunkPtrs;
 
 typedef std::list<ChunkGenerator::SharedJob> ChunkJobs;
 
@@ -58,6 +58,8 @@ public:
 
     void setScreenSize(const glm::i32vec2& screenSize);
     void stop();
+
+    void collectDrawable();
 private:
     Camera* mCamera;
     PhotoMaton mPhotoMaton;
@@ -80,6 +82,7 @@ private:
     Grids mWaters;
     Grids mGrass;
     Chunks mChunks;
+    ChunkPtrs mToDraw;
     ChunkJobs mCJobs;
     ChunkGenerator mChunkGenerator;
     ScreenQuad mScreen;

@@ -72,7 +72,7 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
     //mMaterial.init("v_tree.glsl","f_tree.glsl");
 
     mPos = pos;
-    mEng.seed(pos.x); //Set the seed of the tree, this way we always end up with the same for a specific place
+    mEng.seed(pos.z); //Set the seed of the tree, this way we always end up with the same for a specific place
 
     float count = 10;
     float res = 8;

@@ -8,7 +8,7 @@ using namespace glm;
 
 Chunk::Chunk(const glm::vec2& offset, const glm::vec2& size)
     : mRand(-1,1),mOffset(offset), mSize(size), mRes(-1), mModel(scale(translate(mat4(),vec3(mOffset,0)),vec3(mSize,1))) {
-    mEng.seed(offset.x+offset.y);
+    mEng.seed(offset.x+189*offset.y);
 }
 
 void Chunk::update(float delta_s) {
@@ -26,6 +26,7 @@ int Chunk::setAttrs(int res,SharedTexture hmap, const Grid& terrain, const Grid 
 
 void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool planeOnly) {
     float sq = 12;
+    mEng.seed(mOffset.x+6649*mOffset.y);
     mTrees.reserve(sq*sq);
     for(int i = 1; i < sq; i++) {
         for(int j = 1; j < sq; j++) {
@@ -44,7 +45,7 @@ void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool pl
             float hpy = mHmap->valAt(texPos.y,texPos.y+1);
             float hnx = mHmap->valAt(texPos.x-1,texPos.y);
             float hny = mHmap->valAt(texPos.y,texPos.y-1);
-            float dz = mSize.x*2.f/mHmap->res();
+            float dz = mSize.x*1.f/mHmap->res();
             vec3 normal = normalize(vec3(hnx-hpx,hny-hpy,dz));
             float size = 35+mRand(mEng)*10;
 
@@ -54,6 +55,8 @@ void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool pl
                 mTrees.emplace_back(trunc,leaves);
                 Tree& tree = mTrees.back();
                 tree.build(tpos,normal*size,2.f+mRand(mEng)*0.5);
+            } else {
+                mRand(mEng); //Consume a rand to avoid desync
             }
             normal = normalize(normal*vec3(0.125,0.125,1));
             mTreePlanes.addTree(tpos,normal*size*1.6f);

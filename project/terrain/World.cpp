@@ -11,12 +11,12 @@
 using namespace glm;
 using namespace std;
 
-#define Mb *1024*1024
+#define Mb *1024L*1024L
 
 World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
 {{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(16),
     mFrameID(0), mCenter(5000,5000), mMaxRes(64),
-    mChunkGenerator(1024 Mb, chunkSize,mTerrains,mWaters,mGrass,mMaxRes,mTruncMaterial,mLeafMaterial),
+    mChunkGenerator(2048L Mb, chunkSize,mTerrains,mWaters,mGrass,mMaxRes,mTruncMaterial,mLeafMaterial),
     mLight({3000,3000,2*8192},{1,1,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     //mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
     mRenderGrass(false),
@@ -31,6 +31,7 @@ World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
     mCamera = &mCamFreefly;
     mTreeClip = mChunkSize*2.5f;
+    mToDraw.reserve(mViewDistance*mViewDistance);
 }
 
 void World::init(const ivec2 &screenSize, GLFWwindow* window) {
@@ -38,7 +39,7 @@ void World::init(const ivec2 &screenSize, GLFWwindow* window) {
     mLight.init(1024);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
-    mGrassMaterial.init("terrain_vshader.glsl","grass_fshader.glsl","grass_gshader.glsl");
+    mGrassMaterial.init("terrain_vshader.glsl","grass_fshader_plants.glsl","grass_gshader_plants.glsl");
     mTruncMaterial.init("v_tree.glsl","f_tree.glsl");
     mTruncShadow.init("v_tree.glsl","foccluder.glsl");
     mLeafMaterial.init("v_leaves.glsl","f_leaves.glsl","g_leaves.glsl");
@@ -61,8 +62,8 @@ void World::init(const ivec2 &screenSize, GLFWwindow* window) {
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE, false);
     mGrassMaterial.addTexture(GL_TEXTURE_1D,GL_TEXTURE1,colors.data(),GL_RGB,GL_UNSIGNED_BYTE,
     {colors.size()/3},"color_map",GL_LINEAR,GL_CLAMP_TO_EDGE, false);
-    mGrassMaterial.addTexture(GL_TEXTURE2, "grasscolor.png","grass_col",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
-    mGrassMaterial.addTexture(GL_TEXTURE3, "grasspatch.png", "grasspatch",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
+    //mGrassMaterial.addTexture(GL_TEXTURE2, "grasscolor.png","grass_col",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT, true);
+    mGrassMaterial.addTexture(GL_TEXTURE3, "plants.png", "grasspatch",GL_LINEAR_MIPMAP_LINEAR,GL_CLAMP_TO_EDGE,true);
     mTerrainMaterial.addTexture(GL_TEXTURE2,"moss-albedo.png","moss_alb",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE9,"moss-normal-inverted.png","moss_nor",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
     mTerrainMaterial.addTexture(GL_TEXTURE3,"pebbles.jpg","pebbles_alb",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,true);
@@ -170,15 +171,18 @@ void World::setScreenSize(const glm::i32vec2& screenSize) {
 void World::update(float dt,const glm::vec2& worldPos) {
 
     //First update camera
-    auto it = mChunks.find(mCenter);
-    if(it != mChunks.end()) {
-        mCamera->update(dt,*it->second.get());
-    }
-    ivec2 camPos = mCamera->wPos()/mChunkSize;
+    vec2 fcampos = mCamera->wPos()/mChunkSize;
+    ivec2 camPos(floor(fcampos.x),floor(fcampos.y));
     if(mCenter != camPos) {
         mCenter = camPos;
         updateChunks();
     }
+
+    auto it = mChunks.find(mCenter);
+    if(it != mChunks.end()) {
+        mCamera->update(dt,*it->second.get());
+    }
+
     mLight.update(dt);
 
     int max = mCJobs.size() / 2 +1;
@@ -290,7 +294,7 @@ void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
         mLight.bind(cam(),i);
         Uniforms::viewProjTime(mTruncShadow,mLight.view(i),mLight.proj(i),time);
         for(Chunks::value_type& p : mChunks) {
-            if(distance(vec2(p.first),vec2(mCenter)) < 3) {
+            if(distance(vec2(p.first),vec2(mCenter)) < 4) {
                 p.second->drawTruncs(cam().pos(),mTreeClip);
             }
         }
@@ -303,7 +307,7 @@ void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
         mLight.bind(cam(),i);
         Uniforms::viewProjTime(mLeafShadow,mLight.view(i),mLight.proj(i),time);
         for(Chunks::value_type& p : mChunks) {
-            if(distance(vec2(p.first),vec2(mCenter)) < 3) {
+            if(distance(vec2(p.first),vec2(mCenter)) < 4) {
                 p.second->drawLeaves(cam().pos(),mTreeClip);
             }
         }
@@ -319,9 +323,7 @@ void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
         glUniform1f(mPlanesMaterial.uniformLocation("dist"),mTreeClip);
         glUniform3f(mPlanesMaterial.uniformLocation("eyePos"),cam().pos().x,cam().pos().y,cam().pos().z);
         for(Chunks::value_type& p : mChunks) {
-            if(mCamera->inFrustum(p.second->pos(),mChunkSize)) {
                 p.second->drawPlanes();
-            }
         }
     }
     mLight.unbind();
@@ -333,9 +335,9 @@ void World::drawGrass(float time, const mat4 &view, const mat4 &projection) {
     glDisable(GL_CULL_FACE);
     mGrassMaterial.bind();
     mLight.uniforms(mGrassMaterial);
-    for(Chunks::value_type& p : mChunks) {
-        if(distance(vec2(p.first),vec2(mCenter)) < 3 && mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-            p.second->drawGrass(time,view,projection,mGrassMaterial);
+    for(Chunk* c : mToDraw) {
+        if(distance(c->cpos(),vec2(mCenter)) < 3) {
+            c->drawGrass(time,view,projection,mGrassMaterial);
         }
     }
     mGrassMaterial.unbind();
@@ -345,10 +347,10 @@ void World::drawGrass(float time, const mat4 &view, const mat4 &projection) {
 void World::drawTerrain(float time, const glm::mat4& view, const glm::mat4& projection) {
     mTerrainMaterial.bind();
     mLight.uniforms(mTerrainMaterial);
-    for(Chunks::value_type& p : mChunks) {
-        if(mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-            p.second->drawTerrain(time,view,projection,mTerrainMaterial);
-        }
+    for(Chunk* c : mToDraw) {
+
+            c->drawTerrain(time,view,projection,mTerrainMaterial);
+
     }
     mTerrainMaterial.unbind();
 }
@@ -356,17 +358,17 @@ void World::drawTerrain(float time, const glm::mat4& view, const glm::mat4& proj
 void World::drawTrees(float time, const glm::mat4& view, const glm::mat4& projection) {
     mTruncMaterial.bind();
     Uniforms::viewProjTime(mTruncMaterial,view,projection,time);
-    for(Chunks::value_type& p : mChunks) {
-        if(distance(vec2(p.first),vec2(mCenter)) < 5 && mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-            p.second->drawTruncs(cam().pos(),mTreeClip);
+    for(Chunk* c : mToDraw) {
+        if(distance(c->cpos(),vec2(mCenter)) < 5) {
+           c->drawTruncs(cam().pos(),mTreeClip);
         }
     }
     mTruncMaterial.unbind();
     mLeafMaterial.bind();
     Uniforms::viewProjTime(mLeafMaterial,view,projection,time);
-    for(Chunks::value_type& p : mChunks) {
-        if(distance(vec2(p.first),vec2(mCenter)) < 5 && mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-            p.second->drawLeaves(cam().pos(),mTreeClip);
+    for(Chunk* c : mToDraw) {
+        if(distance(c->cpos(),vec2(mCenter)) < 5) {
+            c->drawLeaves(cam().pos(),mTreeClip);
         }
     }
     mLeafMaterial.unbind();
@@ -375,12 +377,10 @@ void World::drawTrees(float time, const glm::mat4& view, const glm::mat4& projec
     Uniforms::viewProjTime(mPlanesMaterial,view,projection,time);
     glUniform1f(mPlanesMaterial.uniformLocation("dist"),mTreeClip);
     glUniform3f(mPlanesMaterial.uniformLocation("eyePos"),cam().pos().x,cam().pos().y,cam().pos().z);
-    for(Chunks::value_type& p : mChunks) {
-        if(mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-            float dist = p.second->res() < mMaxRes / 2 ? 0 : mTreeClip;
+    for(Chunk* c : mToDraw) {
+            float dist = c->res() < mMaxRes / 2 ? 0 : mTreeClip;
             glUniform1f(mPlanesMaterial.uniformLocation("dist"),dist);
-            p.second->drawPlanes();
-        }
+            c->drawPlanes();
     }
     mPlanesMaterial.unbind();
 }
@@ -408,10 +408,10 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
     if(mRenderTerrain) {
         glEnable(GL_CLIP_DISTANCE0);
         mTerrainMaterial.bind();
-        for(Chunks::value_type& p : mChunks) {
-            if(mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-                p.second->drawTerrain(time,mirror,projection,mTerrainMaterial);
-            }
+        for(Chunk* c : mToDraw) {
+
+                c->drawTerrain(time,mirror,projection,mTerrainMaterial);
+
         }
         mTerrainMaterial.unbind();
         glDisable(GL_CLIP_DISTANCE0);
@@ -420,9 +420,9 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
     if(mRenderGrass) {
         glDisable(GL_CULL_FACE);
         mGrassMaterial.bind();
-        for(Chunks::value_type& p : mChunks) {
-            if(distance(vec2(p.first),vec2(mCenter)) < 2.5 && mCamera->inFrustum(p.second->pos(),mChunkSize)) {
-                p.second->drawGrass(time,mirror,projection,mGrassMaterial);
+        for(Chunk* c : mToDraw) {
+            if(distance(c->cpos(),vec2(mCenter)) < 2.5) {
+                c->drawGrass(time,mirror,projection,mGrassMaterial);
             }
         }
         mGrassMaterial.unbind();
@@ -443,8 +443,21 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
     mMirror.unbind();
 }
 
+
+void World::collectDrawable() {
+    mToDraw.clear();
+    for(Chunks::value_type& p : mChunks) {
+        if(mCamera->inFrustum(p.second->pos(),mChunkSize)) {
+            mToDraw.push_back(p.second.get());
+        }
+    }
+}
+
+
 void World::draw(float time) {
     //mPhotoMaton.draw(8,512,mTruncMaterial,mLeafMaterial);
+
+    collectDrawable();
 
     const mat4 view = mCamera->view();
     const mat4 projection = mCamera->projection();
