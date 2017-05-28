@@ -45,7 +45,7 @@ void main() {
     vec3 center = vertices[0].pos;
 
     //Make quad
-    vertex.normal = normalize(mat3(V)*up);
+    vertex.normal = normalize((V*vec4(up,0)).xyz);
     vertex.color = vertices[0].color;
 
     vec3 pos;

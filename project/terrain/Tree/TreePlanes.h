@@ -17,7 +17,7 @@ public:
     void addTree(const glm::vec3& pos, const glm::vec3 dir);
     void build();
     void finish(Material& mat);
-    void draw(float time, const glm::mat4& view, const glm::mat4& proj, Material& mat);
+    void draw();
     ~TreePlanes();
 private:
     bool mFinished = false;

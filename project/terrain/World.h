@@ -17,6 +17,7 @@
 #include <functional>
 #include "Tree/Tree.h"
 #include "TexGenerator.h"
+#include "Tree/PhotoMaton.h"
 
 typedef std::unordered_map<glm::ivec2,SharedChunk> Chunks;
 
@@ -59,6 +60,7 @@ public:
     void stop();
 private:
     Camera* mCamera;
+    PhotoMaton mPhotoMaton;
     CameraFreefly mCamFreefly;
     CameraBezier mCamBezier;
     BezierBuilder<VecAndDiff> mBezierBuilder;
@@ -95,6 +97,7 @@ private:
     FrameBuffer mFront;
     FrameBuffer mHalf;
     float mChunkSize;
+    float mTreeClip;
     int mViewDistance;
     long mFrameID;
     int mMaxRes;

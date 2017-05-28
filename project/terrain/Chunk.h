@@ -29,8 +29,9 @@ public:
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection, Material& mat, bool shad = false);
     void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
-    void drawTruncs(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat);
-    void drawLeaves(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat);
+    void drawTruncs(const glm::vec3& eye, float dist);
+    void drawLeaves(const vec3 &eye, float dist);
+    void drawPlanes();
     void setFrameID(long id);
     glm::ivec2 key() const;
     long frameID() { return mFrameId;}

@@ -33,7 +33,7 @@ void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool pl
             vec2 rcpos = vec2(i*mSize.x / sq, j*mSize.y / sq)+jitter;
             vec2 wpos = pos()+rcpos;
 
-            float noi = n.fractal(4,wpos.x,wpos.y);
+            float noi = n.fractal(2,wpos.x,wpos.y);
 
             if(noi < 0.1) continue; //Don't generate tree
 
@@ -44,7 +44,8 @@ void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool pl
             float hpy = mHmap->valAt(texPos.y,texPos.y+1);
             float hnx = mHmap->valAt(texPos.x-1,texPos.y);
             float hny = mHmap->valAt(texPos.y,texPos.y-1);
-            vec3 normal = normalize(vec3(hnx-hpx,hny-hpy,1));
+            float dz = mSize.x*2.f/mHmap->res();
+            vec3 normal = normalize(vec3(hnx-hpx,hny-hpy,dz));
             float size = 35+mRand(mEng)*10;
 
             vec3 tpos = vec3(rcpos+pos(),h) - normal*2.f;
@@ -54,7 +55,8 @@ void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool pl
                 Tree& tree = mTrees.back();
                 tree.build(tpos,normal*size,2.f+mRand(mEng)*0.5);
             }
-            mTreePlanes.addTree(tpos,normal*size);
+            normal = normalize(normal*vec3(0.125,0.125,1));
+            mTreePlanes.addTree(tpos,normal*size*1.6f);
         }
     }
     mTreePlanes.build();
@@ -87,24 +89,26 @@ void Chunk::drawWater(float time, const mat4 &view, const mat4 &projection,Mater
     mWater->draw(time,mModel,view,projection,mat,1,mHmap,mHmap->res());
 }
 
-void Chunk::drawTruncs(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat) {
-    glUniformMatrix4fv(mat.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
-    glUniformMatrix4fv(mat.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
+void Chunk::drawTruncs(const vec3 &eye, float dist) {
     for(Tree& t : mTrees) {
-        t.drawTrunc(view,projection,mat);
+        if(distance(eye,t.pos()) < dist) {
+            t.drawTrunc();
+        }
     }
 }
 
-void Chunk::drawLeaves(float time, const glm::mat4& view, const glm::mat4& projection,Material& mat) {
-    glUniformMatrix4fv(mat.uniformLocation("VP"), ONE, DONT_TRANSPOSE,glm::value_ptr(projection*view));
-    glUniformMatrix4fv(mat.uniformLocation("V"), ONE, DONT_TRANSPOSE,glm::value_ptr(view));
-    glUniformMatrix4fv(mat.uniformLocation("iV"), ONE, DONT_TRANSPOSE,glm::value_ptr(inverse(view)));
-    glUniform1f(mat.uniformLocation("time"),time);
+void Chunk::drawLeaves(const vec3 &eye, float dist) {
     for(Tree& t : mTrees) {
-        t.drawLeaves(view,projection,mat);
+        if(distance(eye,t.pos()) < dist) {
+            t.drawLeaves();
+        }
     }
+}
+
+void Chunk::drawPlanes() {
+    mTreePlanes.draw();
 }
 
 Chunk::~Chunk() {
-    cout << "Chunk GC" << endl;
+    //cout << "Chunk GC" << endl;
 }

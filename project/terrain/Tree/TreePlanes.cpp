@@ -6,7 +6,7 @@ TreePlanes::TreePlanes()
 }
 
 void TreePlanes::addTree(const glm::vec3& pos, const glm::vec3 dir) {
-    mVertices.push_back({pos,glm::vec4(dir,rand())});
+    mVertices.push_back({pos,glm::vec4(dir,float(rand())/RAND_MAX)});
 }
 
 void TreePlanes::build() {
@@ -52,7 +52,7 @@ void TreePlanes::finish(Material& mat) {
     mat.unbind();
 }
 
-void TreePlanes::draw(float time, const glm::mat4& view, const glm::mat4& proj, Material& mat) {
+void TreePlanes::draw() {
     glBindVertexArray(mVertexArrayId);
     glDrawArrays(GL_POINTS, 0, mVertexCount);
     glBindVertexArray(0);

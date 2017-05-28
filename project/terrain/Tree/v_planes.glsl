@@ -19,5 +19,5 @@ void main() {
     vertex.dir = dir.xyz;
     vec4 eye = iV * vec4(0,0,-1,0);
     vertex.view_dir = normalize(eye.xyz);
-    vertex.tex =  int((dir.w)*4);
+    vertex.tex =  3+int(round((dir.w)*3));
 }

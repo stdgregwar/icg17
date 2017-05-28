@@ -5,7 +5,7 @@
 
 ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &terrains, const Grids &waters, const Grids &grass, int maxRes, Material &trunc, Material &leaf) : mChunkSize(csize),
     mTextureCache(cacheByteSize,[this](const glm::ivec3& k){return texProd(k);}),
-    mChunkCache(cacheByteSize/256,[this](const glm::ivec3& k){return chunkProd(k);}),
+    mChunkCache(cacheByteSize/512,[this](const glm::ivec3& k){return chunkProd(k);}),
     mTerrains(terrains),
     mWaters(waters),
     mGrass(grass),
@@ -61,7 +61,7 @@ SharedTexture ChunkGenerator::texProd(const glm::ivec3& k) {
     GCTexture* gct = new GCTexture(tex,k.z,k.z);
     glReadPixels(0,0,k.z,k.z,GL_RED,GL_FLOAT,gct->data());
     fb.unbind();
-    glFinish();
+    //glFinish();
     return SharedTexture(gct);
 }
 
@@ -96,6 +96,7 @@ void ChunkGenerator::work() {
 
         ivec3 k = j->posAndSize;
         SharedChunk c = mChunkCache.get(k);
+        glFinish();
 
         try{
             j->promise.set_value(c); //Return the texture to the asker

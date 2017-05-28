@@ -1,6 +1,6 @@
 #version 330
 
-uniform sampler2D tree;
+uniform sampler2D trees_alb;
 
 in vData {
     vec2 uv;
@@ -10,11 +10,14 @@ in vData {
 layout (location = 0) out vec4 color;
 layout (location = 1) out vec4 normal;
 
+#include normal.glsl
+
 void main() {
-    normal.rgb = vertex.normal;
+    normal.rgb = packNormal(vertex.normal);
     normal.a = 0;
-    vec4 tex = texture(tree,vertex.uv);
-    if(tex.a < 0.8f) discard;
+    vec4 tex = texture(trees_alb,vertex.uv);
+    if(length(tex.rgb) > 0.9) discard;
     color.rgb = tex.rgb*1.2;
+    //color.rgb = vec3(1,0,0);
     color.a = 0;
 }

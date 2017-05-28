@@ -71,6 +71,7 @@ void Tree::addLeaves(const Bezier<glm::vec3>& b, float count, float bsize) {
 void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
     //mMaterial.init("v_tree.glsl","f_tree.glsl");
 
+    mPos = pos;
     mEng.seed(pos.x); //Set the seed of the tree, this way we always end up with the same for a specific place
 
     float count = 10;
@@ -78,8 +79,8 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
     Bezier<vec3> mainTrunc({{pos,pos+normal*0.25f,pos+normal*0.3f+vec3(0,0,1)*length(normal)*1.5f}});
     addTrunc(mainTrunc,count,res,width);
 
-    float bCount = 40;
-    for(float i = 0.4; i < 0.85; i+=1/bCount) {
+    float bCount = 90;
+    for(float i = 0.6; i < 0.9; i+=1/bCount) {
         vec3 center, forw, side, bside;
         float twidth = width*(1-i*0.8)*2;
         float lenght = normal.length()*4*(1-i*0.5);
@@ -207,14 +208,14 @@ void Tree::finish() {
     mLeafMaterial.unbind();
 }
 
-void Tree::drawTrunc(const glm::mat4& view, const glm::mat4& proj, Material &mat) {
+void Tree::drawTrunc() {
     glBindVertexArray(mVertexArrayId);
 
     glDrawElements(GL_TRIANGLES, mTruncSize, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
-void Tree::drawLeaves(const glm::mat4& view, const glm::mat4& proj, Material &mat) {
+void Tree::drawLeaves() {
     glBindVertexArray(mLeafVertexArrayId);
     glDrawArrays(GL_POINTS, 0, mLeafSize);
     glBindVertexArray(0);
