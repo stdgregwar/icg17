@@ -11,6 +11,8 @@
 #include "ScreenQuad/ScreenQuad.h"
 #include "Texture.h"
 #include "Tree/Tree.h"
+#include "Tree/SimplexNoise.h"
+#include "Tree/TreePlanes.h"
 
 class Chunk;
 
@@ -21,9 +23,9 @@ class Chunk
 public:
     Chunk(const glm::vec2& offset, const glm::vec2& size);
     void update(float delta_s);
-    void finish();
+    void finish(Material& treePlanesMat);
     int setAttrs(int res, SharedTexture hmap, const Grid& terrain, const Grid& water, const Grid& grass);
-    void addTrees(Material& trunc, Material& leaves);
+    void addTrees(Material& trunc, Material& leaves, SimplexNoise &n, bool planeOnly = false);
     void drawTerrain(float time, const glm::mat4 &view, const glm::mat4 &projection, Material& mat, bool shad = false);
     void drawGrass(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
     void drawWater(float time, const glm::mat4 &view, const glm::mat4 &projection,Material& mat);
@@ -41,6 +43,8 @@ private:
     std::uniform_real_distribution<float> mRand;
     std::default_random_engine mEng;
     std::vector<Tree> mTrees;
+    TreePlanes mTreePlanes;
+
     SharedTexture mHmap;
     SharedTexture mNextHmap;
     ScalarFrameBuffer mNoiseBuffer;

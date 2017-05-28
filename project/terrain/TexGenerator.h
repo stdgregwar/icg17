@@ -21,6 +21,7 @@
 
 #include "Chunk.h"
 #include "Grid/Grid.h"
+#include "Tree/SimplexNoise.h"
 
 typedef std::promise<SharedChunk> ChunkPromise;
 typedef std::future<SharedChunk> ChunkFuture;
@@ -72,6 +73,7 @@ private:
     int mMaxRes;
     Material& mTruncMaterial;
     Material& mLeafMaterial;
+    SimplexNoise mSimpleNoise;
 };
 
 #endif // GLWORKER_H

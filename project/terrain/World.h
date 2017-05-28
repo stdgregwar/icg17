@@ -71,6 +71,8 @@ private:
     Material mTruncShadow;
     Material mLeafShadow;
     Material mLeafMaterial;
+    Material mPlanesMaterial;
+    Material mPlanesShadow;
     Skybox mSkybox;
     Grids mTerrains;
     Grids mWaters;

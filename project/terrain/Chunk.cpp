@@ -24,28 +24,40 @@ int Chunk::setAttrs(int res,SharedTexture hmap, const Grid& terrain, const Grid 
     return 1;
 }
 
-void Chunk::addTrees(Material& trunc, Material& leaves) {
-    float sq = 8;
+void Chunk::addTrees(Material& trunc, Material& leaves, SimplexNoise& n, bool planeOnly) {
+    float sq = 12;
     mTrees.reserve(sq*sq);
     for(int i = 1; i < sq; i++) {
         for(int j = 1; j < sq; j++) {
             vec2 jitter = vec2(mRand(mEng),mRand(mEng))*18.f;
             vec2 rcpos = vec2(i*mSize.x / sq, j*mSize.y / sq)+jitter;
+            vec2 wpos = pos()+rcpos;
+
+            float noi = n.fractal(4,wpos.x,wpos.y);
+
+            if(noi < 0.1) continue; //Don't generate tree
+
             vec2 texPos = rcpos*float(mHmap->res()) / mSize;
-            float h = mHmap->valAt(texPos.x,texPos.y)-2;
-            if(h<10 || h > 300) continue; //Don't generate trees out of range
+            float h = mHmap->valAt(texPos.x,texPos.y);
+            if(h<2 || h > 300) continue; //Don't generate trees out of range
             float hpx = mHmap->valAt(texPos.x+1,texPos.y);
             float hpy = mHmap->valAt(texPos.y,texPos.y+1);
             float hnx = mHmap->valAt(texPos.x-1,texPos.y);
             float hny = mHmap->valAt(texPos.y,texPos.y-1);
-            vec3 normal = normalize(vec3(hnx-hpx,hny-hpy,4));
-            mTrees.emplace_back(trunc,leaves);
-            Tree& tree = mTrees.back();
-            vec3 tpos = vec3(rcpos+pos(),h);
+            vec3 normal = normalize(vec3(hnx-hpx,hny-hpy,1));
             float size = 35+mRand(mEng)*10;
-            tree.build(tpos,normal*size,2.f);
+
+            vec3 tpos = vec3(rcpos+pos(),h) - normal*2.f;
+
+            if(!planeOnly) {
+                mTrees.emplace_back(trunc,leaves);
+                Tree& tree = mTrees.back();
+                tree.build(tpos,normal*size,2.f+mRand(mEng)*0.5);
+            }
+            mTreePlanes.addTree(tpos,normal*size);
         }
     }
+    mTreePlanes.build();
 }
 
 glm::ivec2 Chunk::key() const {
@@ -56,10 +68,11 @@ void Chunk::setFrameID(long id) {
     mFrameId = id;
 }
 
-void Chunk::finish() {
+void Chunk::finish(Material &treePlanesMat) {
     for(Tree& t : mTrees) {
         t.finish();
     }
+    mTreePlanes.finish(treePlanesMat);
 }
 
 void Chunk::drawTerrain(float time, const mat4 &view, const mat4 &projection, Material &mat, bool shad) {

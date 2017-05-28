@@ -75,11 +75,11 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
 
     float count = 10;
     float res = 8;
-    Bezier<vec3> mainTrunc({{pos,pos+normal,pos+normal+vec3(0,0,1)*length(normal)}});
+    Bezier<vec3> mainTrunc({{pos,pos+normal*0.25f,pos+normal*0.3f+vec3(0,0,1)*length(normal)*1.5f}});
     addTrunc(mainTrunc,count,res,width);
 
     float bCount = 40;
-    for(float i = 0.4; i < 0.9; i+=1/bCount) {
+    for(float i = 0.4; i < 0.85; i+=1/bCount) {
         vec3 center, forw, side, bside;
         float twidth = width*(1-i*0.8)*2;
         float lenght = normal.length()*4*(1-i*0.5);
@@ -113,6 +113,10 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
                  mLeafVerts.data(), GL_STATIC_DRAW);
 
     mLeafSize = mLeafVerts.size();
+
+    mTruncIndices.clear();
+    mTruncVerts.clear();
+    mLeafVerts.clear();
 }
 
 void Tree::finish() {
@@ -200,12 +204,7 @@ void Tree::finish() {
                               sizeof(LeafData), (void*)offsetof(LeafData,size));
     }
     glBindVertexArray(0);
-
     mLeafMaterial.unbind();
-
-    mTruncIndices.clear();
-    mTruncVerts.clear();
-    mLeafVerts.clear();
 }
 
 void Tree::drawTrunc(const glm::mat4& view, const glm::mat4& proj, Material &mat) {

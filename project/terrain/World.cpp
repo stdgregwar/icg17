@@ -41,6 +41,7 @@ void World::init(const ivec2 &screenSize, GLFWwindow* window) {
     mTruncShadow.init("v_tree.glsl","foccluder.glsl");
     mLeafMaterial.init("v_leaves.glsl","f_leaves.glsl","g_leaves.glsl");
     mLeafShadow.init("v_leaves.glsl","f_leaves_occluder.glsl","g_leaves.glsl");
+    mPlanesMaterial.init("v_planes.glsl","f_planes.glsl","g_planes.glsl");
 
     vector<unsigned char> colors = {/*blue*/ 0, 0, 255,
                                     /*yellow*/ 0, 255, 255,
@@ -181,7 +182,7 @@ void World::update(float dt,const glm::vec2& worldPos) {
         if(job && job->future.valid()) {
             if(job->future.wait_for(std::chrono::microseconds(0)) == future_status::ready) {
                 SharedChunk c = job->future.get();
-                c->finish();
+                c->finish(mPlanesMaterial);
                 ivec2 key = c->key();
                 mChunks[key] = c;
                 it = mCJobs.erase(it);
@@ -406,8 +407,6 @@ void World::draw(float time) {
     const mat4 projection = mCamera->projection();
     if(mRenderShadow) drawShadows(time,view,projection);
     if(mRenderReflexion) drawReflexions(time,view,projection);
-
-
 
     mGBuffer.bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

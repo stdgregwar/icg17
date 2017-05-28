@@ -5,13 +5,14 @@
 
 ChunkGenerator::ChunkGenerator(size_t cacheByteSize, float csize, const Grids &terrains, const Grids &waters, const Grids &grass, int maxRes, Material &trunc, Material &leaf) : mChunkSize(csize),
     mTextureCache(cacheByteSize,[this](const glm::ivec3& k){return texProd(k);}),
-    mChunkCache(cacheByteSize,[this](const glm::ivec3& k){return chunkProd(k);}),
+    mChunkCache(cacheByteSize/256,[this](const glm::ivec3& k){return chunkProd(k);}),
     mTerrains(terrains),
     mWaters(waters),
     mGrass(grass),
     mMaxRes(maxRes),
     mTruncMaterial(trunc),
-    mLeafMaterial(leaf)
+    mLeafMaterial(leaf),
+    mSimpleNoise(0.001f)
 {
 
 }
@@ -72,9 +73,10 @@ SharedChunk ChunkGenerator::chunkProd(const glm::ivec3& k) {
     ivec3 tres(k.x,k.y,k.z*8+2);
     SharedTexture tex = mTextureCache.get(tres);
     c->setAttrs(res,tex,mTerrains.at(res),mWaters.at(res),mGrass.at(res));
-    if(res > mMaxRes / 2) {
-        c->addTrees(mTruncMaterial,mLeafMaterial);
-    }
+    c->addTrees(mTruncMaterial,
+                mLeafMaterial,
+                mSimpleNoise,
+                res < mMaxRes / 2);
     return c;
 }
 
