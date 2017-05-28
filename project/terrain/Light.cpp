@@ -19,13 +19,17 @@ Light::Light(const glm::vec3& shadowSize, const glm::vec3& direction, const glm:
 
 void Light::setupCycle() {
     //Setup orientation
+    // TODO tweak, makes no sense in current state
     {
         BezierBuilder<glm::vec3> b;
         b
                 (-3,-3,-1)
+                (-3,0,-1)
                 (-3,3,-3)
+                (0,1.5,-2)
                 (3,3,-1)
                 (3,3,-0.5)
+                (1.5,0,-1.75)
                 (-3,-3,-3);
         mDirCycle = b.build();
     }
@@ -35,9 +39,12 @@ void Light::setupCycle() {
         b
                 (182.f/255,126.f/255,91.f/255)
                 (192.f/255,191.f/255,173.f/255)
+                (1.f,1.f,1.f)
+                (192.f/255,191.f/255,173.f/255)
                 (182.f/255,126.f/255,91.f/255)
-                (0.1,0.05,0.025)
-                (0.1,0.1,0.2);
+                (0.0,0.0,0.0)
+                (0.0,0.0,0.0)
+                (0.0,0.0,0.0);
         mColCycle = b.build();
     }
     {
@@ -47,6 +54,9 @@ void Light::setupCycle() {
                 (0.2,0.3,0.3)
                 (0.2,0.3,0.3)
                 (0.2,0.3,0.3)
+                (0.2,0.3,0.3)
+                (0.2,0.3,0.3)
+                (0.1,0.1,0.1)
                 (0.1,0.1,0.1)
                 (0.1,0.1,0.1);
         mAmbientCycle = b.build();
@@ -55,9 +65,12 @@ void Light::setupCycle() {
         //Setup density
         BezierBuilder<float> b;
         b
-                (1)
                 (2)
                 (1)
+                (1)
+                (1)
+                (2)
+                (0.5)
                 (0.5)
                 (0.5);
         mDenCycle = b.build();
@@ -65,7 +78,7 @@ void Light::setupCycle() {
 }
 
 void Light::update(float delta_s) {
-    mTime += 0.005*delta_s;
+    mTime += 0.05*delta_s;
     setDirection(mDirCycle.curveAtTime(mTime));
     mColor = mColCycle.curveAtTime(mTime);
     mAmbient = mAmbientCycle.curveAtTime(mTime);
@@ -216,5 +229,5 @@ void Light::uniforms(Material& m) {
     glUniform3f(m.uniformLocation("l_color"),mColor.x,mColor.y,mColor.z);
     glUniform3f(m.uniformLocation("l_ambient"),mAmbient.x,mAmbient.y,mAmbient.z);
     glUniform1f(m.uniformLocation("l_density"),mDensity);
-    glUniform1f(m.uniformLocation("l_daytime"),mTime/5);
+    glUniform1f(m.uniformLocation("l_daytime"),mTime/mDirCycle.length());
 }

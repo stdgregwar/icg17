@@ -110,5 +110,4 @@ void Chunk::drawPlanes() {
 }
 
 Chunk::~Chunk() {
-    //cout << "Chunk GC" << endl;
 }
