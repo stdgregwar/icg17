@@ -446,6 +446,7 @@ void World::draw(float time) {
     mRays.material().bind();
     mLight.uniforms(mRays.material());
     mRays.draw(view,projection);
+    mRays.material().unbind();
 
     mHalf.unbind();
 
