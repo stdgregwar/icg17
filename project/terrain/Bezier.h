@@ -27,6 +27,10 @@ public:
         return mControlPoints[0][0];
     }
 
+    const int length() const{
+        return mControlPoints.size();
+    }
+
 private:
     vector< vector<K> > mControlPoints;
 

@@ -93,5 +93,4 @@ void Chunk::drawLeaves(float time, const glm::mat4& view, const glm::mat4& proje
 }
 
 Chunk::~Chunk() {
-    cout << "Chunk GC" << endl;
 }

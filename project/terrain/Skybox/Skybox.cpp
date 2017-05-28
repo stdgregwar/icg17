@@ -15,7 +15,7 @@ GLuint Skybox::init() {
     faces.push_back("back_moon.png");
     faces.push_back("front_moon.png");
     GLuint texId = mMaterial.addCubeTexture(GL_TEXTURE_CUBE_MAP,GL_TEXTURE0,faces,"skybox");
-    mMaterial.addTexture(GL_TEXTURE10,"clearsky.png","sky",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,GL_CLAMP_TO_EDGE, true);
+    mMaterial.addTexture(GL_TEXTURE10,"sky.png","sky",GL_LINEAR_MIPMAP_LINEAR,GL_REPEAT,GL_CLAMP_TO_EDGE, true);
 
     GLfloat skyboxVertices[] = {
         // Positions
