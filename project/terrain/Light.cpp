@@ -55,10 +55,10 @@ void Light::setupCycle() {
         //Setup density
         BezierBuilder<float> b;
         b
-                (2)
                 (1)
                 (2)
                 (1)
+                (0.5)
                 (0.5);
         mDenCycle = b.build();
     }

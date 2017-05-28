@@ -14,7 +14,7 @@ using namespace std;
 
 World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
 {{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(16),
-    mFrameID(0), mCenter(5000,5000), mMaxRes(32),
+    mFrameID(0), mCenter(5000,5000), mMaxRes(64),
     mChunkGenerator(1024 Mb, chunkSize,mTerrains,mWaters,mGrass,mMaxRes,mTruncMaterial,mLeafMaterial),
     mLight({3000,3000,2*8192},{1,1,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     //mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
