@@ -1,7 +1,10 @@
+#include "Chunk.h"
 #include "Camera.h"
+
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <unordered_map>
+
 
 #ifndef M_PI
 #define M_PI 3.1415
@@ -30,6 +33,26 @@ void Camera::setProjection(const glm::mat4& projection) {
 
 glm::vec3 Camera::forward() const {
     return vec3(inverse(mView)*vec4(0,0,-1,0));
+}
+
+glm::vec3 Camera::inMap(const glm::vec3& pos, const Chunk& c) {
+    const SharedTexture& st = c.hMap();
+    if(!st.get()) return pos;
+
+    glClampColor(GL_CLAMP_READ_COLOR, GL_FIXED_ONLY);
+    int x; int y;
+    vec2 size = c.size();
+    vec2 cpos = c.pos();
+    //cout << "Cpos " << cpos.x << " " << cpos.y << endl;
+    vec2 rcpos = {pos.x-cpos.x,pos.y-cpos.y};
+    //cout << "RCpos " << rcpos.x << " " << rcpos.y << endl;
+    vec2 texPos = rcpos*float(st->res()) / size;
+    //cout << "Tex " << texPos.x << " " << texPos.y << endl;
+    float h = st->valAt(texPos.x,texPos.y);
+    h = std::max(h,0.f);
+    h+=7;
+    h = pos.z < h ? h : pos.z;
+    return vec3{pos.x,pos.y,h};
 }
 
 bool Camera::inFrustum(const glm::vec2& pos, const float &chunkSize) const {

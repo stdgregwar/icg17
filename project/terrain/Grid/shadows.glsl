@@ -37,7 +37,7 @@ float shadow_val(vec4 wpos) {
 
 float diffFromShadows(vec4 wpos, float diff, vec3 normal, vec3 light) {
 
-    float bias = max(0.005 * (1.0 - dot(normal, light)), 0.0005);
+    float bias = max(0.002 * (1.0 - dot(normal, light)), 0.0002);
     vec4 shadow_coord = l_VP[0]*wpos;
     float dfac = 1-clamp(-3+length(shadow_coord.xy)*2,0,1);
     for(int i = 2; i > -1; i--) {

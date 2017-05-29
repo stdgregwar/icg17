@@ -52,6 +52,7 @@ void CameraBezier::update(float delta_s, const Chunk& c) {
     mTargetPosition += wspeed*mSSpeed*delta_s;
     mTargetPosition = point.v;
     mPosition = mPosition + (mTargetPosition - mPosition) * std::min(10.f * delta_s,1.f);
+    mPosition = inMap(mPosition,c);
     mView = lookAt(mPosition,mPosition+look,up);
 }
 

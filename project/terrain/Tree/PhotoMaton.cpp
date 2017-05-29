@@ -48,4 +48,12 @@ void PhotoMaton::draw(size_t treeCount, size_t baseRes,Material& trunc, Material
         mTrees.at(i).drawLeaves();
     }
     mGBuffer.unbind();
+
+    glBindTexture(GL_TEXTURE_2D,mGBuffer.diffuse());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D,mGBuffer.normal());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D,0);
 }

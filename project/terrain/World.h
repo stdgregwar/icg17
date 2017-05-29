@@ -44,7 +44,7 @@ public:
     void drawTerrain(float time, const glm::mat4& view, const glm::mat4& projection);
     void drawWater(float time, const glm::mat4& view, const glm::mat4& projection);
     void drawReflexions(float time, const glm::mat4& view, const glm::mat4& projection);
-    void drawTrees(float time, const glm::mat4& view, const glm::mat4& projection);
+    void drawTrees(float time, const glm::mat4& view, const glm::mat4& projection, float clip);
 
     void tWater() {mRenderWater = !mRenderWater;}
     void tReflexions() {mRenderReflexion = !mRenderReflexion;}
@@ -52,6 +52,7 @@ public:
     void tShadows() {mRenderShadow = !mRenderShadow;}
     void tSkybox() {mRenderSkybox = !mRenderSkybox;}
     void tGrass() {mRenderGrass = !mRenderGrass;}
+    void tSelf() {mAddSelf = !mAddSelf;}
 
     void registerPoint();
     void tBezierCam();
@@ -104,6 +105,8 @@ private:
     int mViewDistance;
     long mFrameID;
     int mMaxRes;
+    vec3 mSelfColor;
+    bool mAddSelf;
     bool mRenderGrass;
     bool mRenderTerrain;
     bool mRenderReflexion;

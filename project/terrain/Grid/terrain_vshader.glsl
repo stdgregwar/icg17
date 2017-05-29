@@ -36,8 +36,7 @@ void main() {
     vec3 pos_3d = vec3(position.x,position.y,value+shift);
     vertex.w_pos = (M*vec4(pos_3d,1)).xyz;
 
-    vec3 n = fdiff(vertex.uv);
-    vertex.normal_m = normalize((M*vec4(n,0)).xyz);
+    vertex.normal_m = fdiff(vertex.uv);
 
     gl_ClipDistance[0] = dot(vec4(vertex.w_pos,1),vec4(0,0,1,0.1));
     gl_Position = MVP * vec4(pos_3d,1.0);

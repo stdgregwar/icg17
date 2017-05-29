@@ -123,6 +123,8 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             world.tTerrain(); break;
         case GLFW_KEY_F10:
             world.tShadows(); break;
+        case GLFW_KEY_L:
+            world.tSelf(); break;
         default: break;
         }
     }
@@ -158,8 +160,12 @@ int main(int argc, char *argv[]) {
     /// Attempt to open the window: fails if required version unavailable
     /// @note some Intel GPUs do not support OpenGL 3.2
     /// @note update the driver of your graphic card
-    //GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Procedural Terrain",  glfwGetPrimaryMonitor(), NULL);
-    GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Procedural Terrain",  NULL, NULL);
+    GLFWwindow* window;
+    if(argc > 1) {
+        window = glfwCreateWindow(window_width, window_height, "Procedural Terrain",  glfwGetPrimaryMonitor(), NULL);
+    } else {
+        window = glfwCreateWindow(window_width, window_height, "Procedural Terrain",  NULL, NULL);
+    }
     if( !window ){
         glfwTerminate();
         exit(EXIT_FAILURE);

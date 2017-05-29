@@ -14,10 +14,10 @@ using namespace std;
 #define Mb *1024L*1024L
 
 World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
-{{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(16),
+{{{{0.f,0.f,300.f},{M_PI,0.f,0.f}},{{0.f,0.f,300.f},{M_PI,0.f,0.f}}}}), mCamFreefly({128,128,0},{-M_PI/4,-M_PI/4,-M_PI/4}), mChunkSize(chunkSize), mViewDistance(20),
     mFrameID(0), mCenter(5000,5000), mMaxRes(64),
-    mChunkGenerator(2048L Mb, chunkSize,mTerrains,mWaters,mGrass,mMaxRes,mTruncMaterial,mLeafMaterial),
-    mLight({3000,3000,2*8192},{1,1,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
+    mChunkGenerator(3768L Mb, chunkSize,mTerrains,mWaters,mGrass,mMaxRes,mTruncMaterial,mLeafMaterial), mSelfColor(1,1,0.5) ,mAddSelf(false),
+    mLight({5000,5000,2*8192},{1,1,-3},{1,250.f/255,223.f/255},{0.2,0.3,0.3}),
     //mLight({3000,4096,3000},{3,3,-1},{1,0.5,0.25},{0.2,0.3,0.3}),
     mRenderGrass(false),
     mRenderTerrain(true),
@@ -36,7 +36,7 @@ World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
 
 void World::init(const ivec2 &screenSize, GLFWwindow* window) {
     // Terrain material initialization
-    mLight.init(1024);
+    mLight.init(2048);
     mTerrainShadows.init("terrain_vshader.glsl","foccluder.glsl");
     mTerrainMaterial.init("terrain_vshader.glsl","terrain_fshader.glsl");
     mGrassMaterial.init("terrain_vshader.glsl","grass_fshader_plants.glsl","grass_gshader_plants.glsl");
@@ -282,7 +282,9 @@ void World::drawShadows(float time, const mat4 &view, const mat4 &projection){
         glClear(GL_DEPTH_BUFFER_BIT); //Clear first bits
         for(Chunks::value_type& p : mChunks) {
             //if(mLight.inFrustum(p.second.pos(),mChunkSize,i)) {
-            p.second->drawTerrain(time,mLight.view(i),mLight.proj(i),mTerrainShadows,true);
+            if(distance(vec2(p.first),vec2(mCenter)) < 12) {
+                p.second->drawTerrain(time,mLight.view(i),mLight.proj(i),mTerrainShadows,true);
+            }
             //}
         }
     }
@@ -355,12 +357,12 @@ void World::drawTerrain(float time, const glm::mat4& view, const glm::mat4& proj
     mTerrainMaterial.unbind();
 }
 
-void World::drawTrees(float time, const glm::mat4& view, const glm::mat4& projection) {
+void World::drawTrees(float time, const glm::mat4& view, const glm::mat4& projection, float clip) {
     mTruncMaterial.bind();
     Uniforms::viewProjTime(mTruncMaterial,view,projection,time);
     for(Chunk* c : mToDraw) {
         if(distance(c->cpos(),vec2(mCenter)) < 5) {
-           c->drawTruncs(cam().pos(),mTreeClip);
+           c->drawTruncs(cam().pos(),clip);
         }
     }
     mTruncMaterial.unbind();
@@ -368,17 +370,17 @@ void World::drawTrees(float time, const glm::mat4& view, const glm::mat4& projec
     Uniforms::viewProjTime(mLeafMaterial,view,projection,time);
     for(Chunk* c : mToDraw) {
         if(distance(c->cpos(),vec2(mCenter)) < 5) {
-            c->drawLeaves(cam().pos(),mTreeClip);
+            c->drawLeaves(cam().pos(),clip);
         }
     }
     mLeafMaterial.unbind();
 
     mPlanesMaterial.bind();
     Uniforms::viewProjTime(mPlanesMaterial,view,projection,time);
-    glUniform1f(mPlanesMaterial.uniformLocation("dist"),mTreeClip);
+    //glUniform1f(mPlanesMaterial.uniformLocation("dist"),clip);
     glUniform3f(mPlanesMaterial.uniformLocation("eyePos"),cam().pos().x,cam().pos().y,cam().pos().z);
     for(Chunk* c : mToDraw) {
-            float dist = c->res() < mMaxRes / 2 ? 0 : mTreeClip;
+            float dist = c->res() < mMaxRes / 2 ? 0 : clip;
             glUniform1f(mPlanesMaterial.uniformLocation("dist"),dist);
             c->drawPlanes();
     }
@@ -407,14 +409,9 @@ void World::drawReflexions(float time, const glm::mat4& view, const glm::mat4& p
 
     if(mRenderTerrain) {
         glEnable(GL_CLIP_DISTANCE0);
-        mTerrainMaterial.bind();
-        for(Chunk* c : mToDraw) {
-
-                c->drawTerrain(time,mirror,projection,mTerrainMaterial);
-
-        }
-        mTerrainMaterial.unbind();
+        drawTerrain(time,mirror,projection);
         glDisable(GL_CLIP_DISTANCE0);
+        drawTrees(time,mirror,projection,mTreeClip/2);
     }
 
     if(mRenderGrass) {
@@ -468,7 +465,7 @@ void World::draw(float time) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(mRenderTerrain) {
         drawTerrain(time,view,projection);
-        drawTrees(time,view,projection);
+        drawTrees(time,view,projection,mTreeClip);
     }
     //mTree.draw(view,projection);
     if(mRenderGrass) drawGrass(time, view,projection);
@@ -480,6 +477,8 @@ void World::draw(float time) {
 
     mLightPass.material().bind();
     mLight.uniforms(mLightPass.material());
+    mLightPass.material().bind();
+    glUniform3fv(mLightPass.material().uniformLocation("self_light"),1,value_ptr(mAddSelf ? mSelfColor : vec3(0)));
     mLightPass.draw(view,projection);
 
     mSkybox.material().bind();

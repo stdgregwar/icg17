@@ -78,7 +78,7 @@ void main() {
 	value = max(0.1,value);
 	value += (value*0.3+0.9)*fbm(p*1,8)*2;
 	value += (multifractal(p*0.04,0.1,0.5,5,0.7)-10)*10;
-	value += (value*0.3+0.9)*fbm(p*0.5,8)*0.25;
+	//value += (value*0.3+0.9)*fbm(p*0.5,8)*0.25;
 	value += fbm(p*0.01,3)*240+120;
 	value /= s/1.5;
 	value*=0.1;

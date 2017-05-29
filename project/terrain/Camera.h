@@ -16,6 +16,7 @@ public:
     virtual void onKey(GLFWwindow* window, int key, int scancode, int action, int mods) = 0;
     virtual void onMouse(GLFWwindow* window, double xpos, double ypos) = 0;
     virtual void tGravity() = 0;
+    glm::vec3 inMap(const glm::vec3& pos, const Chunk& c);
     const glm::mat4& view() const;
     glm::vec3 forward() const;
     const glm::mat4& projection() const;

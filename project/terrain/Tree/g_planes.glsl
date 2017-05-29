@@ -22,6 +22,7 @@ in vData {
 out vData {
     vec2 uv;
     vec3 normal;
+    mat3 tSpace;
 } vertex;
 
 const vec3 up = vec3(0,0,1);
@@ -44,6 +45,11 @@ void main() {
 
     //Make quad
     vertex.normal = normalize(mat3(V)*up);
+    vertex.tSpace[0] = normalize(side);
+    vertex.tSpace[1] = normalize(top);
+    vertex.tSpace[2] = normalize(-view);
+
+    vertex.tSpace = mat3(V)*vertex.tSpace;
 
     vec3 pos;
 

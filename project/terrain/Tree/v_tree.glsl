@@ -16,12 +16,12 @@ out mat3 tSpace;
 void main() {
     gl_Position = VP*vec4(position,1);
     vColor = color;
-    vNormal = (V*vec4(normal,0)).xyz;
+    vNormal = mat3(V)*normal;
     vec3 bino = cross(normal,vec3(0,0,1));
-    vec3 bitg = cross(normal,bino);
-    tSpace[0] = normal;
-    tSpace[1] = bino;
-    tSpace[2] = bitg;
-    tSpace = tSpace * mat3(V);
-    vUV = uv*vec2(1,7);
+    vec3 bitg = cross(bino,normal);
+    tSpace[0] = normalize(bino);
+    tSpace[1] = normalize(bitg);
+    tSpace[2] = normal;
+    tSpace = mat3(V)*tSpace;
+    vUV = uv*vec2(1,8);
 }

@@ -17,26 +17,6 @@ CameraFreefly::CameraFreefly(const vec3 &pos, const vec3 &orientation) : Camera(
 
 }
 
-
-glm::vec3 CameraFreefly::inMap(const glm::vec3& pos, const Chunk& c) {
-    const SharedTexture& st = c.hMap();
-    if(!st.get()) return pos;
-
-    glClampColor(GL_CLAMP_READ_COLOR, GL_FIXED_ONLY);
-    int x; int y;
-    vec2 size = c.size();
-    vec2 cpos = c.pos();
-    //cout << "Cpos " << cpos.x << " " << cpos.y << endl;
-    vec2 rcpos = {pos.x-cpos.x,pos.y-cpos.y};
-    //cout << "RCpos " << rcpos.x << " " << rcpos.y << endl;
-    vec2 texPos = rcpos*float(st->res()) / size;
-    //cout << "Tex " << texPos.x << " " << texPos.y << endl;
-    float h = st->valAt(texPos.x,texPos.y);
-    h+=7;
-    h = pos.z < h ? h : pos.z;
-    return vec3{pos.x,pos.y,h};
-}
-
 void CameraFreefly::update(float delta_s, const Chunk& c) {
     mRotation = mRotation + (mTargetRotation - mRotation) * std::min(5.f * delta_s,1.f);
 

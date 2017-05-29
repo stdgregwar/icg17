@@ -5,7 +5,6 @@
 #include <memory>
 #include <cmath>
 #include <iostream>
-#include <glm/common.hpp>
 
 /**
  * @brief The Texture class destroy automatically the texture

@@ -19,5 +19,5 @@ void main() {
     color.rgb = texture(bark_alb,vUV).rgb;
     color.a = 0;
     normal.a = 0;
-    normal.rgb = packNormal(normalize(-vNormal+nmap));
+    normal.rgb = packNormal(normalize(nmap));
 }

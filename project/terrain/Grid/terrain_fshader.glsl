@@ -40,15 +40,15 @@ float height(vec2 p) {
 
 void main() {
     if(sdoor(gl_FragCoord.xy,alpha)) discard;
-    vec3 n = fdiff(vertex.uv);
-    vec3 normal_m = normalize((M*vec4(n,0)).xyz);
+    vec3 n = fdiff(vertex.uv)*vec3(4,4,1);
+    vec3 normal_m = n;
 
 
 
-    vec3 gnormal = normalize((MV*vec4(vertex.normal_m,0)).xyz);
+    vec3 gnormal = normalize(vertex.normal_m);
     //normal.xyz = gnormal;
 
-    vec3 norm = vec3(0,0,1);
+    vec3 norm = vec3(0,0,0);
     float spec = 0;
     float power = 0;
     float no = texture(noise,vertex.w_pos.xy*0.06).r*0.3;
@@ -71,7 +71,7 @@ void main() {
     color += texture(sand,vertex.w_pos.xy*0.25)*dist;
 
     dist = clamp(1-distance(b_color,(vec3(1,0,0))),0,1);
-    color += texture(snow,vertex.w_pos.xy*0.25)*dist*2;
+    color += texture(snow,vertex.w_pos.xy*0.25)*dist*1.5;
     norm+=vec3(0,0,2)*dist;
     spec+=dist;
     power+=dist;
@@ -84,15 +84,14 @@ void main() {
     color.rgb = triplanar(rockx,rocky,color.rgb,normal_m).rgb;
     norm = triplanar(rockx_nor,rocky_nor,norm,normal_m);
     norm = normalize(norm);
-    n = normalize(n+norm*0.01);
+    n = normalize(n+norm);
     //tnormal = xytspace*norm;
     color.a = clamp(spec,0,1); //This is specular amount
     normal.a = clamp(power,0,1); //This is specular power
 
-    //n.xy *= -1;
-    n *= -1;
-    vec3 tnormal = normalize((MV*vec4(n,0)).xyz);
+    vec3 tnormal = normalize(mat3(V)*n);
     normal.xyz = packNormal(tnormal);
+    //color.rgb = n;
 
     float fog = clamp(exp(7-0.0002*gl_FragCoord.z/gl_FragCoord.w),0,1);
     if(sdoor(gl_FragCoord.xy,fog)) discard;

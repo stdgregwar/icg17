@@ -29,5 +29,5 @@ void main(void)
     if(tex.a < 0.4f) discard;
     color.rgb = tex.rgb;
     color.a = 0.2;
-    normal.a = 0.2;
+    normal.a = 0.4;
 }

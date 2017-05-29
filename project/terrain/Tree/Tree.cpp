@@ -82,15 +82,15 @@ void Tree::build(const glm::vec3& pos, const glm::vec3& normal, float width) {
     float bCount = 90;
     for(float i = 0.6; i < 0.9; i+=1/bCount) {
         vec3 center, forw, side, bside;
-        float twidth = width*(1-i*0.8)*2;
-        float lenght = normal.length()*4*(1-i*0.5);
+        float twidth = width*(1-i);
+        float lenght = normal.length()*12*(1-i)+0.2;
         tie(center,forw,side,bside) = bezierBase(mainTrunc,i,i+1/count,vec3(1,0,0));
         float ang = 2*M_PI*mRand(mEng);
         vec3 dir = cos(ang) * side + sin(ang)* bside - forw;
         dir*=lenght;
         Bezier<vec3> branch({{center,center+dir,center+dir+vec3(1,0,0)}});
-        addTrunc(branch,3,3,twidth*0.2);
-        addLeaves(branch,5,twidth+0.5);
+        addTrunc(branch,3,3,twidth*0.9*twidth);
+        addLeaves(branch,5,twidth+1.4);
     }
 
     mTruncSize = mTruncIndices.size();

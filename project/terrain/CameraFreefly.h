@@ -17,7 +17,6 @@ public:
     void onMouse(GLFWwindow* window, double xpos, double ypos);
     void tGravity() {mGravity = !mGravity;}
 private:
-    glm::vec3 inMap(const glm::vec3& pos, const Chunk& c);
     enum Plane
                    {
                            PLANE_BACK,

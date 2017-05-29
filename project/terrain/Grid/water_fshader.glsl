@@ -78,12 +78,12 @@ void main() {
     float dist = distance(base_wpos, w_pos);
 
 
-    float frebias = 0;
+    float frebias = -1;
     float frenelpow = 2;
     float fre = 1-dot(view_dir,v_normal)*0.5;
     fre = 1-clamp(frebias+(1-frebias)*pow(fre,frenelpow),0,1);
 
-    float bord = clamp(dist*0.05,0,1);
+    float bord = clamp(dist*0.02,0,1);
     float fac = clamp(bord*4,0,1);
 
     vec3 flat_normal_view = normalize((V*vec4(0,0,1,0)).xyz);
@@ -91,7 +91,7 @@ void main() {
     vec3 rwon = reflect(view_dir,flat_normal_view);
     vec3 rwn = reflect(view_dir,v_normal);
     vec3 rdiff = rwn-rwon; //Making diff of reflection with and without normal mapping to estimate displace in reflect lookup
-    vec3 refl = texture(mirror,gl_FragCoord.xy/size+rdiff.xy*0.04*fac).rgb;
+    vec3 refl = texture(mirror,gl_FragCoord.xy/size+rdiff.xy*0.07*fac).rgb;
 
     float fog2 = clamp(exp(7-0.0002*gl_FragCoord.z/gl_FragCoord.w),0,1);
     if(sdoor(gl_FragCoord.xy,fog2)) discard;
