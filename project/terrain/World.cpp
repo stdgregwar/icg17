@@ -30,8 +30,6 @@ World::World(float chunkSize): mCamBezier({0,0,150},{-M_PI/4,-M_PI/4,-M_PI/4},
     mChunks.reserve((mViewDistance*2+1)*(mViewDistance*2+1)+128);
     mCamera = &mCamFreefly;
 
-    //Particles
-    mParticles = new ParticleGenerator(new Material, 500);
 }
 
 void World::init(const i32vec2 &screenSize, GLFWwindow* window) {
@@ -216,8 +214,6 @@ void World::update(float dt,const glm::vec2& worldPos) {
 
     //cout << "taskspf " << mTaskPerFrame << endl;
 
-    //Update particles
-    mParticles->Update(dt, 50, mCamera);
 }
 
 void World::pushForPos(i32vec2 cpos) {
@@ -433,9 +429,6 @@ void World::draw(float time) {
 
     glViewport(0,0,mScreenSize.x,mScreenSize.y);
     mCompositor.draw(view,projection);
-
-    //Draw Particles
-    mParticles->Draw();
 }
 
 void World::stop() {
