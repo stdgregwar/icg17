@@ -18,6 +18,7 @@
 #include "Tree/Tree.h"
 #include "TexGenerator.h"
 #include "Tree/PhotoMaton.h"
+#include "Particles/Particle_generator.h"
 
 typedef std::unordered_map<glm::ivec2,SharedChunk> Chunks;
 typedef std::vector<Chunk*> ChunkPtrs;
@@ -114,6 +115,9 @@ private:
     bool mRenderSkybox;
     bool mRenderWater;
     bool mBezierCam;
+
+
+    ParticleGenerator *mParticles;
 };
 
 #endif // WORLD_H
