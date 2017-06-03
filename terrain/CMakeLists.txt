@@ -18,7 +18,8 @@ file(GLOB SHADERS
   ScreenQuad/*.glsl
   Grid/*.glsl
   Skybox/*.glsl
-  Tree/*.glsl)
+  Tree/*.glsl
+  Particles/*.glsl)
 deploy_shaders_to_build_dir(${SHADERS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
