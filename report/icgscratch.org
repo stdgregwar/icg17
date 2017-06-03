@@ -1,0 +1,64 @@
+* Noises
+** Simplex, ridged hybrid
+
+* Water
+** Reflexion
+** Refractions
+** Normal mapping
+** Chromatic Abberation
+
+* Texturing
+** Triplanar Texturing
+** Noised texture-mapping
+** Normal mapping
+
+* Skybox
+** Dynamic Skybox
+** Day night cycle
+
+* Infinite terrain
+** Pixel perfect tiling, Chunk system
+
+* Procedural trees
+** Using bezier
+** Procedural leaves
+** Geometry shader billboard
+** Delegate rendering for LOD
+
+* Static Particle system
+** Grass, Geometry Shader
+
+* Camera
+** Advanced freefly
+** Advanced bezier
+*** Bezier builder
+*** Composite bezier cam with aim and all
+*** Bezier curve for velocity
+** Collision of the camera with terrain
+
+* Shadow mapping
+** Base shadow mapping
+** Cascaded shadow mapping
+** Noise PCF
+
+* Optimization
+** Frustum Culling
+** Spiral Chunk generation
+** texture in shared opengl context
+** chunks generated in worker thread, with other parts of the procedural generation such as trees
+
+* GLSL include system
+
+* Deffered Shading
+** Multi-target rendering
+
+* Post-Processing
+** Light pass
+*** Shadow pass
+*** Point light for night
+** God rays
+** Compositing
+
+Marc worked on texturing for terrain and skybox, the noise composition, the spiral chunk generation, basic water reflexions, the freefly camera, work in progress dynamic particles.
+Raphael did bezier templated implementation, the BezierCamera, the night day cycle, the frustum culling, bases of shadow mapping and lighting, basic water with reflexion and normal map, glsl includes.
+Grégoire did the trees, the tiling system, the grass, the deffered lighning, the shadow mapping, the post processing, Camera collisions and most of the optimizations.
