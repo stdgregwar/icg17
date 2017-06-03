@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11   CMakeFiles/terrain.dir/main.cpp.o  -o terrain -rdynamic -lGLU -lGL -lglfw -lGLEW 
