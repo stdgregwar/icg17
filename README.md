@@ -25,3 +25,6 @@ F5-F10 toggle various things
 
 F11 toggle fullscreen (windowed)
 
+## Video
+
+[Demo on YouTube](https://youtu.be/cGEtmy54KBU)
